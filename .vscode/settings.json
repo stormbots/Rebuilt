@@ -57,5 +57,16 @@
     "edu.wpi.first.math.**.proto.*",
     "edu.wpi.first.math.**.struct.*",
   ],
-  "java.dependency.enableDependencyCheckup": false
+  "java.dependency.enableDependencyCheckup": false,
+  "chat.agent.enabled": false,
+  "chat.tools.terminal.enableAutoApprove": false,
+  "chat.mcp.autostart": "never",
+  "C_Cpp.copilotHover": "disabled",
+  "chat.disableAIFeatures": true,
+  "chat.mcp.access": "none",
+  "workbench.settings.showAISearchToggle": false,
+  "java.completion.guessMethodArguments": "insertParameterNames",
+  "editor.autoClosingDelete": "never",
+  "editor.autoClosingOvertype": "never",
+  "editor.autoClosingQuotes": "never"
 }
