@@ -1,0 +1,19 @@
+// Copyright (c) FIRST and other WPILib contributors.
+// Open Source Software; you can modify and/or share it under the terms of
+// the WPILib BSD license file in the root directory of this project.
+
+package frc.robot.Subsystems.Intake;
+
+import frc.robot.Subsystems.Intake.IntakeExtension.IntakeExtension;
+import frc.robot.Subsystems.Intake.OuterRollers.OuterRollers;
+import frc.robot.Subsystems.Intake.Rollers.Rollers;
+
+/** Add your docs here. */
+public class Intake {
+    private IntakeExtension intakeExtension = new IntakeExtension();
+    private Rollers rollers = new Rollers();
+    private OuterRollers outerrollers = new OuterRollers();
+
+    //TODO: Create a lot of useful commands here
+
+}
