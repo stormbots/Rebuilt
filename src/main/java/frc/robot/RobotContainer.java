@@ -30,9 +30,17 @@ public class RobotContainer {
 
   public RobotContainer() {
     configureBindings();
+    swerve.setDefaultCommand(swerve.driveAllianceManagedCommand(
+      ()->0.0, ()->0.0, ()->-0.0
+     ));
   }
 
-  private void configureBindings() {}
+  private void configureBindings() {
+    driver.a().whileTrue(swerve.driveAllianceManagedCommand(()->0.0, ()->0.0, ()->0.1));
+    driver.b().whileTrue(swerve.driveAllianceManagedCommand(()->0.0, ()->0.0, ()->-0.1));
+    driver.x().whileTrue(swerve.driveAllianceManagedCommand(()->0.1, ()->0.0, ()->0.0));
+    driver.y().whileTrue(swerve.driveAllianceManagedCommand(()->-0.1, ()->0.0, ()->0.0));
+  }
 
   public Command getAutonomousCommand() {
     //TODO: Get this from Autos.java instead
