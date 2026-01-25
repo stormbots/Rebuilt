@@ -22,10 +22,13 @@ import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 
+import java.awt.Color;
+import java.awt.color.*;
+
 public class WLED extends SubsystemBase {
   SerialPort leds = new SerialPort(115200, Port.kUSB1);
   // SerialPort led = new SerialPort(115200, Port.kUSB1);
-  LedSegment seg = new LedSegment(0, 0, 15, false);
+  LedSegment seg = new LedSegment(0, 0, 60, false);
 
   CustomColor pink = new CustomColor(255, 28, 206);
   CustomColor white = new CustomColor(255, 255, 255);
@@ -45,7 +48,7 @@ public class WLED extends SubsystemBase {
   /** Creates a new Leds. */
   // LedSegment segment =new LedSegment(0, 0, 30, false);
   public WLED() {
-    setDefaultCommand(solidColor(seg, blue));
+    setDefaultCommand(pride(seg));
   }
 
   @Override
@@ -86,65 +89,12 @@ public class WLED extends SubsystemBase {
       this.b = b;
     }
 
-    private String toHex(int n){
-      if(n > 255){
-        n = 255;
-      }
-      else if(n < 0){
-        n = 0;
-      }
-
-      // char array to store hexadecimal number
-      char []hexaDeciNum = new char[2];
- 
-      // counter for hexadecimal number array
-      int i = 0;
-      while (n != 0) {
- 
-        // temporary variable to store remainder
-        int temp = 0;
- 
-        // storing remainder in temp variable.
-        temp = n % 16;
- 
-        // check if temp < 10
-        if (temp < 10) {
-            hexaDeciNum[i] = (char) (temp + 48);
-            i++;
-        }
-        else {
-            hexaDeciNum[i] = (char) (temp + 55);
-            i++;
-        }
- 
-        n = n / 16;
-      }
- 
-      String hexCode = "";
-      if (i == 2) {
-        hexCode+=hexaDeciNum[0];
-        hexCode+=hexaDeciNum[1];
-      }
-      else if (i == 1) {
-        hexCode = "0";
-        hexCode+=hexaDeciNum[0];
-      }
-      else if (i == 0){
-        hexCode = "00";
-      }
-        
-      // Return the equivalent
-      // hexadecimal color code
-      return hexCode;
+    private int toInteger(){
+      return (255 << 24) | (r << 16) | (g << 8) | b;
     }
 
     public String getHex(){
-      String hexCode = "";
-      hexCode += toHex(r);
-      hexCode += toHex(g);
-      hexCode += toHex(b);
- 
-      return hexCode;
+      return Integer.toString(toInteger() & 0x00ffffff, 16);
     }
   }
 
@@ -175,21 +125,31 @@ public class WLED extends SubsystemBase {
   }
 
   public Command stripes(LedSegment segment, int numStripes, CustomColor[] colors){
-    int counter = 0;
+    int j = 0;
+    int k = 0;
+    boolean l = true;
     String[] key = new String[(numStripes*3)+1];
     key[0] = "id";
     List<Object> data = new ArrayList<>();
     data.add(segment.id);
   for (int i = 1; i<= numStripes*3; i++){
     key[i] = "i";
-    if (i%3==0){
-      data.add(colors[counter]);
+    if(i == numStripes*3-1){
+      data.add(segment.length);
+    }
+    else if (i%3==0){
+      data.add(colors[j].getHex());
+      j++;
     }
     else{
-      data.add((segment.length/numStripes)*(i-i/3)-1);
+      data.add((segment.length/numStripes)*k);
+      if(l){
+        k++;
+      }
+      l = !l;
     }
   }
-    return new InstantCommand(()->setState(toJSON(key, data)), this);
+    return new InstantCommand(()->setState(toJSON(key, data)), this).handleInterrupt(()->setState("{\"seg\":[{\"id\":"+segment.id+",\"frz\":false}]}"));
   }
 
    public Command pride(LedSegment segment){
@@ -202,159 +162,65 @@ public class WLED extends SubsystemBase {
     CustomColor[] colors4 = {magenta,magenta,purple,blue,blue};
     CustomColor[] colors6 = {black,grey,white,purple};
     CustomColor[] colors7 = {green,lightGreen,white,grey,black};
-    return new RunCommand(()->{
+    // return new RunCommand(()->{
       double time = (Timer.getFPGATimestamp()-StartTime)%(duration*7);
       SmartDashboard.putNumber("Time", time);
-      if (time < duration){
-      
-        stripes(segment, 5, colors1);
-        // setState(
-        // "{\"seg\":["+
-        // "{"+
-        //   "\"id\":" + segment.id + ","+
-        //   "\"i\":[0,"+segment.length/5+",\""+ 
-        //   babyBlue.getHex() +"\","+ 
-        //   segment.length/5+","+ (segment.length/5)*2 +",\""+
-        //   pink.getHex() +"\","+
-        //   (segment.length/5)*2+","+(segment.length/5)*3+",\""+
-        //   white.getHex() +"\","+
-        //   (segment.length/5)*3+","+(segment.length/5)*4+",\""+
-        //   pink.getHex() +"\","+
-        //   (segment.length/5)*4+","+segment.length+",\""+
-        //   babyBlue.getHex() +
-        //   "\"]"+
-        // "}"+
-        // "]}");
+      if ((Timer.getFPGATimestamp()-StartTime)%(duration*7) < duration){
+        return stripes(segment, 5, colors1);
       }
 
       else if (time < duration*2){
-        stripes(segment, 6, colors2);
-        // setState(
-        // "{\"seg\":["+
-        // "{"+
-        //   "\"id\":" + segment.id + ","+
-        //   "\"i\":[0,"+segment.length/6+",\""+ 
-        //   red.getHex() +"\","+ 
-        //   segment.length/6+","+ (segment.length/6)*2 +",\""+
-        //   orange.getHex() +"\","+
-        //   (segment.length/6)*2+","+(segment.length/6)*3+",\""+
-        //   yellow.getHex() +"\","+
-        //   (segment.length/6)*3+","+(segment.length/6)*4+",\""+
-        //   green.getHex() +"\","+
-        //   (segment.length/6)*4+","+(segment.length/6)*5+",\""+
-        //   blue.getHex() +"\","+
-        //   (segment.length/6)*5+","+segment.length + ",\""+
-        //   purple.getHex() +
-        //   "\"]"+
-        // "}"+
-        // "]}");
+        return stripes(segment, 6, colors2);
       }
 
       else if (time < duration*3){
-        stripes(segment, 4, colors3);
-        // setState(
-        // "{\"seg\":["+
-        // "{"+
-        //   "\"id\":" + segment.id + ","+
-        //   "\"i\":[0,"+segment.length/4+",\""+ 
-        //   yellow.getHex() +"\","+ 
-        //   segment.length/4+","+ (segment.length/4)*2 +",\""+
-        //   white.getHex() +"\","+
-        //   (segment.length/4)*2+","+(segment.length/4)*3+",\""+
-        //   purple.getHex() +"\","+
-        //   (segment.length/4)*3+","+segment.length+",\""+
-        //   black.getHex() +
-        //   "\"]"+
-        // "}"+
-        // "]}");
+        return stripes(segment, 4, colors3);
       }
 
       else if (time < duration*4){
-        stripes(segment, 5, colors4);
-        // setState(
-        // "{\"seg\":["+
-        // "{"+
-        //   "\"id\":" + segment.id + ","+
-        //   "\"i\":[0,"+(segment.length/5)*2+",\""+ 
-        //   magenta.getHex() +"\","+ 
-        //   (segment.length/5)*2+","+(segment.length/5)*3+",\""+
-        //   purple.getHex() +"\","+
-        //   (segment.length/5)*3+","+segment.length+",\""+
-        //   blue.getHex() +
-        //   "\"]"+
-        // "}"+
-        // "]}");
+        return stripes(segment, 5, colors4);
       }
 
       else if (time < duration*5){
-        int fraction = segment.length/18;
-        if (fraction == 0){
-          fraction = 1;
-        }
+        final int fraction = segment.length/18;
+        // if (fraction == 0){
+        //   fraction = 1;
+        // }
+
+        int otherFraction = fraction*6;
+        return new InstantCommand(()->
         setState(
         "{\"seg\":["+
         "{"+
           "\"id\":" + segment.id + ","+
-          "\"i\":[0,"+segment.length/3+",\""+ 
+          "\"i\":[0,"+otherFraction+",\""+ 
           yellow.getHex() +"\","+ 
-          segment.length/3+","+ fraction*7 +",\""+
+          otherFraction+","+ fraction*7 +",\""+
           purple.getHex() +"\","+
           fraction*7+","+fraction*11+",\""+
           yellow.getHex() +"\","+
-          fraction*11+","+(segment.length/3)*2+",\""+
+          fraction*11+","+otherFraction*2+",\""+
           purple.getHex() +"\","+
-          (segment.length/3)*2+","+segment.length+",\""+
+          otherFraction*2+","+segment.length+",\""+
           yellow.getHex() +
           "\"]"+
         "}"+
-        "]}");
+        "]}")).handleInterrupt(()->setState("{\"seg\":[{\"id\":"+segment.id+",\"frz\":false}]}"));
       }
 
       else if (time < duration*6){
-        stripes(segment, 4, colors6);
-        // setState(
-        // "{\"seg\":["+
-        // "{"+
-        //   "\"id\":" + segment.id + ","+
-        //   "\"i\":[0,"+segment.length/4+",\""+ 
-        //   black.getHex() +"\","+ 
-        //   segment.length/4+","+ (segment.length/4)*2 +",\""+
-        //   grey.getHex() +"\","+
-        //   (segment.length/4)*2+","+(segment.length/4)*3+",\""+
-        //   white.getHex() +"\","+
-        //   (segment.length/4)*3+","+segment.length+",\""+
-        //   purple.getHex() +
-        //   "\"]"+
-        // "}"+
-        // "]}");
+        return stripes(segment, 4, colors6);
       }
 
       else {
-        stripes(segment, 5, colors7);
-        // setState(
-        // "{\"seg\":["+
-        // "{"+
-        //   "\"id\":" + segment.id + ","+
-        //   "\"i\":[0,"+segment.length/5+",\""+ 
-        //   green.getHex() +"\","+ 
-        //   segment.length/5+","+ (segment.length/5)*2 +",\""+
-        //   lightGreen.getHex() +"\","+
-        //   (segment.length/5)*2+","+(segment.length/5)*3+",\""+
-        //   white.getHex() +"\","+
-        //   (segment.length/5)*3+","+(segment.length/5)*4+",\""+
-        //   grey.getHex() +"\","+
-        //   (segment.length/5)*4+","+segment.length+",\""+
-        //   black.getHex() +
-        //   "\"]"+
-        // "}"+
-        // "]}");
+        return stripes(segment, 5, colors7);
       }
-    }, this).handleInterrupt(()->setState("{\"seg\":[{\"id\":"+segment.id+",\"frz\":false}]}"));
   }
 
 private String toJSON(String[] key, List<Object> data){
   //ADD EXCEPTION IF LEGTHS UNEQUAL
   if (key.length != data.size()){
+    SmartDashboard.putString("lengthError", "true");
     return "";
   }
   JsonObject json = new JsonObject();
@@ -378,6 +244,7 @@ private String toJSON(String[] key, List<Object> data){
       else{
         indexArray.add((Number)data.get(i));
       }
+      indexCounter++;
       index = true;
     }
 
@@ -390,6 +257,7 @@ private String toJSON(String[] key, List<Object> data){
     }
 
     else{
+      SmartDashboard.putString("typeError", indexArray.toString());
       return "";
     }
   }
