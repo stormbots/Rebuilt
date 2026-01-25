@@ -68,5 +68,6 @@
   "java.completion.guessMethodArguments": "insertParameterNames",
   "editor.autoClosingDelete": "never",
   "editor.autoClosingOvertype": "never",
-  "editor.autoClosingQuotes": "never"
+  "editor.autoClosingQuotes": "never",
+  "java.jdt.ls.vmargs": "-XX:+UseParallelGC -XX:GCTimeRatio=4 -XX:AdaptiveSizePolicyWeight=90 -Dsun.zip.disableMemoryMapping=true -Xmx2G -Xms100m -Xlog:disable"
 }

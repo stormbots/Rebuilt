@@ -8,7 +8,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.Subsystems.Intake.Intake;
-import frc.robot.Subsystems.Lighting.Lighting;
+import frc.robot.Subsystems.Lighting.WLED;
 import frc.robot.Subsystems.Photonvision.Photonvision;
 import frc.robot.Subsystems.Questnav.QuestNav;
 import frc.robot.Subsystems.Shooter.Shooter;
@@ -24,6 +24,7 @@ public class RobotContainer {
   Shooter shooter = new Shooter(/* targetingsystem */);
   Intake Intake = new Intake();
   Spindexer spindexer = new Spindexer();
+  WLED leds = new WLED();
 
   CommandXboxController driver = new CommandXboxController(0);
   CommandXboxController operator = new CommandXboxController(1);

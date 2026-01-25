@@ -4,50 +4,78 @@
 
 package frc.robot.Subsystems.Lighting;
 
-import edu.wpi.first.wpilibj.I2C.Port;
-import edu.wpi.first.wpilibj.DriverStation;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+
 import edu.wpi.first.wpilibj.SerialPort;
+import edu.wpi.first.wpilibj.SerialPort.Port;
 import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 
-public class Lighting extends SubsystemBase {
-  SerialPort leds = new SerialPort(115200, null); 
+public class WLED extends SubsystemBase {
+  SerialPort leds = new SerialPort(115200, Port.kUSB1);
+  // SerialPort led = new SerialPort(115200, Port.kUSB1);
+  LedSegment seg = new LedSegment(0, 0, 15, false);
+  CustomColor r = new CustomColor(0, 255, 0);
+  CustomColor pink = new CustomColor(255, 28, 206);
+  CustomColor white = new CustomColor(255, 255, 255);
+  CustomColor babyBlue = new CustomColor(38, 14, 255);
+  CustomColor red = new CustomColor(255, 0, 0);
+  CustomColor orange = new CustomColor(255, 140, 0);
+  CustomColor yellow = new CustomColor(255, 215, 0);
+  CustomColor green = new CustomColor(0, 255, 0);
+  CustomColor blue = new CustomColor(0, 0, 255);
+  CustomColor purple = new CustomColor(255, 0, 255);
+  CustomColor black = new CustomColor(0, 0, 0);
+  CustomColor grey = new CustomColor(119, 119, 119);
+  CustomColor magenta = new CustomColor(255, 0, 111);
+  CustomColor lightGreen = new CustomColor(159, 255, 133); 
+// private Signals signlas = new Signals();
+  // private Bling bling = new Bling();
   /** Creates a new Leds. */
-  public Lighting() {
-    LedSegment segment =new LedSegment(0, 0, 30, false);
+  // LedSegment segment =new LedSegment(0, 0, 30, false);
+  public WLED() {
+    setDefaultCommand(solidColorTest(seg, blue));
   }
 
   @Override
   public void periodic() {
-    setState("{\"seg\":[{\"col\":[[0,25,200]]}]}");
+    //{"seg":[{"id":0, "col":[000000]}]}
+    SmartDashboard.putString("hex", r.getHex());
+    SmartDashboard.putNumber("Legth", seg.length);
     // This method will be called once per scheduler run
   }
 
-  private class LedSegment {
+  class LedSegment {
     int id;
     int start;
     int stop;
     boolean reverse;
     int length;
-    private LedSegment(int id, int start, int stop, boolean reverse){
+    LedSegment(int id, int start, int stop, boolean reverse){
       this.id = id;
       this.start = start;
       this.stop = stop;
       this.reverse = reverse;
       this.length = stop - start;
-      setState(
-      "{\"seg\":["+
-        "{"+
-          "\"id\":" + id + ", "+
-          "\"start\":" + start + ", "+
-          "\"stop\":" + stop + ", "+
-          "\"rev\":" + reverse + 
-        "}"+
-        "]}");
+      String[] key = {"id","start","stop","rev"};
+      List<Object> data = new ArrayList<>();
+      data.add(id);
+      data.add(start);
+      data.add(stop);
+      data.add(reverse);
+
+      setState(toJSON(key,data));
     }
   }
 
@@ -123,43 +151,19 @@ public class Lighting extends SubsystemBase {
     }
   }
 
-  private void setState(String state){
+  void setState(String state){
     leds.writeString(state);
+    SmartDashboard.putString("JSON", state);
+    // led.writeString(state);
   }
 
-  // private void configureSegment(int id, int start, int stop, boolean reverse){
-  //   setState(
-  //   "{\"seg\":["+
-  //     "{"+
-  //       "\"id\":" + id + ", "+
-  //       "\"start\":" + start + ", "+
-  //       "\"stop\":" + stop + ", "+
-  //       "\"rev\":" + reverse + 
-  //     "}"+
-  //     "]}");
-  // }
-
-  public Command hopperFull(LedSegment segment){
-    // return run(()->setState("{\"seg\":[{\"id\":" + segment.id + "\"col\":[[255,204,0]]}]}"));
-    CustomColor color = new CustomColor(255, 215, 0);
-    return solidColor(segment, color, 1);
-  }
-
-   public Command hopperLow(LedSegment segment){
-    // return run(()->setState("{\"seg\":[{\"id\":" + segment.id + "\"col\":[[255,204,0]]}]}"));
-    CustomColor color = new CustomColor(255, 215, 0);
-    return blink(segment, color, 225 ,1);
-  }
-
-  public Command solidColor(LedSegment segment, CustomColor color, double timeSec){
-    return new InstantCommand(()->setState(
-      "{\"seg\":["+
-      "{"+
-        "\"id\":" + segment.id + ","+
-        "\"fx\":0,"+
-        "\"col\":[["+ color.getHex() +"]]"+
-      "}"+
-      "]}"), this).andThen(new WaitCommand(timeSec));
+  public Command solidColorTest(LedSegment segment, CustomColor color){
+    String[] keys = {"id", "fx","col"};
+    List<Object> data = new ArrayList<>();
+    data.add(segment.id);
+    data.add(0);
+    data.add(color.getHex());
+    return new InstantCommand(()->setState(toJSON(keys, data)), this);
   }
 
   public Command blink(LedSegment segment, CustomColor color, int speed, double timeSec){
@@ -169,31 +173,19 @@ public class Lighting extends SubsystemBase {
         "\"id\":" + segment.id + ","+
         "\"fx\":1,"+
         "\"sx\":"+ speed + ","+
-        "\"col\":[[\""+ color.getHex() +"\", 000000]]"+
+        "\"col\":[\""+ color.getHex() +"\", 000000]"+
       "}"+
       "]}"), this).andThen(new WaitCommand(timeSec));
   }
 
-  public Command pride(LedSegment segment){
-    CustomColor pink = new CustomColor(255, 28, 206);
-    CustomColor white = new CustomColor(255, 255, 255);
-    CustomColor babyBlue = new CustomColor(38, 14, 255);
-    CustomColor red = new CustomColor(255, 0, 0);
-    CustomColor orange = new CustomColor(255, 140, 0);
-    CustomColor yellow = new CustomColor(255, 215, 0);
-    CustomColor green = new CustomColor(0, 255, 0);
-    CustomColor blue = new CustomColor(0, 0, 255);
-    CustomColor purple = new CustomColor(255, 0, 255);
-    CustomColor black = new CustomColor(0, 0, 0);
-    CustomColor grey = new CustomColor(119, 119, 119);
-    CustomColor magenta = new CustomColor(255, 0, 111);
-    CustomColor lightGreen = new CustomColor(159, 255, 133);
+   public Command pride(LedSegment segment){
+    
     double StartTime = Timer.getFPGATimestamp();
     double duration = 5;
     
     return new RunCommand(()->{
       double time = (Timer.getFPGATimestamp()-StartTime)%(duration*7);
-      
+      SmartDashboard.putNumber("Time", time);
       if (time < duration){
         setState(
         "{\"seg\":["+
@@ -248,7 +240,7 @@ public class Lighting extends SubsystemBase {
           (segment.length/4)*2+","+(segment.length/4)*3+",\""+
           purple.getHex() +"\","+
           (segment.length/4)*3+","+segment.length+",\""+
-          black.getHex() +"\","+
+          black.getHex() +
           "\"]"+
         "}"+
         "]}");
@@ -306,7 +298,7 @@ public class Lighting extends SubsystemBase {
           (segment.length/4)*2+","+(segment.length/4)*3+",\""+
           white.getHex() +"\","+
           (segment.length/4)*3+","+segment.length+",\""+
-          purple.getHex() +"\","+
+          purple.getHex() +
           "\"]"+
         "}"+
         "]}");
@@ -334,12 +326,46 @@ public class Lighting extends SubsystemBase {
     }, this).handleInterrupt(()->setState("{\"seg\":[{\"id\":"+segment.id+",\"frz\":false}]}"));
   }
 
-  public Command showAllianceColor(LedSegment segment){
-    return new RunCommand(()->{
-      var color = DriverStation.getAlliance();
-
-      if (color.isPresent()){}
-    }, this);
+private String toJSON(String[] key, List<Object> data){
+  //ADD EXCEPTION IF LEGTHS UNEQUAL
+  if (key.length != data.size()){
+    return "";
   }
+  JsonObject json = new JsonObject();
+  JsonObject tempObject = new JsonObject();
+  JsonArray colorArray = new JsonArray();
+  // JsonArray indexArray = new JsonArray();
+  boolean col = false;
+  // boolean index = false;
+
+  for (int i = 0; i < key.length; i++){
+    if (key[i]== "col" && data.get(i) instanceof String){
+      colorArray.add((String)data.get(i));
+      col = true;
+    }
+
+    else if ((key[i]=="rev" || key[i]=="on") && data.get(i) instanceof Boolean){
+      tempObject.addProperty(key[i], (Boolean)data.get(i));
+    }
+
+    else if (data.get(i) instanceof Number){
+      tempObject.addProperty(key[i], (Number)data.get(i));
+    }
+
+    else{
+      return "";
+    }
+  }
+
+  if (col){
+    tempObject.add("col", colorArray);
+  }
+
+  json.add("seg", tempObject);
+  
+  return json.toString();
+
+}
+
 }
 
