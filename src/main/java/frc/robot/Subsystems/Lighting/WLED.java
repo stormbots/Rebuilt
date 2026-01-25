@@ -9,10 +9,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
 import edu.wpi.first.wpilibj.SerialPort;
+import edu.wpi.first.wpilibj.Servo;
 import edu.wpi.first.wpilibj.SerialPort.Port;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -20,10 +20,6 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import edu.wpi.first.wpilibj2.command.WaitCommand;
-
-import java.awt.Color;
-import java.awt.color.*;
 
 public class WLED extends SubsystemBase {
   SerialPort leds = new SerialPort(115200, Port.kUSB1);
@@ -124,10 +120,14 @@ public class WLED extends SubsystemBase {
     return new InstantCommand(()->setState(toJSON(key, data)), this);
   }
 
-  public Command stripes(LedSegment segment, int numStripes, CustomColor[] colors){
+  public void stripes(LedSegment segment, int numStripes, CustomColor[] colors){
     int j = 0;
     int k = 0;
     boolean l = true;
+    int fraction = segment.length/numStripes;
+    if (fraction == 0){
+      fraction = 1;
+    }
     String[] key = new String[(numStripes*3)+1];
     key[0] = "id";
     List<Object> data = new ArrayList<>();
@@ -142,14 +142,15 @@ public class WLED extends SubsystemBase {
       j++;
     }
     else{
-      data.add((segment.length/numStripes)*k);
+      data.add((fraction)*k);
       if(l){
         k++;
       }
       l = !l;
     }
   }
-    return new InstantCommand(()->setState(toJSON(key, data)), this).handleInterrupt(()->setState("{\"seg\":[{\"id\":"+segment.id+",\"frz\":false}]}"));
+    // return new RunCommand(()->setState(toJSON(key, data)), this).handleInterrupt(()->setState("{\"seg\":[{\"id\":"+segment.id+",\"frz\":false}]}"));
+    setState(toJSON(key, data));
   }
 
    public Command pride(LedSegment segment){
@@ -160,61 +161,48 @@ public class WLED extends SubsystemBase {
     CustomColor[] colors2 = {red,orange,yellow,green,blue,purple};
     CustomColor[] colors3 = {yellow,white,purple,black};
     CustomColor[] colors4 = {magenta,magenta,purple,blue,blue};
+    CustomColor[] colors5 = {yellow,yellow,yellow,yellow,yellow,yellow,purple,yellow,yellow,yellow,yellow,purple,yellow,yellow,yellow,yellow,yellow,yellow};
     CustomColor[] colors6 = {black,grey,white,purple};
     CustomColor[] colors7 = {green,lightGreen,white,grey,black};
-    // return new RunCommand(()->{
+    return new RunCommand(()->{
       double time = (Timer.getFPGATimestamp()-StartTime)%(duration*7);
       SmartDashboard.putNumber("Time", time);
-      if ((Timer.getFPGATimestamp()-StartTime)%(duration*7) < duration){
-        return stripes(segment, 5, colors1);
+
+      if ((time) < duration){
+        stripes(segment, 5, colors1);
+        return;
       }
 
       else if (time < duration*2){
-        return stripes(segment, 6, colors2);
+        stripes(segment, 6, colors2);
+        return;
       }
 
       else if (time < duration*3){
-        return stripes(segment, 4, colors3);
+        stripes(segment, 4, colors3);
+        return;
       }
 
       else if (time < duration*4){
-        return stripes(segment, 5, colors4);
+        stripes(segment, 5, colors4);
+        return;
       }
 
       else if (time < duration*5){
-        final int fraction = segment.length/18;
-        // if (fraction == 0){
-        //   fraction = 1;
-        // }
-
-        int otherFraction = fraction*6;
-        return new InstantCommand(()->
-        setState(
-        "{\"seg\":["+
-        "{"+
-          "\"id\":" + segment.id + ","+
-          "\"i\":[0,"+otherFraction+",\""+ 
-          yellow.getHex() +"\","+ 
-          otherFraction+","+ fraction*7 +",\""+
-          purple.getHex() +"\","+
-          fraction*7+","+fraction*11+",\""+
-          yellow.getHex() +"\","+
-          fraction*11+","+otherFraction*2+",\""+
-          purple.getHex() +"\","+
-          otherFraction*2+","+segment.length+",\""+
-          yellow.getHex() +
-          "\"]"+
-        "}"+
-        "]}")).handleInterrupt(()->setState("{\"seg\":[{\"id\":"+segment.id+",\"frz\":false}]}"));
+        stripes(segment, 18, colors5);
+        return;
       }
 
       else if (time < duration*6){
-        return stripes(segment, 4, colors6);
+        stripes(segment, 4, colors6);
+        return;
       }
 
       else {
-        return stripes(segment, 5, colors7);
+        stripes(segment, 5, colors7);
+        return;
       }
+    },this).handleInterrupt(()->setState("{\"seg\":[{\"id\":"+segment.id+",\"frz\":false}]}"));
   }
 
 private String toJSON(String[] key, List<Object> data){
