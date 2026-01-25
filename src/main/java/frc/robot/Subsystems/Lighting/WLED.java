@@ -26,7 +26,7 @@ public class WLED extends SubsystemBase {
   SerialPort leds = new SerialPort(115200, Port.kUSB1);
   // SerialPort led = new SerialPort(115200, Port.kUSB1);
   LedSegment seg = new LedSegment(0, 0, 15, false);
-  CustomColor r = new CustomColor(0, 255, 0);
+
   CustomColor pink = new CustomColor(255, 28, 206);
   CustomColor white = new CustomColor(255, 255, 255);
   CustomColor babyBlue = new CustomColor(38, 14, 255);
@@ -45,14 +45,11 @@ public class WLED extends SubsystemBase {
   /** Creates a new Leds. */
   // LedSegment segment =new LedSegment(0, 0, 30, false);
   public WLED() {
-    setDefaultCommand(solidColorTest(seg, blue));
+    setDefaultCommand(solidColor(seg, blue));
   }
 
   @Override
   public void periodic() {
-    //{"seg":[{"id":0, "col":[000000]}]}
-    SmartDashboard.putString("hex", r.getHex());
-    SmartDashboard.putNumber("Legth", seg.length);
     // This method will be called once per scheduler run
   }
 
@@ -157,109 +154,136 @@ public class WLED extends SubsystemBase {
     // led.writeString(state);
   }
 
-  public Command solidColorTest(LedSegment segment, CustomColor color){
-    String[] keys = {"id", "fx","col"};
+  public Command solidColor(LedSegment segment, CustomColor color){
+    String[] key = {"id", "fx","col"};
     List<Object> data = new ArrayList<>();
     data.add(segment.id);
     data.add(0);
     data.add(color.getHex());
-    return new InstantCommand(()->setState(toJSON(keys, data)), this);
+    return new InstantCommand(()->setState(toJSON(key, data)), this);
   }
 
-  public Command blink(LedSegment segment, CustomColor color, int speed, double timeSec){
-    return new InstantCommand(()->setState(
-      "{\"seg\":["+
-      "{"+
-        "\"id\":" + segment.id + ","+
-        "\"fx\":1,"+
-        "\"sx\":"+ speed + ","+
-        "\"col\":[\""+ color.getHex() +"\", 000000]"+
-      "}"+
-      "]}"), this).andThen(new WaitCommand(timeSec));
+  public Command blink(LedSegment segment, CustomColor color, int speed){
+    String[] key = {"id", "fx","sx","col","col"};
+    List<Object> data = new ArrayList<>();
+    data.add(segment.id);
+    data.add(1);
+    data.add(speed);
+    data.add(color.getHex());
+    data.add(black.getHex());
+    return new InstantCommand(()->setState(toJSON(key, data)), this);
+  }
+
+  public Command stripes(LedSegment segment, int numStripes, CustomColor[] colors){
+    int counter = 0;
+    String[] key = new String[(numStripes*3)+1];
+    key[0] = "id";
+    List<Object> data = new ArrayList<>();
+    data.add(segment.id);
+  for (int i = 1; i<= numStripes*3; i++){
+    key[i] = "i";
+    if (i%3==0){
+      data.add(colors[counter]);
+    }
+    else{
+      data.add((segment.length/numStripes)*(i-i/3)-1);
+    }
+  }
+    return new InstantCommand(()->setState(toJSON(key, data)), this);
   }
 
    public Command pride(LedSegment segment){
     
     double StartTime = Timer.getFPGATimestamp();
     double duration = 5;
-    
+    CustomColor[] colors1 = {babyBlue,pink,white,pink,babyBlue};
+    CustomColor[] colors2 = {red,orange,yellow,green,blue,purple};
+    CustomColor[] colors3 = {yellow,white,purple,black};
+    CustomColor[] colors4 = {magenta,magenta,purple,blue,blue};
+    CustomColor[] colors6 = {black,grey,white,purple};
+    CustomColor[] colors7 = {green,lightGreen,white,grey,black};
     return new RunCommand(()->{
       double time = (Timer.getFPGATimestamp()-StartTime)%(duration*7);
       SmartDashboard.putNumber("Time", time);
       if (time < duration){
-        setState(
-        "{\"seg\":["+
-        "{"+
-          "\"id\":" + segment.id + ","+
-          "\"i\":[0,"+segment.length/5+",\""+ 
-          babyBlue.getHex() +"\","+ 
-          segment.length/5+","+ (segment.length/5)*2 +",\""+
-          pink.getHex() +"\","+
-          (segment.length/5)*2+","+(segment.length/5)*3+",\""+
-          white.getHex() +"\","+
-          (segment.length/5)*3+","+(segment.length/5)*4+",\""+
-          pink.getHex() +"\","+
-          (segment.length/5)*4+","+segment.length+",\""+
-          babyBlue.getHex() +
-          "\"]"+
-        "}"+
-        "]}");
+      
+        stripes(segment, 5, colors1);
+        // setState(
+        // "{\"seg\":["+
+        // "{"+
+        //   "\"id\":" + segment.id + ","+
+        //   "\"i\":[0,"+segment.length/5+",\""+ 
+        //   babyBlue.getHex() +"\","+ 
+        //   segment.length/5+","+ (segment.length/5)*2 +",\""+
+        //   pink.getHex() +"\","+
+        //   (segment.length/5)*2+","+(segment.length/5)*3+",\""+
+        //   white.getHex() +"\","+
+        //   (segment.length/5)*3+","+(segment.length/5)*4+",\""+
+        //   pink.getHex() +"\","+
+        //   (segment.length/5)*4+","+segment.length+",\""+
+        //   babyBlue.getHex() +
+        //   "\"]"+
+        // "}"+
+        // "]}");
       }
 
       else if (time < duration*2){
-        setState(
-        "{\"seg\":["+
-        "{"+
-          "\"id\":" + segment.id + ","+
-          "\"i\":[0,"+segment.length/6+",\""+ 
-          red.getHex() +"\","+ 
-          segment.length/6+","+ (segment.length/6)*2 +",\""+
-          orange.getHex() +"\","+
-          (segment.length/6)*2+","+(segment.length/6)*3+",\""+
-          yellow.getHex() +"\","+
-          (segment.length/6)*3+","+(segment.length/6)*4+",\""+
-          green.getHex() +"\","+
-          (segment.length/6)*4+","+(segment.length/6)*5+",\""+
-          blue.getHex() +"\","+
-          (segment.length/6)*5+","+segment.length + ",\""+
-          purple.getHex() +
-          "\"]"+
-        "}"+
-        "]}");
+        stripes(segment, 6, colors2);
+        // setState(
+        // "{\"seg\":["+
+        // "{"+
+        //   "\"id\":" + segment.id + ","+
+        //   "\"i\":[0,"+segment.length/6+",\""+ 
+        //   red.getHex() +"\","+ 
+        //   segment.length/6+","+ (segment.length/6)*2 +",\""+
+        //   orange.getHex() +"\","+
+        //   (segment.length/6)*2+","+(segment.length/6)*3+",\""+
+        //   yellow.getHex() +"\","+
+        //   (segment.length/6)*3+","+(segment.length/6)*4+",\""+
+        //   green.getHex() +"\","+
+        //   (segment.length/6)*4+","+(segment.length/6)*5+",\""+
+        //   blue.getHex() +"\","+
+        //   (segment.length/6)*5+","+segment.length + ",\""+
+        //   purple.getHex() +
+        //   "\"]"+
+        // "}"+
+        // "]}");
       }
 
       else if (time < duration*3){
-        setState(
-        "{\"seg\":["+
-        "{"+
-          "\"id\":" + segment.id + ","+
-          "\"i\":[0,"+segment.length/4+",\""+ 
-          yellow.getHex() +"\","+ 
-          segment.length/4+","+ (segment.length/4)*2 +",\""+
-          white.getHex() +"\","+
-          (segment.length/4)*2+","+(segment.length/4)*3+",\""+
-          purple.getHex() +"\","+
-          (segment.length/4)*3+","+segment.length+",\""+
-          black.getHex() +
-          "\"]"+
-        "}"+
-        "]}");
+        stripes(segment, 4, colors3);
+        // setState(
+        // "{\"seg\":["+
+        // "{"+
+        //   "\"id\":" + segment.id + ","+
+        //   "\"i\":[0,"+segment.length/4+",\""+ 
+        //   yellow.getHex() +"\","+ 
+        //   segment.length/4+","+ (segment.length/4)*2 +",\""+
+        //   white.getHex() +"\","+
+        //   (segment.length/4)*2+","+(segment.length/4)*3+",\""+
+        //   purple.getHex() +"\","+
+        //   (segment.length/4)*3+","+segment.length+",\""+
+        //   black.getHex() +
+        //   "\"]"+
+        // "}"+
+        // "]}");
       }
 
       else if (time < duration*4){
-        setState(
-        "{\"seg\":["+
-        "{"+
-          "\"id\":" + segment.id + ","+
-          "\"i\":[0,"+(segment.length/5)*2+",\""+ 
-          magenta.getHex() +"\","+ 
-          (segment.length/5)*2+","+(segment.length/5)*3+",\""+
-          purple.getHex() +"\","+
-          (segment.length/5)*3+","+segment.length+",\""+
-          blue.getHex() +
-          "\"]"+
-        "}"+
-        "]}");
+        stripes(segment, 5, colors4);
+        // setState(
+        // "{\"seg\":["+
+        // "{"+
+        //   "\"id\":" + segment.id + ","+
+        //   "\"i\":[0,"+(segment.length/5)*2+",\""+ 
+        //   magenta.getHex() +"\","+ 
+        //   (segment.length/5)*2+","+(segment.length/5)*3+",\""+
+        //   purple.getHex() +"\","+
+        //   (segment.length/5)*3+","+segment.length+",\""+
+        //   blue.getHex() +
+        //   "\"]"+
+        // "}"+
+        // "]}");
       }
 
       else if (time < duration*5){
@@ -287,41 +311,43 @@ public class WLED extends SubsystemBase {
       }
 
       else if (time < duration*6){
-        setState(
-        "{\"seg\":["+
-        "{"+
-          "\"id\":" + segment.id + ","+
-          "\"i\":[0,"+segment.length/4+",\""+ 
-          black.getHex() +"\","+ 
-          segment.length/4+","+ (segment.length/4)*2 +",\""+
-          grey.getHex() +"\","+
-          (segment.length/4)*2+","+(segment.length/4)*3+",\""+
-          white.getHex() +"\","+
-          (segment.length/4)*3+","+segment.length+",\""+
-          purple.getHex() +
-          "\"]"+
-        "}"+
-        "]}");
+        stripes(segment, 4, colors6);
+        // setState(
+        // "{\"seg\":["+
+        // "{"+
+        //   "\"id\":" + segment.id + ","+
+        //   "\"i\":[0,"+segment.length/4+",\""+ 
+        //   black.getHex() +"\","+ 
+        //   segment.length/4+","+ (segment.length/4)*2 +",\""+
+        //   grey.getHex() +"\","+
+        //   (segment.length/4)*2+","+(segment.length/4)*3+",\""+
+        //   white.getHex() +"\","+
+        //   (segment.length/4)*3+","+segment.length+",\""+
+        //   purple.getHex() +
+        //   "\"]"+
+        // "}"+
+        // "]}");
       }
 
       else {
-        setState(
-        "{\"seg\":["+
-        "{"+
-          "\"id\":" + segment.id + ","+
-          "\"i\":[0,"+segment.length/5+",\""+ 
-          green.getHex() +"\","+ 
-          segment.length/5+","+ (segment.length/5)*2 +",\""+
-          lightGreen.getHex() +"\","+
-          (segment.length/5)*2+","+(segment.length/5)*3+",\""+
-          white.getHex() +"\","+
-          (segment.length/5)*3+","+(segment.length/5)*4+",\""+
-          grey.getHex() +"\","+
-          (segment.length/5)*4+","+segment.length+",\""+
-          black.getHex() +
-          "\"]"+
-        "}"+
-        "]}");
+        stripes(segment, 5, colors7);
+        // setState(
+        // "{\"seg\":["+
+        // "{"+
+        //   "\"id\":" + segment.id + ","+
+        //   "\"i\":[0,"+segment.length/5+",\""+ 
+        //   green.getHex() +"\","+ 
+        //   segment.length/5+","+ (segment.length/5)*2 +",\""+
+        //   lightGreen.getHex() +"\","+
+        //   (segment.length/5)*2+","+(segment.length/5)*3+",\""+
+        //   white.getHex() +"\","+
+        //   (segment.length/5)*3+","+(segment.length/5)*4+",\""+
+        //   grey.getHex() +"\","+
+        //   (segment.length/5)*4+","+segment.length+",\""+
+        //   black.getHex() +
+        //   "\"]"+
+        // "}"+
+        // "]}");
       }
     }, this).handleInterrupt(()->setState("{\"seg\":[{\"id\":"+segment.id+",\"frz\":false}]}"));
   }
@@ -334,14 +360,25 @@ private String toJSON(String[] key, List<Object> data){
   JsonObject json = new JsonObject();
   JsonObject tempObject = new JsonObject();
   JsonArray colorArray = new JsonArray();
-  // JsonArray indexArray = new JsonArray();
+  JsonArray indexArray = new JsonArray();
   boolean col = false;
-  // boolean index = false;
+  boolean index = false;
+  int indexCounter = 1;
 
   for (int i = 0; i < key.length; i++){
     if (key[i]== "col" && data.get(i) instanceof String){
       colorArray.add((String)data.get(i));
       col = true;
+    }
+
+    if (key[i]== "i" && (data.get(i) instanceof String || data.get(i) instanceof Number)){
+      if (indexCounter % 3 == 0){
+        indexArray.add((String)data.get(i));
+      }
+      else{
+        indexArray.add((Number)data.get(i));
+      }
+      index = true;
     }
 
     else if ((key[i]=="rev" || key[i]=="on") && data.get(i) instanceof Boolean){
@@ -359,6 +396,10 @@ private String toJSON(String[] key, List<Object> data){
 
   if (col){
     tempObject.add("col", colorArray);
+  }
+
+  if (index){
+    tempObject.add("i", indexArray);
   }
 
   json.add("seg", tempObject);
