@@ -4,8 +4,15 @@
 
 package frc.robot.Subsystems.Lighting;
 
+import java.awt.Color;
+
+import org.dyn4j.geometry.Segment;
+
+import com.ctre.phoenix6.controls.SolidColor;
+
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -14,14 +21,21 @@ import frc.robot.Subsystems.Lighting.WLED.CustomColor;
 import frc.robot.Subsystems.Lighting.WLED.LedSegment;
 
 /** Add your docs here. */
-public class Signals {
-    public Signals(){}
+public class Signals extends SubsystemBase {
 
-//     public Command hopperFull(LedSegment segment){
-//     // return run(()->setState("{\"seg\":[{\"id\":" + segment.id + "\"col\":[[255,204,0]]}]}"));
-//     CustomColor color = new CustomColor(255, 215, 0);
-//     return solidColor(segment, color, 1);
-//   }
+    double[] ownedSegments=new double[]{0,1,2,3};
+    public WLED wled = new WLED();
+
+    // private WLED.LedSegment segment = wled.new LedSegment(0, 0, 30, false);
+
+    LedSegment segment = wled.getLedSegment(0, 0, 30, false);
+
+
+    public Signals(){
+        segment.setDefaultCommand(hopperFull());
+        // setDefaultCommand(hopperFull());
+    }
+
 
 //   public Command hopperLow(LedSegment segment){
 //     // return run(()->setState("{\"seg\":[{\"id\":" + segment.id + "\"col\":[[255,204,0]]}]}"));
@@ -37,15 +51,28 @@ public class Signals {
 //     }, this);
 //   }
 
-//   public Command showhopperFull(){
-//     wled.segment(0).setPattern(1);
-//     wled.segment(0).solidColor(color);
-//     // wled.segment(0).setPattern(1,primaryColor,secondaryColor,tertiary,time,etc)
-//     wled.pattern(segmet)
-
-//   }
 
 
+//Must haves
+// hopperfull
+// hopperlow
+// shift/activated
+// team color/solid color
+// shoot status?
+
+ public Command hopperFull(){
+    return Commands.sequence(
+        segment.solidColor(wled.yellow),
+        idle()
+    );
+ }
+
+
+ /**
+  * seg0,seg1,seg2,seg3
+  */
+
+  
 }
 
 
