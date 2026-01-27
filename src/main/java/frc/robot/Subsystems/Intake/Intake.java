@@ -4,6 +4,8 @@
 
 package frc.robot.Subsystems.Intake;
 
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.Subsystems.Intake.IntakeExtension.IntakeExtension;
 import frc.robot.Subsystems.Intake.OuterRollers.OuterRollers;
 import frc.robot.Subsystems.Intake.Rollers.Rollers;
@@ -15,5 +17,19 @@ public class Intake {
     private OuterRollers outerrollers = new OuterRollers();
 
     //TODO: Create a lot of useful commands here
+
+    // Interface: 
+    // intake while retracted
+    // intake while extended
+    // eject / get rid of stuck things
+
+
+    public Command intakeRetracted(){
+        return Commands.parallel(
+            rollers.intake()
+            //intakeExtension.up()
+            //outerrollers.stop()
+        );
+    };
 
 }
