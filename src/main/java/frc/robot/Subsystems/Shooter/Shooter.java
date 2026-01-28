@@ -26,7 +26,7 @@ public class Shooter {
 
     public Command shoot(){
         //this whole thing is pretty temporary, whole system is going to be reorganized after flywheel testing
-        return new RunCommand(()->flywheel.SetWantedState(WantedState.SETRPM, targetRPM)).finallyDo(()->flywheel.SetWantedState(WantedState.STOP));
+        return new RunCommand(()->flywheel.setWantedState(WantedState.SETRPM, targetRPM)).finallyDo(()->flywheel.setWantedState(WantedState.STOP));
     }
 
 }

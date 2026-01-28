@@ -13,6 +13,7 @@ import com.revrobotics.spark.SparkClosedLoopController;
 import com.revrobotics.spark.SparkFlex;
 import com.revrobotics.spark.SparkClosedLoopController.ArbFFUnits;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
+import com.revrobotics.spark.config.SparkBaseConfig;
 import com.revrobotics.spark.config.SparkFlexConfig;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 
@@ -45,34 +46,10 @@ public class Flywheel extends SubsystemBase {
 
   /** Creates a new Flywheel. */
   public Flywheel() {
-    SparkFlexConfig config = new SparkFlexConfig();
-    config.inverted(false)
-    .idleMode(IdleMode.kCoast);
-    config.closedLoop
-    .p(0.00025)
-    .i(0.0)
-    .d(0.0)
-    .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
-    .feedForward
-    .kS(0.0)//0.22
-    .kV(0.0024309)
-    // .kA(0.0)
-    ;
-
-    config.encoder
-      .positionConversionFactor(kGEARING)
-      .velocityConversionFactor(kGEARING) //rpm, not rps
-    ;
-
-    SparkFlexConfig followerConfig = new SparkFlexConfig();
+    SparkBaseConfig followerConfig = getMotorConfig();
     followerConfig.follow(flywheelMotor1, true);
-    followerConfig.idleMode(IdleMode.kCoast);
-    followerConfig.encoder
-      .positionConversionFactor(kGEARING)
-      .velocityConversionFactor(kGEARING) //rpm, not rps
-    ;
 
-    flywheelMotor1.configure(config, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+    flywheelMotor1.configure(getMotorConfig(), ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
     flywheelMotor2.configure(followerConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
   }
 
@@ -99,7 +76,7 @@ public class Flywheel extends SubsystemBase {
     flywheelMotor1.stopMotor();
   }
 
-  public SystemState handleStateTransitions(){
+  private SystemState handleStateTransitions(){
     switch (wantedState){
     case SETRPM:
       return SystemState.SETRPM;
@@ -110,7 +87,7 @@ public class Flywheel extends SubsystemBase {
     return SystemState.STOP;
   }
   
-  public void applyStates(){
+  private void applyStates(){
     switch(systemState){
       case SETRPM:
         setRPM();
@@ -122,14 +99,39 @@ public class Flywheel extends SubsystemBase {
     }
   }
 
-
-  public void SetWantedState(WantedState wantedState){
+  public void setWantedState(WantedState wantedState){
     this.wantedState = wantedState;
   }
 
-  public void SetWantedState(WantedState wantedState, double targetRPM){
+  public void setWantedState(WantedState wantedState, double targetRPM){
     this.wantedState = wantedState;
     this.targetRPM = targetRPM;
+  }
+
+  private SparkBaseConfig getMotorConfig(){
+    SparkBaseConfig config = new SparkFlexConfig();
+
+    config
+      .smartCurrentLimit(100)
+      .inverted(false)
+      .idleMode(IdleMode.kCoast);
+
+    config.closedLoop
+      .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
+      .p(0.00025)
+      .i(0.0)
+      .d(0.0)
+    .feedForward
+      .kS(0.0) //0.22
+      .kV(0.0024309)
+    ;
+
+    config.encoder
+      .positionConversionFactor(kGEARING)
+      .velocityConversionFactor(kGEARING) //Do NOT divide by 60, rpm is desired, not rps
+    ;
+
+    return config;
   }
 
 }
