@@ -27,7 +27,7 @@ public class Rollers extends SubsystemBase {
     config.encoder
     .positionConversionFactor(factor)
     .velocityConversionFactor(factor/60);
-    
+
     config.closedLoop.feedForward
     .sva(0, 12/6000.0/factor, 0);
 
@@ -46,6 +46,8 @@ public class Rollers extends SubsystemBase {
     ;
 
     motor.configure(config, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+
+    setDefaultCommand(stop());
   }
 
   @Override
@@ -60,6 +62,12 @@ public class Rollers extends SubsystemBase {
       .setSetpoint(5, ControlType.kMAXMotionVelocityControl);
     });
 
+  }
+
+  public Command stop(){
+    return run(()->{
+        motor.stopMotor();
+    });
   }
 
 

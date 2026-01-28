@@ -22,7 +22,7 @@ public class RobotContainer {
   QuestNav questnav = new QuestNav(swerve,photonvision);
   //TODO: TargetingSystem targetingsystem = new TargetingSystem(swerve);
   Shooter shooter = new Shooter(/* targetingsystem */);
-  Intake Intake = new Intake();
+  Intake intake = new Intake();
   Spindexer spindexer = new Spindexer();
 
   CommandXboxController driver = new CommandXboxController(0);
@@ -32,7 +32,10 @@ public class RobotContainer {
     configureBindings();
   }
 
-  private void configureBindings() {}
+  private void configureBindings() {
+    driver.a().whileTrue(intake.intake());
+
+  }
 
   public Command getAutonomousCommand() {
     //TODO: Get this from Autos.java instead
