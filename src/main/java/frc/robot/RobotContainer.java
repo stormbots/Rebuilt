@@ -32,7 +32,9 @@ public class RobotContainer {
     configureBindings();
   }
 
-  private void configureBindings() {}
+  private void configureBindings() {
+    driver.rightTrigger().whileTrue(shooter.shoot());
+  }
 
   public Command getAutonomousCommand() {
     //TODO: Get this from Autos.java instead
