@@ -10,16 +10,16 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.Subsystems.Intake.Intake;
 import frc.robot.Subsystems.Lighting.Lighting;
 import frc.robot.Subsystems.Photonvision.Photonvision;
-import frc.robot.Subsystems.Questnav.QuestNav;
+import frc.robot.Subsystems.Questnav.QuestNavSubsystem;
 import frc.robot.Subsystems.Shooter.Shooter;
 import frc.robot.Subsystems.Spindexer.Spindexer;
-import frc.robot.Subsystems.Swerve.Swerve;
+import frc.robot.Subsystems.Swerve.SwerveSubsystem;
 
 public class RobotContainer {
 
-  Swerve swerve = new Swerve();
+  SwerveSubsystem swerve = new SwerveSubsystem();
   Photonvision photonvision = new Photonvision(swerve);
-  QuestNav questnav = new QuestNav(swerve,photonvision);
+  QuestNavSubsystem questnav = new QuestNavSubsystem(swerve);
   //TODO: TargetingSystem targetingsystem = new TargetingSystem(swerve);
   Shooter shooter = new Shooter(/* targetingsystem */);
   Intake Intake = new Intake();
@@ -30,13 +30,15 @@ public class RobotContainer {
 
   public RobotContainer() {
     configureBindings();
-    swerve.setDefaultCommand(swerve.driveAllianceManagedCommand(
-      ()->0.0, ()->0.0, ()->-0.0
-     ));
+    
   }
 
   private void configureBindings() {
-    driver.a().whileTrue(swerve.driveAllianceManagedCommand(()->0.0, ()->0.0, ()->0.1));
+     swerve.setDefaultCommand(swerve.driveAllianceManagedCommand(
+      ()->driver.getLeftX(), 
+      ()->driver.getLeftY(), 
+      ()->driver.getRightX()));
+   driver.a().whileTrue(swerve.driveAllianceManagedCommand(()->0.0, ()->0.0, ()->0.1));
     driver.b().whileTrue(swerve.driveAllianceManagedCommand(()->0.0, ()->0.0, ()->-0.1));
     driver.x().whileTrue(swerve.driveAllianceManagedCommand(()->0.1, ()->0.0, ()->0.0));
     driver.y().whileTrue(swerve.driveAllianceManagedCommand(()->-0.1, ()->0.0, ()->0.0));

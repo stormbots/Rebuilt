@@ -5,12 +5,15 @@
 package frc.robot.Subsystems.Photonvision;
 
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.Subsystems.Swerve.Swerve;
+import frc.robot.Subsystems.Swerve.SwerveSubsystem;
 
 public class Photonvision extends SubsystemBase {
   /** Creates a new Photonvision.
    *  @param swerve */
-  public Photonvision(Swerve swerve) {}
+  public Photonvision(SwerveSubsystem swerve) {
+
+    
+  }
 
   @Override
   public void periodic() {

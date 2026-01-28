@@ -21,7 +21,7 @@ import swervelib.telemetry.SwerveDriveTelemetry;
 import swervelib.telemetry.SwerveDriveTelemetry.TelemetryVerbosity;
 
 
-public class Swerve extends SubsystemBase {
+public class SwerveSubsystem extends SubsystemBase {
 
   final double maximumSpeed = 5.0;
 
@@ -31,7 +31,7 @@ public class Swerve extends SubsystemBase {
 
 
   /** Creates a new SwerveSubsystem. */
-  public Swerve() {
+  public SwerveSubsystem() {
 
     File swerveJsonDirectory = new File(Filesystem.getDeployDirectory(),"choppedbot");
     try
