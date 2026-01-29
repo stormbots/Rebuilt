@@ -4,6 +4,7 @@
 
 package frc.robot.Subsystems.Intake.IntakeExtension;
 
+import static edu.wpi.first.units.Units.Degree;
 import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.DegreesPerSecond;
 import static edu.wpi.first.units.Units.Radians;
@@ -21,9 +22,14 @@ public class IntakeExtensionSim {
     SparkFlex armMotor;
     SparkFlexSim simArmMotor;
 
+    final Angle startingAngle=Degree.of(40);
+
     public IntakeExtensionSim(SparkFlex armMotor){
         this.armMotor = armMotor;
         simArmMotor = new SparkFlexSim(armMotor, DCMotor.getNeoVortex(1));
+        simArmMotor.setPosition(startingAngle.in(Degree));
+        simArmMotor.getRelativeEncoderSim().setPosition(startingAngle.in(Degree));
+        simArmMotor.getAbsoluteEncoderSim().setPosition(startingAngle.in(Degree));
     }
   
   SingleJointedArmSim simArm = new SingleJointedArmSim(
@@ -34,7 +40,7 @@ public class IntakeExtensionSim {
     Degrees.of(-40).in(Radians),
     Degrees.of(100).in(Radians),
     false,
-    Degrees.of(0).in(Radians)
+    startingAngle.in(Radians)
   );
 
   public void update() {

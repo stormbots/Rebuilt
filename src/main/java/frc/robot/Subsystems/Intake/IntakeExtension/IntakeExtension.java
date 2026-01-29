@@ -8,6 +8,7 @@ import static edu.wpi.first.units.Units.Degree;
 
 import com.revrobotics.PersistMode;
 import com.revrobotics.ResetMode;
+import com.revrobotics.spark.FeedbackSensor;
 import com.revrobotics.spark.SparkFlex;
 import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.SparkBase.ControlType;
@@ -31,26 +32,28 @@ public class IntakeExtension extends SubsystemBase {
   /** Creates a new IntakeExtension. */
   public IntakeExtension() {
      var config = new  SparkFlexConfig();
-    double factor = 1; //convert to surface speed of roller
+    double factor = 1;
     config.encoder
     .positionConversionFactor(factor)
     .velocityConversionFactor(factor / 60);
 
-    var absfactor = 1;
+    var absfactor = 360;
     config.absoluteEncoder
     .inverted(false)
     .positionConversionFactor(absfactor)
     .velocityConversionFactor(absfactor / 60);
 
+    config.closedLoop.feedbackSensor(FeedbackSensor.kAbsoluteEncoder);
+
     
     config.closedLoop.feedForward
     .svacr(0, 0, 0, 0, 0);
     
-    config.closedLoop.p(0.05);
+    config.closedLoop.p(8/90.0);
 
     config.closedLoop.maxMotion
-    .maxAcceleration(20)
-    .cruiseVelocity(100);
+    .maxAcceleration(360/2*4)
+    .cruiseVelocity(360/2);
 
     config
     .idleMode(IdleMode.kCoast)
@@ -74,13 +77,12 @@ public class IntakeExtension extends SubsystemBase {
   public void periodic() {
     // This method will be called once per scheduler run
 
-    // motor.getAbsoluteEncoder().getPosition()
     motor.getAppliedOutput();
     motor.getOutputCurrent();
+    motor.getAbsoluteEncoder().getPosition();
     SmartDashboard.putNumber("Intake/Extension/OutputCurrent", motor.getOutputCurrent());
     SmartDashboard.putNumber("Intake/Extension/Dutycycle", motor.getAppliedOutput());
-
-    
+    SmartDashboard.putNumber("Intake/Extension/enc angle", motor.getAbsoluteEncoder().getPosition());
 
   }
 
@@ -90,21 +92,22 @@ public class IntakeExtension extends SubsystemBase {
     SmartDashboard.putNumber("Intake/Extension/SimAngle", sim.getAngle().in(Degree));
   }
 
-  public Command up(){
+  public Command setAngle(double degrees){
     return run(()->{
       motor
       .getClosedLoopController()
-      .setSetpoint(90, ControlType.kMAXMotionPositionControl);
+      //FIXME: Get kSmartMaxMotion working. Weird issues in sim.
+      .setSetpoint(degrees, ControlType.kPosition);
     });
   }
 
+
+  public Command up(){
+    return setAngle(90);
+  }
+
   public Command down(){
-    return run(()->{
-      motor
-      .getClosedLoopController()
-      .setSetpoint(0, ControlType.kMAXMotionPositionControl);
-    });
-    
+    return setAngle(0);
   }
 
 

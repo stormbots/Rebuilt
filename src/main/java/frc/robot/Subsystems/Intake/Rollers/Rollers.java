@@ -61,7 +61,6 @@ public class Rollers extends SubsystemBase {
       .getClosedLoopController()
       .setSetpoint(5, ControlType.kMAXMotionVelocityControl);
     });
-
   }
 
   public Command stop(){
