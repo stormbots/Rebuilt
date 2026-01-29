@@ -10,12 +10,15 @@ import java.util.function.DoubleSupplier;
 
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.Filesystem;
+import edu.wpi.first.wpilibj.Preferences;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -25,11 +28,13 @@ import swervelib.SwerveDrive;
 import swervelib.parser.SwerveParser;
 import swervelib.telemetry.SwerveDriveTelemetry;
 import swervelib.telemetry.SwerveDriveTelemetry.TelemetryVerbosity;
+import frc.robot.lib.BLine.*;
+import edu.wpi.first.math.controller.PIDController;
 
 
 public class Swerve extends SubsystemBase {
 
-  final double maximumSpeed = 5.0;
+  final double maximumSpeed = 2.0;
 
   SwerveDrive swerveDrive; 
 
@@ -40,7 +45,8 @@ public class Swerve extends SubsystemBase {
   public Swerve() {
 
     //this needs to be changed once final frame is decided
-    File swerveJsonDirectory = new File(Filesystem.getDeployDirectory(),"choppedbot");
+    var name = Preferences.getString("BotName", "compbot");
+    File swerveJsonDirectory = new File(Filesystem.getDeployDirectory(),name);
     try
     {
       swerveDrive = new SwerveParser(swerveJsonDirectory).createSwerveDrive(maximumSpeed, new Pose2d());
@@ -80,6 +86,7 @@ public class Swerve extends SubsystemBase {
 
   SwerveInputs driverInputs = new SwerveInputs();
   SwerveInputs fieldInputs = new SwerveInputs();
+  SwerveInputs autoInputs = new SwerveInputs();
 
   @Override
   public void periodic() {
@@ -91,6 +98,7 @@ public class Swerve extends SubsystemBase {
     var inputs = new SwerveInputs()
     .add(driverInputs)
     .add(fieldInputs)
+    .add(autoInputs)
     ;
     if(DriverStation.isDisabled())inputs.clear();
 
@@ -123,6 +131,24 @@ public class Swerve extends SubsystemBase {
     ;
   }
 
+  public Command addAutoInputs(DoubleSupplier translationX, DoubleSupplier translationY, DoubleSupplier angularRotationX){
+    return Commands.either(
+      run(()->{
+        autoInputs.tx = 1 * translationX.getAsDouble();
+        autoInputs.ty = 1 * translationY.getAsDouble();
+        driverInputs.r = angularRotationX.getAsDouble();
+      }), 
+      run(()->{
+        autoInputs.tx = -1 * translationX.getAsDouble();
+        autoInputs.ty = -1 * translationY.getAsDouble();
+        autoInputs.r = angularRotationX.getAsDouble();
+      }),
+      ()->DriverStation.getAlliance().equals(Optional.of(Alliance.Blue))
+    )
+    .finallyDo(autoInputs::clear)
+    ;
+  }
+
   public Command zeroGyro(){
     return Commands.runOnce(swerveDrive::zeroGyro);
   }
@@ -136,6 +162,13 @@ public class Swerve extends SubsystemBase {
     swerveDrive.addVisionMeasurement(pose2d, timestamp, STD_DEVS);
   }
 
-  
+  public ChassisSpeeds getChassisSpeedsRobotRelative(){
+    return swerveDrive.getRobotVelocity();
+  }
+
+  public ChassisSpeeds getChassisSpeedsFieldRelative(){
+    return swerveDrive.getFieldVelocity();
+  }
+
 
 }

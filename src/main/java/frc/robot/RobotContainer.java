@@ -14,6 +14,9 @@ import frc.robot.Subsystems.Questnav.QuestNavSubsystem;
 import frc.robot.Subsystems.Shooter.Shooter;
 import frc.robot.Subsystems.Spindexer.Spindexer;
 import frc.robot.Subsystems.Swerve.Swerve;
+import frc.robot.Subsystems.Swerve.Pathing;
+import frc.robot.lib.BLine.FollowPath;
+import frc.robot.lib.BLine.Path;
 
 public class RobotContainer {
 
@@ -24,19 +27,27 @@ public class RobotContainer {
   Shooter shooter = new Shooter(/* targetingsystem */);
   Intake Intake = new Intake();
   Spindexer spindexer = new Spindexer();
+  Pathing pathing = new Pathing(swerve);
 
   CommandXboxController driver = new CommandXboxController(0);
   CommandXboxController operator = new CommandXboxController(1);
+  Path testingPath = new Path("testingBline");
 
   public RobotContainer() {
     configureBindings();
   }
+
+
 
   private void configureBindings() {
     swerve.addDriverInputs(
       ()->driver.getLeftX(), 
       ()->driver.getLeftY(), 
       ()->driver.getRightX());
+
+    driver.a().onTrue(pathing.followPath(testingPath));
+    
+    
 
   }
 
