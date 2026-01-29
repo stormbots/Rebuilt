@@ -32,7 +32,7 @@ public class Signals extends SubsystemBase {
 
 
     public Signals(){
-        segment.setDefaultCommand(hopperFull());
+        segment.setDefaultCommand(segment.pride());
         // setDefaultCommand(hopperFull());
     }
 

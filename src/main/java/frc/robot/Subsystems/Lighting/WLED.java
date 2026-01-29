@@ -111,35 +111,128 @@ public class WLED {
     return new InstantCommand(()->writeJSON(toJSON(key, data)), this);
   }
 
-  public Command stripes(int numStripes, CustomColor[] colors){
+  public Command stripes(CustomColor[] colors){
     int j = 0;
-    int k = 0;
-    boolean l = true;
+    int numStripes = colors.length;
+    int l = 0;
+    int num = 0;
+    boolean addColor;
+    boolean addNumber;
+    boolean end = false;
+    boolean sameLastColor = false;
+    boolean sameNextColor = false;
     int fraction = length/numStripes;
     if (fraction == 0){
       fraction = 1;
     }
-    String[] key = new String[(numStripes*3)+1];
+    for (int i=0; i<colors.length; i++){
+      if(i==0){
+        num++;
+      }
+      else if (colors[i] != colors[i-1]){
+        num ++;
+      }
+    }
+    
+    int instances =1;
+    String[] key = new String[(num*3)+1];
     key[0] = "id";
     List<Object> data = new ArrayList<>();
     data.add(id);
-  for (int i = 1; i<= numStripes*3; i++){
-    key[i] = "i";
-    if(i == numStripes*3-1){
-      data.add(length);
+  for (int i = 0; i< numStripes*3; i++){
+    if (j!=0){
+      sameLastColor = (colors[Math.min(j, colors.length-1)]==colors[Math.min(j-1, colors.length-2)]);
     }
-    else if (i%3==0){
+    
+    sameNextColor = (colors[Math.min(j, colors.length-2)]==colors[Math.min(j+1, colors.length-1)]);
+    
+    
+    addNumber = l < 2;
+    addNumber = addNumber || (data.get(l) instanceof String);
+    addNumber = addNumber || ((data.get(l) instanceof Number) && (data.get(l-1) instanceof String));
+    addNumber = addNumber && l<key.length-2;
+    addColor = !addNumber && l<=key.length-2;
+    
+    
+    if (addColor || end){
+      // data.add("j"+Integer.toString(j));
       data.add(colors[j].getHex());
       j++;
-    }
-    else{
-      data.add((fraction)*k);
-      if(l){
-        k++;
+      if (end){
+        end =false;
       }
-      l = !l;
+      l++;
+      
+      key[l] = "i";
     }
+    else if (addNumber) {
+
+      if(l==key.length-3){
+        // data.add(76);
+        data.add(length);
+        l++;
+        key[l] = "i";
+        end = true;
+      }
+      else if (l == 0){
+          // data.add(j);
+          data.add(0);
+          l++;
+          instances++;
+          key[l] = "i";
+          if (sameNextColor){
+            j++;
+          }
+          // j++;
+        }
+
+      else if (!sameLastColor && sameNextColor){
+        
+        // data.add(25);
+        data.add((int)data.get(l-1));
+        l++;
+        key[l] = "i";
+        j++;
+        instances++;
+      }
+
+      else if(sameLastColor && !sameNextColor){
+        int newFraction = (int)(length * ((double)instances/numStripes));
+        if (newFraction == 0){
+          newFraction = 1;
+        }
+        // data.add(77);
+        data.add((int)data.get(l)+newFraction);
+        l++;
+        key[l] = "i";
+        instances = 1;
+        // j++;
+      }
+
+      else if (!sameLastColor && !sameNextColor){
+        if(data.get(l) instanceof Number){
+          data.add((int)data.get(l)+fraction);
+          // data.add(67);
+        }
+        else{
+          data.add((int)data.get(l-1));
+          // data.add(52);
+        }
+        l++;
+        key[l] = "i";
+        }
+      else if (sameNextColor && sameLastColor){
+        // data.add(addNumber);
+        instances++;
+        j++;
+      }
+    
+    }
+    // else{
+    //   data.add(67);
+    // }
   }
+    SmartDashboard.putString("data", data.toString());
     return new InstantCommand(()->writeJSON(toJSON(key, data)), this);//.handleInterrupt(()->setState("{\"seg\":[{\"id\":"+segment.id+",\"frz\":false}]}"));
     // setState(toJSON(key, data));
     
@@ -154,20 +247,23 @@ public class WLED {
     CustomColor[] colors5 = {yellow,yellow,yellow,yellow,yellow,yellow,purple,yellow,yellow,yellow,yellow,purple,yellow,yellow,yellow,yellow,yellow,yellow};
     CustomColor[] colors6 = {black,grey,white,purple};
     CustomColor[] colors7 = {green,lightGreen,white,grey,black};
+    CustomColor[] test1 = {blue,yellow,red,green,red,green};
+    CustomColor[] test2 = {blue,blue,blue,red,red,red,blue,blue,blue};
+    CustomColor[] test3 = {blue,blue,red,red};
 
-    return new SequentialCommandGroup(stripes(5, colors1)
+    return new SequentialCommandGroup(stripes(colors1)
     .andThen(new WaitCommand(duration))
-    .andThen(stripes( 6, colors2))
+    .andThen(stripes(colors2))
     .andThen(new WaitCommand(duration))
-    .andThen(stripes(4, colors3))
+    .andThen(stripes(colors3))
     .andThen(new WaitCommand(duration))
-    .andThen(stripes(5, colors4))
+    .andThen(stripes(colors4))
     .andThen(new WaitCommand(duration))
-    .andThen(stripes(18, colors5))
+    .andThen(stripes(colors5))
     .andThen(new WaitCommand(duration))
-    .andThen(stripes(4, colors6))
+    .andThen(stripes(colors6))
     .andThen(new WaitCommand(duration))
-    .andThen(stripes(5, colors7))
+    .andThen(stripes(colors7))
     .andThen(new WaitCommand(duration))).handleInterrupt(()->writeJSON("{\"seg\":[{\"id\":"+id+",\"frz\":false}]}"));
   }
 
@@ -175,6 +271,9 @@ public class WLED {
     //ADD EXCEPTION IF LEGTHS UNEQUAL
     if (key.length != data.size()){
       SmartDashboard.putString("lengthError", "true");
+      SmartDashboard.putNumber("keyLength", key.length);
+      SmartDashboard.putNumber("dataLength", data.size());
+      SmartDashboard.putString("data", data.toString());
       return "";
     }
     JsonObject json = new JsonObject();
@@ -192,7 +291,7 @@ public class WLED {
       }
 
       else if (key[i]== "i" && (data.get(i) instanceof String || data.get(i) instanceof Number)){
-        if (indexCounter % 3 == 0){
+        if (data.get(i) instanceof String){
           indexArray.add((String)data.get(i));
         }
         else{
@@ -211,13 +310,13 @@ public class WLED {
       }
 
       else{
-        SmartDashboard.putString("typeErrorColor", colorArray.toString());
-        SmartDashboard.putString("typeErrorIndex", indexArray.toString());
-        SmartDashboard.putString("typeError", tempObject.toString());
-        SmartDashboard.putString("key", key[i]);
-        SmartDashboard.putString("data",(String)data.get(i));
-        SmartDashboard.putBoolean("string",data.get(i) instanceof String);
-        SmartDashboard.putNumber("index", i);
+        // SmartDashboard.putString("typeErrorColor", colorArray.toString());
+        // SmartDashboard.putString("typeErrorIndex", indexArray.toString());
+        // SmartDashboard.putString("typeError", tempObject.toString());
+        // // SmartDashboard.putString("key", key[i]);
+        // SmartDashboard.putString("data",(String)data.get(i));
+        // SmartDashboard.putBoolean("string",data.get(i) instanceof String);
+        // SmartDashboard.putNumber("index", i);
         return "";
       }
     }
