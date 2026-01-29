@@ -68,5 +68,6 @@
   "java.completion.guessMethodArguments": "insertParameterNames",
   "editor.autoClosingDelete": "never",
   "editor.autoClosingOvertype": "never",
-  "editor.autoClosingQuotes": "never"
+  "editor.autoClosingQuotes": "never",
+  "wpilib.autoStartRioLog": false
 }
