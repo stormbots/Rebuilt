@@ -10,7 +10,7 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.Subsystems.Intake.Intake;
 import frc.robot.Subsystems.Lighting.Lighting;
 import frc.robot.Subsystems.Photonvision.Photonvision;
-import frc.robot.Subsystems.Questnav.QuestNav;
+import frc.robot.Subsystems.Questnav.QuestNavSubsystem;
 import frc.robot.Subsystems.Shooter.Shooter;
 import frc.robot.Subsystems.Spindexer.Spindexer;
 import frc.robot.Subsystems.Swerve.Swerve;
@@ -19,7 +19,7 @@ public class RobotContainer {
 
   Swerve swerve = new Swerve();
   Photonvision photonvision = new Photonvision(swerve);
-  QuestNav questnav = new QuestNav(swerve,photonvision);
+  QuestNavSubsystem questnav = new QuestNavSubsystem(swerve);
   //TODO: TargetingSystem targetingsystem = new TargetingSystem(swerve);
   Shooter shooter = new Shooter(/* targetingsystem */);
   Intake Intake = new Intake();

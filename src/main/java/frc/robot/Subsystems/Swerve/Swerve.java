@@ -8,8 +8,11 @@ import java.io.File;
 import java.util.Optional;
 import java.util.function.DoubleSupplier;
 
+import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.numbers.N1;
+import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.Filesystem;
@@ -19,7 +22,6 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import swervelib.SwerveDrive;
-import swervelib.imu.NavXSwerve;
 import swervelib.parser.SwerveParser;
 import swervelib.telemetry.SwerveDriveTelemetry;
 import swervelib.telemetry.SwerveDriveTelemetry.TelemetryVerbosity;
@@ -54,6 +56,7 @@ public class Swerve extends SubsystemBase {
     SwerveDriveTelemetry.verbosity = TelemetryVerbosity.HIGH;
 
     SmartDashboard.putData("odometryField", odometryField);
+
     
   }
 
@@ -125,9 +128,12 @@ public class Swerve extends SubsystemBase {
   }
 
   //For other subsystems/files
-  public Pose2d getSwervePose()
-  {
+  public Pose2d getSwervePose(){
     return swerveDrive.getPose();
+  }
+
+  public void addVisionMeasurement(Pose2d pose2d, double timestamp, Matrix<N3, N1> STD_DEVS){
+    swerveDrive.addVisionMeasurement(pose2d, timestamp, STD_DEVS);
   }
 
   
