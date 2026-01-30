@@ -30,7 +30,7 @@ public class Intake {
 
     public Command eject(){
         return Commands.parallel(
-            // rollers.eject()
+            rollers.eject()
         );
     }
 

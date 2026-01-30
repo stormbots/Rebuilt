@@ -4,20 +4,27 @@
 
 package frc.robot.Subsystems.Intake.Rollers;
 
+import static edu.wpi.first.units.Units.RPM;
+
 import com.revrobotics.PersistMode;
 import com.revrobotics.ResetMode;
-import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.SparkBase.ControlType;
+import com.revrobotics.spark.SparkFlex;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
-import com.revrobotics.spark.config.SparkFlexConfig;
+import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
+import com.revrobotics.spark.config.SparkFlexConfig;
 
+import edu.wpi.first.units.measure.Velocity;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class Rollers extends SubsystemBase {
 
-  SparkMax motor = new SparkMax(35, MotorType.kBrushless);
+  SparkFlex motor = new SparkFlex(35, MotorType.kBrushless);
+
+  RollersSim sim = new RollersSim(motor);
 
   /** Creates a new Rollers. */
   public Rollers() {
@@ -52,15 +59,32 @@ public class Rollers extends SubsystemBase {
 
   @Override
   public void periodic() {
-    // This method will be called once per scheduler run
+    SmartDashboard.putNumber("Rollers/DutyCycle" , motor.getAppliedOutput());
+    SmartDashboard.putNumber("Rollers/OutputCurrent" , motor.getOutputCurrent());
   }
 
-  public Command intake(){
+  @Override
+  public void simulationPeriodic(){
+    sim.update();
+    SmartDashboard.putNumber("Rollers/SimVelocity" , sim.getVelocity().in(RPM));
+  }
+
+
+  public Command setVelocity(double velocity){
   return run(()->{
       motor
       .getClosedLoopController()
-      .setSetpoint(5, ControlType.kMAXMotionVelocityControl);
+      .setSetpoint(velocity, ControlType.kMAXMotionVelocityControl);
     });
+  }
+
+  public Command intake(){
+    return setVelocity(5);
+  }
+
+
+ public Command eject(){
+    return setVelocity(-5);
   }
 
   public Command stop(){
