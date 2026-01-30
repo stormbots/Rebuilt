@@ -41,6 +41,7 @@ public class Swerve extends SubsystemBase {
   Field2d odometryField = new Field2d();
 
 
+
   /** Creates a new SwerveSubsystem. */
   public Swerve() {
 
@@ -93,7 +94,10 @@ public class Swerve extends SubsystemBase {
     // This method will be called once per scheduler run
     swerveDrive.updateOdometry();
 
+
     odometryField.setRobotPose(swerveDrive.getPose());
+
+    
 
     var inputs = new SwerveInputs()
     .add(driverInputs)
@@ -101,6 +105,7 @@ public class Swerve extends SubsystemBase {
     .add(autoInputs)
     ;
     if(DriverStation.isDisabled())inputs.clear();
+
 
     swerveDrive.drive(
         new Translation2d(
@@ -136,7 +141,7 @@ public class Swerve extends SubsystemBase {
       run(()->{
         autoInputs.tx = 1 * translationX.getAsDouble();
         autoInputs.ty = 1 * translationY.getAsDouble();
-        driverInputs.r = angularRotationX.getAsDouble();
+        autoInputs.r = angularRotationX.getAsDouble();
       }), 
       run(()->{
         autoInputs.tx = -1 * translationX.getAsDouble();
@@ -147,6 +152,13 @@ public class Swerve extends SubsystemBase {
     )
     .finallyDo(autoInputs::clear)
     ;
+  }
+
+  public void addAutoInputsVoid(DoubleSupplier translationX, DoubleSupplier translationY, DoubleSupplier angularRotationX)
+  {
+    autoInputs.tx = 1 * translationX.getAsDouble();
+    autoInputs.ty = 1 * translationY.getAsDouble();
+    autoInputs.r = angularRotationX.getAsDouble();
   }
 
   public Command zeroGyro(){
