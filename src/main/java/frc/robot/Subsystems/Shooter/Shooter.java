@@ -1,5 +1,7 @@
 package frc.robot.Subsystems.Shooter;
 
+import com.stormbots.LUT;
+
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
@@ -14,6 +16,12 @@ public class Shooter {
     Flywheel flywheel = new Flywheel();
     Turret turret = new Turret();
     Hood hood = new Hood();
+
+    // normed distance vector, flywheel rpm, hood angle, time of flight
+    LUT hubLUT = new LUT(new double[][]{
+        {0,0,0,0},
+        {1,1,1,1}
+    });
 
     private double targetRPM = 4000.0;
 
