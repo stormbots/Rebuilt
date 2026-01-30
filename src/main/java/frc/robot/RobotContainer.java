@@ -4,6 +4,8 @@
 
 package frc.robot;
 
+import com.stormbots.CRTAbsoluteEncoder;
+
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
@@ -30,6 +32,8 @@ public class RobotContainer {
 
   public RobotContainer() {
     configureBindings();
+
+    CRTAbsoluteEncoder.getInstance().sync();
   }
 
   private void configureBindings() {

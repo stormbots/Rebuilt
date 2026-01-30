@@ -4,29 +4,34 @@
 
 package frc.robot.Subsystems.Shooter.Turret;
 
+import static edu.wpi.first.units.Units.Degrees;
+
 import com.revrobotics.PersistMode;
 import com.revrobotics.ResetMode;
 import com.revrobotics.spark.FeedbackSensor;
+import com.revrobotics.spark.SparkBase.ControlType;
 import com.revrobotics.spark.SparkFlex;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.config.SparkBaseConfig;
-import com.revrobotics.spark.config.SparkFlexConfig;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
+import com.revrobotics.spark.config.SparkFlexConfig;
 import com.stormbots.CRTAbsoluteEncoder;
+import com.stormbots.Clamp;
 
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class Turret extends SubsystemBase {
 
-  public static final double TURRET_GEAR_TOOTH_COUNT = 100;
-  public static final double GEAR_1_TOOTH_COUNT = 16;
-  public static final double GEAR_2_TOOTH_COUNT = 17;
-  private static final CRTAbsoluteEncoder crtAbsoluteEncoder = new CRTAbsoluteEncoder(TURRET_GEAR_TOOTH_COUNT, GEAR_1_TOOTH_COUNT, GEAR_2_TOOTH_COUNT, true);
+  public static final double kTurretGearToothCount = 100;
+  public static final double kGear1ToothCount = 16;
+  public static final double kGear2ToothCount = 17;
   
-  public static final double GEARING = 1.0;
+  public static final double kGearing = 1.0;
 
-  public static final double MAXROTATION = 540.0 / 2.0;
+  //How much in ONE direction, hence max range divided by 2
+  public static final double kMaxRotation = 540.0 / 2.0;
 
 
   SparkFlex motor = new SparkFlex(99, MotorType.kBrushless);
@@ -36,7 +41,9 @@ public class Turret extends SubsystemBase {
 
     motor.configure(getMotorConfig(), ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
 
-    motor.getEncoder().setPosition(getTurretAngleAbsolute());
+    CRTAbsoluteEncoder.getInstance().setParams(kTurretGearToothCount, kGear1ToothCount, kGear2ToothCount, true);
+    CRTAbsoluteEncoder.getInstance().setRelativeEncoder(motor.getEncoder());
+
   }
 
   @Override
@@ -47,31 +54,37 @@ public class Turret extends SubsystemBase {
   /**
    * @return degrees
    */
-  public double getAngle(){
-    return motor.getEncoder().getPosition();
+  public Angle getAngle(){
+    return Degrees.of(motor.getEncoder().getPosition());
   }
 
-  /**
-   * @param angle degrees
-   */
-  private void setAngle(double angle){
-  }
 
-  private void setAngle(Rotation2d angle) {
-    setAngle(angle.getDegrees());
-  }
-
-  public double getTurretAngleAbsolute(){
-    //Since encoders cannot be accessed til runtime, will likely be passed in through constructor
-    //Make getAngle() take encoder positions as arguments
-    //Could have better design but ykw it works for now
-    double turretAngle = crtAbsoluteEncoder.getAngle(
-      //replace with correct absolute encoders
-      motor.getAbsoluteEncoder().getPosition(), 
-      motor.getAbsoluteEncoder().getPosition()
+  /** Sets direct position does not consider coterminal angles */
+  private void setPosition(double degrees){
+    motor.getClosedLoopController().setSetpoint(
+      degrees, 
+      ControlType.kPosition
     );
+  }
 
-    return turretAngle;
+  private void setAngle(double angle){
+    //Only works if our range is less than +- 360. but it definitely will be
+    double alternate = angle>0 ? angle + 360 : angle - 360;
+
+    if(Clamp.bounded(alternate, -kMaxRotation, kMaxRotation)){
+      //If we are closer to the alternate angle, go to the alternate angle
+      if ( Math.abs(alternate-getAngle().in(Degrees)) < Math.abs(angle-getAngle().in(Degrees)) ){
+        angle = alternate; 
+      }
+    }
+
+    setPosition(angle);
+  }
+
+  // Rotation2d instead of angle to work with wpilib geometry classes
+  //Also cw vs ccw is enforced
+  public void setAngle(Rotation2d angle) {
+    setAngle(angle.getDegrees());
   }
 
   private SparkBaseConfig getMotorConfig(){
@@ -85,8 +98,8 @@ public class Turret extends SubsystemBase {
     ;
 
     config.encoder
-      .positionConversionFactor(GEARING)
-      .velocityConversionFactor(GEARING / 60.0)
+      .positionConversionFactor(kGearing)
+      .velocityConversionFactor(kGearing / 60.0)
       //Turning the turret CCW should increase position
       .inverted(false)
     ;
@@ -97,9 +110,9 @@ public class Turret extends SubsystemBase {
     ;
 
     config.softLimit
-      .forwardSoftLimit(MAXROTATION)
+      .forwardSoftLimit(kMaxRotation)
       .forwardSoftLimitEnabled(true)
-      .reverseSoftLimit(-MAXROTATION)
+      .reverseSoftLimit(-kMaxRotation)
       .reverseSoftLimitEnabled(true)
     ;
 

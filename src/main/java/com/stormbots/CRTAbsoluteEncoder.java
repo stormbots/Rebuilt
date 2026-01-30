@@ -4,62 +4,91 @@
 
 package com.stormbots;
 
+import static edu.wpi.first.units.Units.Degrees;
+
+import com.revrobotics.RelativeEncoder;
 import com.revrobotics.spark.SparkAbsoluteEncoder;
+
+import edu.wpi.first.units.measure.Angle;
 
 /** Add your docs here. */
 public class CRTAbsoluteEncoder {
-    private final double TURRET_GEAR_TOOTH_COUNT;
-    private final double GEAR_1_TOOTH_COUNT;
-    private final double GEAR_2_TOOTH_COUNT;
-    private final double SLOPE;
 
-    private final boolean INVERTED;
+    private static CRTAbsoluteEncoder instance;
+     
+    private double kTurretGearToothCount;
+    private double kGear1ToothCount;
+    private double kGear2ToothCount;
+    private double kSlope;
+    private boolean kInverted;
 
+    private RelativeEncoder relativeEncoder;
+    private SparkAbsoluteEncoder encoder1;
+    private SparkAbsoluteEncoder encoder2;
 
-    /**
-     * Assumes both absolute encoders are zero at turret angle of zero and increase in the same direction
-     */
-    public CRTAbsoluteEncoder(
+    private CRTAbsoluteEncoder(){}
+
+    public static CRTAbsoluteEncoder getInstance(){
+        if(instance==null){
+            instance = new CRTAbsoluteEncoder();
+        }
+
+        return instance;
+    }
+
+    /** Assumes both absolute encoders are zero at turret angle of zero and increase in the same direction */
+    public void setParams(
         double turretGearTeeth, 
         double gear1Teeth, 
         double gear2Teeth, 
         boolean inverted
     ){
-        TURRET_GEAR_TOOTH_COUNT = turretGearTeeth;
-        GEAR_1_TOOTH_COUNT = gear1Teeth;
-        GEAR_2_TOOTH_COUNT = gear2Teeth;
+        kTurretGearToothCount = turretGearTeeth;
+        kGear1ToothCount = gear1Teeth;
+        kGear2ToothCount = gear2Teeth;
 
-        SLOPE = (GEAR_2_TOOTH_COUNT * GEAR_1_TOOTH_COUNT)
-            / ((GEAR_1_TOOTH_COUNT - GEAR_2_TOOTH_COUNT) * TURRET_GEAR_TOOTH_COUNT);
+        kSlope = (kGear2ToothCount * kGear1ToothCount)
+            / ((kGear1ToothCount - kGear2ToothCount) * kTurretGearToothCount);
 
 
-        INVERTED = inverted;
-
+        kInverted = inverted;
     }
 
+    public void setRelativeEncoder(RelativeEncoder encoder){
+        this.relativeEncoder = encoder;
+    }
 
-    /**
-     * @param e1 degrees pls
-     * @param e2 degrees pls
-     * @return turret angle in degrees
-     */
-    public double getAngle(double e1, double e2){
-        double difference = e2 - e1;
+    public void setEncoder1(SparkAbsoluteEncoder encoder){
+        this.encoder1 = encoder;
+    }
 
-        if(INVERTED){
+    public void setEncoder2(SparkAbsoluteEncoder encoder){
+        this.encoder2 = encoder;
+    }
+
+    /** Return the absolute rotation of the system, derived from the CRT process */
+    public Angle getPosition(){
+        
+        double difference = encoder2.getPosition() - encoder1.getPosition();
+        
+        if(kInverted){
             difference*=-1;
         }
-
+        
         if (difference < -180){
             difference += 360;
         }
         else if(difference > 180){
             difference -= 360;
         }
-
+        
         //Difference increases linearly with turret angle
         //Multiply by slope to get turret angle from difference
-        return difference * SLOPE;
+        return Degrees.of(difference * kSlope);
+    }
+
+    public void sync(){
+        relativeEncoder.setPosition(getPosition().in(Degrees));
     }
 
 }

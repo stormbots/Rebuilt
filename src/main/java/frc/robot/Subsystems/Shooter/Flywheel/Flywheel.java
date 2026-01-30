@@ -23,10 +23,10 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class Flywheel extends SubsystemBase {
 
-  static final double kGEARING = (18.0) / (24.0);
+  static final double kGearing = (18.0) / (24.0);
 
-  SparkFlex flywheelMotor1 = new SparkFlex(13, MotorType.kBrushless);
-  SparkFlex flywheelMotor2 = new SparkFlex(9, MotorType.kBrushless);
+  SparkFlex leaderMotor = new SparkFlex(13, MotorType.kBrushless);
+  SparkFlex followerMotor = new SparkFlex(9, MotorType.kBrushless);
 
   private double targetRPM = 0.0;
 
@@ -47,10 +47,10 @@ public class Flywheel extends SubsystemBase {
   /** Creates a new Flywheel. */
   public Flywheel() {
     SparkBaseConfig followerConfig = getMotorConfig();
-    followerConfig.follow(flywheelMotor1, true);
+    followerConfig.follow(leaderMotor, true);
 
-    flywheelMotor1.configure(getMotorConfig(), ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
-    flywheelMotor2.configure(followerConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+    leaderMotor.configure(getMotorConfig(), ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+    followerMotor.configure(followerConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
   }
 
   @Override
@@ -59,21 +59,21 @@ public class Flywheel extends SubsystemBase {
     applyStates();
 
     SmartDashboard.putNumber("shooter/flywheel/targetrpm", targetRPM);
-    SmartDashboard.putNumber("shooter/flywheel/rpm", flywheelMotor1.getEncoder().getVelocity());
-    SmartDashboard.putNumber("shooter/flywheel/rpmSetpoint", flywheelMotor1.getClosedLoopController().getSetpoint());
-    SmartDashboard.putNumber("shooter/flywheel/rotations", flywheelMotor1.getEncoder().getPosition());
-    SmartDashboard.putNumber("shooter/flywheel/voltage", flywheelMotor1.getAppliedOutput()*flywheelMotor1.getBusVoltage());
+    SmartDashboard.putNumber("shooter/flywheel/rpm", leaderMotor.getEncoder().getVelocity());
+    SmartDashboard.putNumber("shooter/flywheel/rpmSetpoint", leaderMotor.getClosedLoopController().getSetpoint());
+    SmartDashboard.putNumber("shooter/flywheel/rotations", leaderMotor.getEncoder().getPosition());
+    SmartDashboard.putNumber("shooter/flywheel/voltage", leaderMotor.getAppliedOutput()*leaderMotor.getBusVoltage());
   }
   
   private void setRPM(){
-    flywheelMotor1.getClosedLoopController().setSetpoint(
+    leaderMotor.getClosedLoopController().setSetpoint(
       targetRPM, 
       SparkBase.ControlType.kVelocity
     );
   }
 
   private void stop(){
-    flywheelMotor1.stopMotor();
+    leaderMotor.stopMotor();
   }
 
   private SystemState handleStateTransitions(){
@@ -127,8 +127,8 @@ public class Flywheel extends SubsystemBase {
     ;
 
     config.encoder
-      .positionConversionFactor(kGEARING)
-      .velocityConversionFactor(kGEARING) //Do NOT divide by 60, rpm is desired, not rps
+      .positionConversionFactor(kGearing)
+      .velocityConversionFactor(kGearing) //Do NOT divide by 60, rpm is desired, not rps
     ;
 
     return config;
