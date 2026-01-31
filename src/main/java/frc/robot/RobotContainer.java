@@ -33,11 +33,19 @@ public class RobotContainer {
   }
 
   private void configureBindings() {
-    swerve.addDriverInputs(
-      ()->driver.getLeftX(), 
-      ()->driver.getLeftY(), 
-      ()->driver.getRightX());
-
+    swerve.setDefaultCommand(swerve.addDriverInputs(
+      ()->-driver.getLeftY(), 
+      ()->-driver.getLeftX(), 
+      ()->-driver.getRightX()
+    ));
+    if(Robot.isSimulation()){
+      //Make it "drive right" on the sim field using default Red1
+      swerve.setDefaultCommand(swerve.addDriverInputs(
+        ()->-driver.getLeftX(), 
+        ()->driver.getLeftY(), 
+        ()->-driver.getRightX()
+      ));
+    }
   }
 
   public Command getAutonomousCommand() {
