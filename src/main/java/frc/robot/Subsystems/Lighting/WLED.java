@@ -11,17 +11,11 @@ import java.util.List;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 
-import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.SerialPort;
-import edu.wpi.first.wpilibj.Servo;
 import edu.wpi.first.wpilibj.SerialPort.Port;
-import edu.wpi.first.wpilibj.Timer;
-import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
-import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
@@ -30,6 +24,7 @@ public class WLED {
   static SerialPort serialport;
   // SerialPort led = new SerialPort(115200, Port.kUSB1);
   int calls;
+  
   CustomColor pink = new CustomColor(255, 28, 206);
   CustomColor white = new CustomColor(255, 255, 255);
   CustomColor babyBlue = new CustomColor(38, 14, 255);
@@ -54,7 +49,7 @@ public class WLED {
     catch (NullPointerException n){
       serialport = new SerialPort(115200, Port.kUSB1);
     }
-    calls = 1; 
+    calls = 0; 
   }
 
   public LedSegment getLedSegment(int id, int start, int stop, boolean reverse){
@@ -72,6 +67,9 @@ public class WLED {
     int stop;
     boolean reverse;
     int length;
+    String[] lastKey;
+    String lastState; //for debug
+    List<Object> lastData;
     LedSegment(int id, int start, int stop, boolean reverse){
       this.id = id;
       this.start = start;
@@ -84,15 +82,100 @@ public class WLED {
       data.add(stop);
       data.add(reverse);
 
-      writeJSON(toJSON(key,data));
+      writeJSONUnchecked(key,data);
     }
 
-    void writeJSON(String state){
+    void writeJSON(String[] key, List<Object> data){
+      String state = lastState;
+      if (differentData(key, data)){
+        state = toJSON(key, data);
+        lastKey = key;
+        lastData = data;
+        lastState = state;
+        if (!state.equals("" )){
+          serialport.writeString(state);
+          calls++;
+        }
+      }
+      SmartDashboard.putString("JSON", state);
+      SmartDashboard.putNumber("calls", calls);
+      SmartDashboard.putBoolean("different", differentData(key, data));
+  }
+
+  void writeJSONUnchecked(String state){
+      lastKey = null;
+      lastData = null;
+      lastState = state;
       serialport.writeString(state);
       SmartDashboard.putString("JSON", state);
       SmartDashboard.putNumber("calls", calls);
       calls++;
-    // led.writeString(state);
+  }
+
+  void writeJSONUnchecked(String[] key, List<Object> data){
+      lastKey = key;
+      lastData = data;
+      String state;
+      if (key.length != data.size()){
+        SmartDashboard.putString("lengthError", "true");
+        state = "";
+      }
+      else{
+        state = toJSON(key, data);
+      }
+      if (!state.equals("")){
+        serialport.writeString(state);
+        calls++;
+      }
+      lastState = state;
+      
+      SmartDashboard.putString("JSON", state);
+      SmartDashboard.putNumber("calls", calls);
+      
+  }
+
+  private boolean differentData(String[] key, List<Object> data){
+    if(key == null || data == null){
+      return true;
+    }
+    if (key.length != data.size()){
+      SmartDashboard.putString("lengthError", "true");
+      SmartDashboard.putNumber("keyLength", key.length);
+      SmartDashboard.putNumber("dataLength", data.size());
+      SmartDashboard.putString("data", data.toString());
+      return false;
+    }
+    if(key.length != lastKey.length){
+      return true;
+    }
+    else{
+      for (int i = 0; i < key.length; i++){
+        if(!key[i].equals(lastKey[i])){
+          return true;
+        }
+        else{
+          if(data.get(i) instanceof Boolean && lastData.get(i) instanceof Boolean){
+            if(data.get(i)!= lastData.get(i)){
+              return true;
+            }
+          }
+          else if(data.get(i) instanceof Number && lastData.get(i) instanceof Number){
+            if(data.get(i)!= lastData.get(i)){
+              return true;
+            }
+          }
+          else if(data.get(i) instanceof String && lastData.get(i) instanceof String){
+            if(data.get(i)!= lastData.get(i)){
+              return true;
+            }
+          }
+          else{
+            return true;
+          }
+        }
+      }
+    }
+    return false;
   }
 
 
@@ -102,7 +185,7 @@ public class WLED {
     data.add(id);
     data.add(0);
     data.add(color.getHex());
-    return new InstantCommand(()->writeJSON(toJSON(key, data)), this);
+    return new InstantCommand(()->writeJSON(key, data), this);
   }
 
   public Command blink(CustomColor color, int speed){
@@ -113,7 +196,7 @@ public class WLED {
     data.add(speed);
     data.add(color.getHex());
     data.add(black.getHex());
-    return new InstantCommand(()->writeJSON(toJSON(key, data)), this);
+    return new InstantCommand(()->writeJSON(key, data), this);
   }
 
   public Command stripes(CustomColor[] colors){
@@ -238,7 +321,7 @@ public class WLED {
     // }
   }
     SmartDashboard.putString("data", data.toString());
-    return new InstantCommand(()->writeJSON(toJSON(key, data)), this);//.handleInterrupt(()->setState("{\"seg\":[{\"id\":"+segment.id+",\"frz\":false}]}"));
+    return new InstantCommand(()->writeJSON(key, data), this);//.handleInterrupt(()->setState("{\"seg\":[{\"id\":"+segment.id+",\"frz\":false}]}"));
     // setState(toJSON(key, data));
     
   }
@@ -266,26 +349,25 @@ public class WLED {
     .andThen(stripes(colors6))
     .andThen(new WaitCommand(duration))
     .andThen(stripes(colors7))
-    .andThen(new WaitCommand(duration))).handleInterrupt(()->writeJSON("{\"seg\":[{\"id\":"+id+",\"frz\":false}]}"));
+    .andThen(new WaitCommand(duration))).handleInterrupt(()->writeJSONUnchecked("{\"seg\":[{\"id\":"+id+",\"frz\":false}]}"));
   }
 
   private String toJSON(String[] key, List<Object> data){
     //ADD EXCEPTION IF LEGTHS UNEQUAL
-    if (key.length != data.size()){
-      SmartDashboard.putString("lengthError", "true");
-      SmartDashboard.putNumber("keyLength", key.length);
-      SmartDashboard.putNumber("dataLength", data.size());
-      SmartDashboard.putString("data", data.toString());
-      return "";
-    }
+    // if (key.length != data.size()){
+    //   SmartDashboard.putString("lengthError", "true");
+    //   SmartDashboard.putNumber("keyLength", key.length);
+    //   SmartDashboard.putNumber("dataLength", data.size());
+    //   SmartDashboard.putString("data", data.toString());
+    //   return "";
+    // }
     JsonObject json = new JsonObject();
     JsonObject tempObject = new JsonObject();
     JsonArray colorArray = new JsonArray();
     JsonArray indexArray = new JsonArray();
     boolean col = false;
     boolean index = false;
-    int indexCounter = 1;
-
+    
     for (int i = 0; i < key.length; i++){
       if (key[i]== "col" && data.get(i) instanceof String){
         colorArray.add((String)data.get(i));
@@ -299,7 +381,6 @@ public class WLED {
         else{
           indexArray.add((Number)data.get(i));
         }
-        indexCounter++;
         index = true;
       }
 
@@ -336,7 +417,6 @@ public class WLED {
     return json.toString();
 
   }
-
 
 
   }

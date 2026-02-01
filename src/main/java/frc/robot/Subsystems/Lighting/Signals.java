@@ -5,9 +5,11 @@
 package frc.robot.Subsystems.Lighting;
 
 import java.util.HashMap;
+import java.util.Optional;
 
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -26,8 +28,8 @@ public class Signals extends SubsystemBase {
 
 
     public Signals(){
-        // setDefaultCommand(showAllianceColorBoring(segment));
-        segment.setDefaultCommand(hopperLow(segment));
+        segment.setDefaultCommand(doAllianceSelect(segment));
+        // segment.setDefaultCommand(hopperLow(segment));
     }
 
 
@@ -46,17 +48,17 @@ public class Signals extends SubsystemBase {
 //   }
 
   private Command doAllianceSelect(LedSegment segment){
-    // HashMap<Optional<Alliance>,Command> map = new HashMap<>();
-    // map.put(Optional.empty(), segment.solidColor(wled.purple));
-    // map.put(Optional.of(Alliance.Blue), segment.solidColor(wled.blue));
-    // map.put(Optional.of(Alliance.Red),segment.solidColor(wled.red));
+    HashMap<Optional<Alliance>,Command> map = new HashMap<>();
+    map.put(Optional.empty(), segment.solidColor(wled.purple));
+    map.put(Optional.of(Alliance.Blue), segment.solidColor(wled.blue));
+    map.put(Optional.of(Alliance.Red),segment.solidColor(wled.red));
 
-    HashMap<Alliance,Command> map = new HashMap<>();
-    // map.put(Optional.empty(), segment.solidColor(wled.purple));
-    map.put(Alliance.Blue, segment.solidColor(wled.blue));
-    map.put(Alliance.Red,segment.solidColor(wled.red));
+    // HashMap<Alliance,Command> map = new HashMap<>();
+    // // map.put(Optional.empty(), segment.solidColor(wled.purple));
+    // map.put(Alliance.Blue, segment.solidColor(wled.blue));
+    // map.put(Alliance.Red,segment.solidColor(wled.red));
 
-    return Commands.select(map, ()->DriverStation.getAlliance().orElse(Alliance.Blue));
+    return Commands.select(map, ()->DriverStation.getAlliance());
   }
 
 
@@ -81,6 +83,7 @@ public class Signals extends SubsystemBase {
         segment.idle()
     );
  }
+
 
 //  public Command test(){
 //     // return Commands.
