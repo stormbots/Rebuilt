@@ -4,20 +4,13 @@
 
 package frc.robot.Subsystems.Lighting;
 
-import java.awt.Color;
-
-import org.dyn4j.geometry.Segment;
-
-import com.ctre.phoenix6.controls.SolidColor;
+import java.util.HashMap;
 
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
-import edu.wpi.first.wpilibj2.command.InstantCommand;
-import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import edu.wpi.first.wpilibj2.command.WaitCommand;
-import frc.robot.Subsystems.Lighting.WLED.CustomColor;
 import frc.robot.Subsystems.Lighting.WLED.LedSegment;
 
 /** Add your docs here. */
@@ -25,6 +18,7 @@ public class Signals extends SubsystemBase {
 
     double[] ownedSegments=new double[]{0,1,2,3};
     public WLED wled = new WLED();
+    DriverStation.Alliance lastColor;// = null;
 
     // private WLED.LedSegment segment = wled.new LedSegment(0, 0, 30, false);
 
@@ -32,8 +26,8 @@ public class Signals extends SubsystemBase {
 
 
     public Signals(){
-        segment.setDefaultCommand(segment.pride());
-        // setDefaultCommand(hopperFull());
+        // setDefaultCommand(showAllianceColorBoring(segment));
+        segment.setDefaultCommand(hopperLow(segment));
     }
 
 
@@ -44,12 +38,26 @@ public class Signals extends SubsystemBase {
 //   }
 
 //   public Command showAllianceColorBoring(LedSegment segment){
-//     return new RunCommand(()->{
-//       var color = DriverStation.getAlliance();
+//     // lastColor = Optional.empty();
+//     Command command = doAllianceSelect(segment);
+//     command.addRequirements(segment);
 
-//       if (color.isPresent()){}
-//     }, this);
+//     return command;
 //   }
+
+  private Command doAllianceSelect(LedSegment segment){
+    // HashMap<Optional<Alliance>,Command> map = new HashMap<>();
+    // map.put(Optional.empty(), segment.solidColor(wled.purple));
+    // map.put(Optional.of(Alliance.Blue), segment.solidColor(wled.blue));
+    // map.put(Optional.of(Alliance.Red),segment.solidColor(wled.red));
+
+    HashMap<Alliance,Command> map = new HashMap<>();
+    // map.put(Optional.empty(), segment.solidColor(wled.purple));
+    map.put(Alliance.Blue, segment.solidColor(wled.blue));
+    map.put(Alliance.Red,segment.solidColor(wled.red));
+
+    return Commands.select(map, ()->DriverStation.getAlliance().orElse(Alliance.Blue));
+  }
 
 
 
@@ -60,13 +68,24 @@ public class Signals extends SubsystemBase {
 // team color/solid color
 // shoot status?
 
- public Command hopperFull(){
+ public Command hopperFull(LedSegment segment){
     return Commands.sequence(
         segment.solidColor(wled.yellow),
-        idle()
+        segment.idle()
     );
  }
 
+ public Command hopperLow(LedSegment segment){
+    return Commands.sequence(
+        segment.blink(wled.yellow,230),
+        segment.idle()
+    );
+ }
+
+//  public Command test(){
+//     // return Commands.
+//     return Commands.
+//  }
 
  /**
   * seg0,seg1,seg2,seg3

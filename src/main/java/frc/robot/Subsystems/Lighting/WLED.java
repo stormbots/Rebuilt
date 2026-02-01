@@ -11,12 +11,15 @@ import java.util.List;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.SerialPort;
 import edu.wpi.first.wpilibj.Servo;
 import edu.wpi.first.wpilibj.SerialPort.Port;
 import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
@@ -26,7 +29,7 @@ import edu.wpi.first.wpilibj2.command.WaitCommand;
 public class WLED {
   static SerialPort serialport;
   // SerialPort led = new SerialPort(115200, Port.kUSB1);
-
+  int calls;
   CustomColor pink = new CustomColor(255, 28, 206);
   CustomColor white = new CustomColor(255, 255, 255);
   CustomColor babyBlue = new CustomColor(38, 14, 255);
@@ -51,7 +54,7 @@ public class WLED {
     catch (NullPointerException n){
       serialport = new SerialPort(115200, Port.kUSB1);
     }
-     
+    calls = 1; 
   }
 
   public LedSegment getLedSegment(int id, int start, int stop, boolean reverse){
@@ -85,8 +88,10 @@ public class WLED {
     }
 
     void writeJSON(String state){
-    serialport.writeString(state);
-    SmartDashboard.putString("JSON", state);
+      serialport.writeString(state);
+      SmartDashboard.putString("JSON", state);
+      SmartDashboard.putNumber("calls", calls);
+      calls++;
     // led.writeString(state);
   }
 
@@ -247,9 +252,6 @@ public class WLED {
     CustomColor[] colors5 = {yellow,yellow,yellow,yellow,yellow,yellow,purple,yellow,yellow,yellow,yellow,purple,yellow,yellow,yellow,yellow,yellow,yellow};
     CustomColor[] colors6 = {black,grey,white,purple};
     CustomColor[] colors7 = {green,lightGreen,white,grey,black};
-    CustomColor[] test1 = {blue,yellow,red,green,red,green};
-    CustomColor[] test2 = {blue,blue,blue,red,red,red,blue,blue,blue};
-    CustomColor[] test3 = {blue,blue,red,red};
 
     return new SequentialCommandGroup(stripes(colors1)
     .andThen(new WaitCommand(duration))
