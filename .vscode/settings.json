@@ -12,7 +12,8 @@
     "**/.project": true,
     "**/.settings": true,
     "**/.factorypath": true,
-    "**/*~": true
+    "**/*~": true,
+    "**/hs_err_pid*.log":true,
   },
   "java.test.config": [
     {

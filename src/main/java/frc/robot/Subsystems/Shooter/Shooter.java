@@ -1,9 +1,15 @@
 package frc.robot.Subsystems.Shooter;
 
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
+import frc.robot.Robot;
+import frc.robot.Subsystems.HopperSensors.HopperSensors;
+import frc.robot.Subsystems.HopperSensors.FuelSim.FuelSim;
 import frc.robot.Subsystems.Shooter.Feeder.Feeder;
 import frc.robot.Subsystems.Shooter.Flywheel.Flywheel;
 import frc.robot.Subsystems.Shooter.Hood.Hood;
 import frc.robot.Subsystems.Shooter.Turret.Turret;
+import frc.robot.Subsystems.TargetingSystem.TargetingSystem;
 
 public class Shooter {
     Feeder feeder = new Feeder();
@@ -11,11 +17,42 @@ public class Shooter {
     Turret turret = new Turret();
     Hood hood = new Hood();
 
+    TargetingSystem targeting;
+
     /** Just set up the mechanism2d so we can visualize the system all at once */
     ShooterVisual visual = new ShooterVisual(feeder, flywheel, hood, turret);
 
     //TODO create helpful commands and/or logic
     //Note, this is not a subsystem, but we can turn it into one
     //There's some considerations in doing so worth working through
+
+
+    public Shooter(TargetingSystem targeting) {
+        this.targeting=targeting;
+    }
+
+
+    public Command simGetLaunchCommand(){
+        //Don't do anything on a normal bot
+        if(Robot.isReal())return Commands.idle();
+
+        double fuelPerSecond=8;
+
+        var shot=Commands.runOnce(()->{
+            if (HopperSensors.getInstance().fuelInHopper <= 0) return;
+            HopperSensors.getInstance().fuelInHopper--;
+
+            var initialPosition = targeting.getTurretCenterpoint();
+            var velocity=targeting.simGenerateIdealShot();
+
+            FuelSim.getInstance().spawnFuel(initialPosition, velocity);
+        });
+
+        return Commands.sequence(
+        shot,
+        Commands.waitSeconds(1/fuelPerSecond)
+        )
+        .repeatedly();
+    }
 
 }

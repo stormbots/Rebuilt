@@ -8,9 +8,11 @@ import java.io.File;
 import java.util.Optional;
 import java.util.function.DoubleSupplier;
 
+import dev.doglog.DogLog;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.Filesystem;
@@ -21,7 +23,6 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import swervelib.SwerveDrive;
-import swervelib.imu.NavXSwerve;
 import swervelib.parser.SwerveParser;
 import swervelib.telemetry.SwerveDriveTelemetry;
 import swervelib.telemetry.SwerveDriveTelemetry.TelemetryVerbosity;
@@ -48,6 +49,7 @@ public class Swerve extends SubsystemBase {
       .createSwerveDrive(maximumSpeed, new Pose2d(1,1,new Rotation2d()));
     } catch (Exception e)
     {
+      System.err.println("Could not find robot config for " + botname);
       throw new RuntimeException(e);
     }  
 
@@ -86,6 +88,8 @@ public class Swerve extends SubsystemBase {
   public void periodic() {
     // This method will be called once per scheduler run
     swerveDrive.updateOdometry();
+    //Log the pose to allow AdvantageScope to work properly
+    DogLog.log("Swerve/pose", swerveDrive.getPose());
 
     odometryField.setRobotPose(swerveDrive.getPose());
 
@@ -129,11 +133,20 @@ public class Swerve extends SubsystemBase {
   }
 
   //For other subsystems/files
-  public Pose2d getSwervePose()
-  {
+  public Pose2d getSwervePose(){
     return swerveDrive.getPose();
   }
 
-  
+  public ChassisSpeeds getChassisSpeeds(){
+    return swerveDrive.getRobotVelocity();
+  }
+
+  public Command addFieldInput(DoubleSupplier translationX,DoubleSupplier translationY,DoubleSupplier angularRotationX){
+      return run(()->{
+        fieldInputs.tx = translationX.getAsDouble();
+        fieldInputs.ty = translationY.getAsDouble();
+        fieldInputs.r = angularRotationX.getAsDouble();
+      });
+    };
 
 }
