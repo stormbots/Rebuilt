@@ -26,6 +26,8 @@ import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.wpilibj.smartdashboard.Field2d;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Subsystems.Swerve.Swerve;
 
@@ -41,14 +43,17 @@ public class Photonvision extends SubsystemBase {
     Inch.of(6).in(Meters), 
     Inch.of(6).in(Meters), 
     Inch.of(0).in(Meters)), 
-    new Rotation3d(0.0, 0.0, 0.0)
+    new Rotation3d(0.0, 0.0, 45.0)
     );
+
+    Field2d visionField2d = new Field2d();
 
     PhotonPoseEstimator centerEstimator = new PhotonPoseEstimator(aprilTagFieldLayout, cameraToCenter);
   /** Creates a new Photonvision.
    *  @param swerve */
   public Photonvision(Swerve swerve) {
     this.swerve = swerve;
+    SmartDashboard.putData("visionfield", visionField2d);
 
     try{
       centerCamera = Optional.of(new PhotonCamera("Arducam_OV9782_USB_Camera"));
@@ -80,7 +85,9 @@ public class Photonvision extends SubsystemBase {
         var estimatedStdDevs = getEstimationStdDevs();
 
         swerve.swerveDrive.addVisionMeasurement(est.estimatedPose.toPose2d(),est.timestampSeconds, estimatedStdDevs);
+        visionField2d.getObject(camera.getName()).setPose(est.estimatedPose.toPose2d());
       }
+      
     );
   }
 
@@ -128,6 +135,7 @@ public class Photonvision extends SubsystemBase {
   @Override
   public void periodic() {
     // This method will be called once per scheduler run
+    visionField2d.setRobotPose(swerve.getSwervePose());
     updateOdometry();
   }
 }
