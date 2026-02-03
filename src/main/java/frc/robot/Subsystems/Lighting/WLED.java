@@ -99,7 +99,7 @@ public class WLED {
       }
       SmartDashboard.putString("JSON", state);
       SmartDashboard.putNumber("calls", calls);
-      SmartDashboard.putBoolean("different", differentData(key, data));
+      // SmartDashboard.putBoolean("different", differentData(key, data));
   }
 
   void writeJSONUnchecked(String state){
@@ -145,35 +145,11 @@ public class WLED {
       SmartDashboard.putString("data", data.toString());
       return false;
     }
-    if(key.length != lastKey.length){
+    if(!key.equals(lastKey)){
       return true;
     }
-    else{
-      for (int i = 0; i < key.length; i++){
-        if(!key[i].equals(lastKey[i])){
-          return true;
-        }
-        else{
-          if(data.get(i) instanceof Boolean && lastData.get(i) instanceof Boolean){
-            if(data.get(i)!= lastData.get(i)){
-              return true;
-            }
-          }
-          else if(data.get(i) instanceof Number && lastData.get(i) instanceof Number){
-            if(data.get(i)!= lastData.get(i)){
-              return true;
-            }
-          }
-          else if(data.get(i) instanceof String && lastData.get(i) instanceof String){
-            if(data.get(i)!= lastData.get(i)){
-              return true;
-            }
-          }
-          else{
-            return true;
-          }
-        }
-      }
+    if (!data.equals(lastData)){
+      return true;
     }
     return false;
   }

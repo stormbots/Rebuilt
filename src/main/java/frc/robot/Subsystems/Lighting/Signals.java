@@ -28,36 +28,18 @@ public class Signals extends SubsystemBase {
 
 
     public Signals(){
-        segment.setDefaultCommand(doAllianceSelect(segment));
+        segment.setDefaultCommand(showAllianceColorBoring(segment).ignoringDisable(true));
         // segment.setDefaultCommand(hopperLow(segment));
     }
 
 
-//   public Command hopperLow(LedSegment segment){
-//     // return run(()->setState("{\"seg\":[{\"id\":" + segment.id + "\"col\":[[255,204,0]]}]}"));
-//     CustomColor color = new CustomColor(255, 215, 0);
-//     return blink(segment, color, 225 ,1);
-//   }
 
-//   public Command showAllianceColorBoring(LedSegment segment){
-//     // lastColor = Optional.empty();
-//     Command command = doAllianceSelect(segment);
-//     command.addRequirements(segment);
 
-//     return command;
-//   }
-
-  private Command doAllianceSelect(LedSegment segment){
+  private Command showAllianceColorBoring(LedSegment segment){
     HashMap<Optional<Alliance>,Command> map = new HashMap<>();
     map.put(Optional.empty(), segment.solidColor(wled.purple));
     map.put(Optional.of(Alliance.Blue), segment.solidColor(wled.blue));
     map.put(Optional.of(Alliance.Red),segment.solidColor(wled.red));
-
-    // HashMap<Alliance,Command> map = new HashMap<>();
-    // // map.put(Optional.empty(), segment.solidColor(wled.purple));
-    // map.put(Alliance.Blue, segment.solidColor(wled.blue));
-    // map.put(Alliance.Red,segment.solidColor(wled.red));
-
     return Commands.select(map, ()->DriverStation.getAlliance());
   }
 
