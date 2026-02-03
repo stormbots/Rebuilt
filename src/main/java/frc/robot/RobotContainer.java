@@ -4,11 +4,17 @@
 
 package frc.robot;
 
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.smartdashboard.Field2d;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
+import frc.robot.Subsystems.FieldBehaviour;
 import frc.robot.Subsystems.Intake.Intake;
-import frc.robot.Subsystems.Lighting.Lighting;
 import frc.robot.Subsystems.Photonvision.Photonvision;
 import frc.robot.Subsystems.Questnav.QuestNav;
 import frc.robot.Subsystems.Shooter.Shooter;
@@ -24,9 +30,12 @@ public class RobotContainer {
   Shooter shooter = new Shooter(/* targetingsystem */);
   Intake Intake = new Intake();
   Spindexer spindexer = new Spindexer();
+  FieldBehaviour fieldBehaviour = new FieldBehaviour();
 
   CommandXboxController driver = new CommandXboxController(0);
   CommandXboxController operator = new CommandXboxController(1);
+
+  Field2d gavinTestField = new Field2d();
 
   public RobotContainer() {
     configureBindings();
@@ -37,6 +46,17 @@ public class RobotContainer {
       ()->driver.getLeftX(), 
       ()->driver.getLeftY(), 
       ()->driver.getRightX());
+
+      SmartDashboard.putData("GavinTestField",gavinTestField);
+      gavinTestField.getObject("fakedrive").setPose(new Pose2d());
+
+      gavinTestField.getObject("BlueTrench").setPoses(new Pose2d(),new Pose2d(1,1,new Rotation2d()));
+
+      new Trigger(DriverStation::isEnabled)
+      .whileTrue(
+          swerve.addFieldInputs( ()->fieldBehaviour.getSwerveAction(gavinTestField.getObject("fakedrive").getPose()) )
+      );
+  
 
   }
 

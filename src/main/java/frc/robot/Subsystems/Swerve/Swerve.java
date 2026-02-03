@@ -7,6 +7,7 @@ package frc.robot.Subsystems.Swerve;
 import java.io.File;
 import java.util.Optional;
 import java.util.function.DoubleSupplier;
+import java.util.function.Supplier;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Translation2d;
@@ -18,6 +19,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Subsystems.FieldBehaviour;
 import swervelib.SwerveDrive;
 import swervelib.imu.NavXSwerve;
 import swervelib.parser.SwerveParser;
@@ -30,6 +32,8 @@ public class Swerve extends SubsystemBase {
   final double maximumSpeed = 5.0;
 
   SwerveDrive swerveDrive; 
+
+  FieldBehaviour fieldBehaviour = new FieldBehaviour();
 
   Field2d odometryField = new Field2d();
 
@@ -57,13 +61,14 @@ public class Swerve extends SubsystemBase {
     
   }
 
-  static class SwerveInputs{
+  /** Represent Inputs as a proportion to the drive trains maximum capability */
+  public static class SwerveInputs{
     /** Positive meaning away from driver station */
-    double tx=0;
+    public double tx=0;
     /** Positive meaning up from driver station */
-    double ty=0;
+    public double ty=0;
     /** rotation, positive ccw*/
-    double r=0;
+    public double r=0;
     /** Zero out all inputs for this input set  */
     public void clear(){this.tx=0;this.ty=0;this.r=0;}
     /** Add another input to this one */
@@ -118,6 +123,13 @@ public class Swerve extends SubsystemBase {
     )
     .finallyDo(driverInputs::clear)
     ;
+  }
+
+  public Command addFieldInputs(Supplier<SwerveInputs> inputs){
+    return Commands.run(() -> {
+        fieldInputs = inputs.get();
+    });
+    //return Commands.idle();
   }
 
   public Command zeroGyro(){
