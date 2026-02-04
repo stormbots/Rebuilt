@@ -36,7 +36,7 @@ public class Swerve extends SubsystemBase {
 
   final double maximumSpeed = 2.0;
 
-  SwerveDrive swerveDrive; 
+  public SwerveDrive swerveDrive; 
 
   Field2d odometryField = new Field2d();
 
@@ -46,11 +46,12 @@ public class Swerve extends SubsystemBase {
   public Swerve() {
 
     //this needs to be changed once final frame is decided
-    var name = Preferences.getString("BotName", "compbot");
-    File swerveJsonDirectory = new File(Filesystem.getDeployDirectory(),name);
+    var botname = Preferences.getString("BotName", "compbot");
+    File swerveJsonDirectory = new File(Filesystem.getDeployDirectory(),botname);
     try
     {
-      swerveDrive = new SwerveParser(swerveJsonDirectory).createSwerveDrive(maximumSpeed, new Pose2d());
+      swerveDrive = new SwerveParser(swerveJsonDirectory)
+      .createSwerveDrive(maximumSpeed, new Pose2d(1,1,new Rotation2d()));
     } catch (Exception e)
     {
       throw new RuntimeException(e);
