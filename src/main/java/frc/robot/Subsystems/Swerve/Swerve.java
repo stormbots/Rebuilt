@@ -35,19 +35,13 @@ import edu.wpi.first.math.controller.PIDController;
 public class Swerve extends SubsystemBase {
 
   final double maximumSpeed = 2.0;
-
   public SwerveDrive swerveDrive; 
-
   Field2d odometryField = new Field2d();
-
-
 
   /** Creates a new SwerveSubsystem. */
   public Swerve() {
-
     //this needs to be changed once final frame is decided
-    var botname = Preferences.getString("BotName", "compbot");
-    File swerveJsonDirectory = new File(Filesystem.getDeployDirectory(),botname);
+    File swerveJsonDirectory = new File(Filesystem.getDeployDirectory(),"choppedbot");
     try
     {
       swerveDrive = new SwerveParser(swerveJsonDirectory)
@@ -60,12 +54,8 @@ public class Swerve extends SubsystemBase {
     swerveDrive.setMotorIdleMode(true);
     swerveDrive.setModuleStateOptimization(true);
     swerveDrive.setCosineCompensator(false);
-
     SwerveDriveTelemetry.verbosity = TelemetryVerbosity.HIGH;
-
     SmartDashboard.putData("odometryField", odometryField);
-
-    
   }
 
   static class SwerveInputs{
@@ -94,20 +84,13 @@ public class Swerve extends SubsystemBase {
   public void periodic() {
     // This method will be called once per scheduler run
     swerveDrive.updateOdometry();
-
-
     odometryField.setRobotPose(swerveDrive.getPose());
-
-    
-
     var inputs = new SwerveInputs()
     .add(driverInputs)
     .add(fieldInputs)
     .add(autoInputs)
     ;
     if(DriverStation.isDisabled())inputs.clear();
-
-
     swerveDrive.drive(
         new Translation2d(
           inputs.tx * swerveDrive.getMaximumChassisVelocity(),
@@ -182,6 +165,4 @@ public class Swerve extends SubsystemBase {
   public ChassisSpeeds getChassisSpeedsFieldRelative(){
     return swerveDrive.getFieldVelocity();
   }
-
-
 }

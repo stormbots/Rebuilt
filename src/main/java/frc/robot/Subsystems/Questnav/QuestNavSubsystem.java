@@ -20,36 +20,25 @@ import gg.questnav.questnav.QuestNav;
 public class QuestNavSubsystem extends SubsystemBase {
   /** Creates a new QuestNav. */
   Swerve swerveSubsystem;
-
   public QuestNavSubsystem(Swerve swerveSubsystem) {
     this.swerveSubsystem = swerveSubsystem;
+  }
 
-}
+  //Values to change when we get bot
+  Transform3d robotToQuest = new Transform3d(0.0, 0.0, 0.0, new Rotation3d(0.0, 0.0, 0.0));
 
-//Values to change when we get bot
-Transform3d robotToQuest = new Transform3d(
-  0.0,
-  0.0,
-  0.0,
-  new Rotation3d(
-    0.0,
-    0.0,
-    0.0
-  )
-);
-QuestNav questNav = new QuestNav();
-Matrix<N3, N1> QUESTNAV_STD_DEVS =
-    VecBuilder.fill(
+  QuestNav questNav = new QuestNav();
+  Matrix<N3, N1> QUESTNAV_STD_DEVS =
+      VecBuilder.fill(
         0.02, // Trust down to 2cm in X direction
-        0.02, // Trust down to 2cm in Y direction
-        0.035 // Trust down to 2 degrees rotational
-    );
+          0.02, // Trust down to 2cm in Y direction
+      0.035 // Trust down to 2 degrees rotational
+      );
 
 @Override
   public void periodic() {
     // Get the latest pose data frames from the Quest
     PoseFrame[] questFrames = questNav.getAllUnreadPoseFrames();
-
     // Loop over the pose data frames and send them to the pose estimator
     for (PoseFrame questFrame : questFrames) {
         // Make sure the Quest was tracking the pose for this frame
@@ -64,7 +53,6 @@ Matrix<N3, N1> QUESTNAV_STD_DEVS =
             swerveSubsystem.addVisionMeasurement(robotPose.toPose2d(), timestamp, QUESTNAV_STD_DEVS);
         }
     }
-
   }
 
   public void setQuestPose(Pose3d robotPose)

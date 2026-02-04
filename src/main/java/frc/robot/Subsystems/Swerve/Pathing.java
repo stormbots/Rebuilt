@@ -19,9 +19,7 @@ import frc.robot.lib.BLine.Path;
 public class Pathing extends SubsystemBase {
   /** Creates a new Pathing. */
   Swerve swerveSubsystem;
-
   FollowPath.Builder pathBuilder;
-
   double autoinputx;
   double autoinputy;
   double autoinputr;
@@ -57,6 +55,4 @@ public class Pathing extends SubsystemBase {
   public void periodic() {
     // This method will be called once per scheduler run
   }
-
-
 }

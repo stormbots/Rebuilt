@@ -38,8 +38,6 @@ public class RobotContainer {
     configureBindings();
   }
 
-
-
   private void configureBindings() {
     swerve.setDefaultCommand(swerve.addDriverInputs(
       ()->-driver.getLeftY(), 
@@ -60,5 +58,4 @@ public class RobotContainer {
     //TODO: Get this from Autos.java instead
     return Commands.print("No autonomous command configured");
   }
-
 }
