@@ -40,8 +40,8 @@ public class Swerve extends SubsystemBase {
 
   /** Creates a new SwerveSubsystem. */
   public Swerve() {
-    //this needs to be changed once final frame is decided
-    File swerveJsonDirectory = new File(Filesystem.getDeployDirectory(),"choppedbot");
+    var botname = Preferences.getString("BotName", "compbot");
+    File swerveJsonDirectory = new File(Filesystem.getDeployDirectory(),botname);
     try
     {
       swerveDrive = new SwerveParser(swerveJsonDirectory)
