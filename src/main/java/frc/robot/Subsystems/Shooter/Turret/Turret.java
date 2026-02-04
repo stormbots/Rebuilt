@@ -60,31 +60,31 @@ public class Turret extends SubsystemBase {
 
 
   /** Sets direct position does not consider coterminal angles */
-  private void setPosition(double degrees){
+  private void setPositionRaw(double degrees){
     motor.getClosedLoopController().setSetpoint(
       degrees, 
       ControlType.kPosition
     );
   }
 
-  private void setAngle(double angle){
+  private void setPosition(double degrees){
     //Only works if our range is less than +- 360. but it definitely will be
-    double alternate = angle>0 ? angle + 360 : angle - 360;
+    double alternate = degrees>0 ? degrees + 360 : degrees - 360;
 
     if(Clamp.bounded(alternate, -kMaxRotation, kMaxRotation)){
       //If we are closer to the alternate angle, go to the alternate angle
-      if ( Math.abs(alternate-getAngle().in(Degrees)) < Math.abs(angle-getAngle().in(Degrees)) ){
-        angle = alternate; 
+      if ( Math.abs(alternate-getAngle().in(Degrees)) < Math.abs(degrees-getAngle().in(Degrees)) ){
+        degrees = alternate; 
       }
     }
 
-    setPosition(angle);
+    setPositionRaw(degrees);
   }
 
   // Rotation2d instead of angle to work with wpilib geometry classes
   //Also cw vs ccw is enforced
-  public void setAngle(Rotation2d angle) {
-    setAngle(angle.getDegrees());
+  public void setPosition(Rotation2d angle) {
+    setPosition(angle.getDegrees());
   }
 
   private SparkBaseConfig getMotorConfig(){
