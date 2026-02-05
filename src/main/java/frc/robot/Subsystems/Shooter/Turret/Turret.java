@@ -60,25 +60,11 @@ public class Turret extends SubsystemBase {
 
 
   /** Sets direct position does not consider coterminal angles */
-  private void setPositionRaw(double degrees){
+  private void setPosition(double degrees){
     motor.getClosedLoopController().setSetpoint(
       degrees, 
       ControlType.kPosition
     );
-  }
-
-  private void setPosition(double degrees){
-    //Only works if our range is less than +- 360. but it definitely will be
-    double alternate = degrees>0 ? degrees + 360 : degrees - 360;
-
-    if(Clamp.bounded(alternate, -kMaxRotation, kMaxRotation)){
-      //If we are closer to the alternate angle, go to the alternate angle
-      if ( Math.abs(alternate-getAngle().in(Degrees)) < Math.abs(degrees-getAngle().in(Degrees)) ){
-        degrees = alternate; 
-      }
-    }
-
-    setPositionRaw(degrees);
   }
 
   // Rotation2d instead of angle to work with wpilib geometry classes
