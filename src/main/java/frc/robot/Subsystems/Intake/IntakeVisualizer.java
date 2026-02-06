@@ -3,6 +3,11 @@
 // the WPILib BSD license file in the root directory of this project.
 
 package frc.robot.Subsystems.Intake;
+import static edu.wpi.first.units.Units.Degrees;
+
+import edu.wpi.first.units.Units;
+import edu.wpi.first.units.measure.Angle;
+import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.wpilibj.smartdashboard.Mechanism2d;
 import edu.wpi.first.wpilibj.smartdashboard.MechanismLigament2d;
 import edu.wpi.first.wpilibj.smartdashboard.MechanismRoot2d;
@@ -35,15 +40,15 @@ public class IntakeVisualizer {
     }
 
     public void update(
-        double angle,
-        double rollerPosition,
-        double rollerVelocity
+        Angle angle,
+        Angle rollerPosition,
+        AngularVelocity rollerVelocity
         ) {
-      intakeArm.setAngle(angle);
-      roller.setAngle(rollerPosition/100);
+      intakeArm.setAngle(angle.in(Degrees));
+      roller.setAngle(rollerPosition.in(Degrees));
 
-      if(rollerVelocity==0)roller.setColor(new Color8Bit(Color.kOrange));
-      if(rollerVelocity>0)roller.setColor(new Color8Bit(Color.kGreen));
-      if(rollerVelocity<0)roller.setColor(new Color8Bit(Color.kRed));
+      if(rollerVelocity.in(Units.DegreesPerSecond) == 0)roller.setColor(new Color8Bit(Color.kOrange));
+      if(rollerVelocity.in(Units.DegreesPerSecond) > 0)roller.setColor(new Color8Bit(Color.kGreen));
+      if(rollerVelocity.in(Units.DegreesPerSecond) < 0)roller.setColor(new Color8Bit(Color.kRed));
     }
   }

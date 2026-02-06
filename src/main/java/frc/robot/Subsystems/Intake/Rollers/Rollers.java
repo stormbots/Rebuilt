@@ -11,11 +11,12 @@ import com.revrobotics.ResetMode;
 import com.revrobotics.spark.SparkBase.ControlType;
 import com.revrobotics.spark.SparkFlex;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
-import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.SparkFlexConfig;
 
-import edu.wpi.first.units.measure.Velocity;
+import edu.wpi.first.units.Units;
+import edu.wpi.first.units.measure.Angle;
+import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -61,8 +62,8 @@ public class Rollers extends SubsystemBase {
   public void periodic() {
     SmartDashboard.putNumber("Rollers/DutyCycle" , motor.getAppliedOutput());
     SmartDashboard.putNumber("Rollers/OutputCurrent" , motor.getOutputCurrent());
-    SmartDashboard.putNumber("Rollers/Position" , getPosition());
-    SmartDashboard.putNumber("Rollers/Velocity" , getVelocity());
+    SmartDashboard.putNumber("Rollers/Position" , getPosition().in(Units.Degrees));
+    SmartDashboard.putNumber("Rollers/Velocity" , getVelocity().in(Units.DegreesPerSecond));
   }
 
   @Override
@@ -95,12 +96,12 @@ public class Rollers extends SubsystemBase {
     });
   }
 
-  public double getVelocity(){
-    return motor.getAbsoluteEncoder().getVelocity();
+  public AngularVelocity getVelocity(){
+    return Units.DegreesPerSecond.of(motor.getAbsoluteEncoder().getVelocity());
   }
 
-  public double getPosition(){
-    return motor.getAbsoluteEncoder().getPosition();
+  public Angle getPosition(){
+    return Units.Degrees.of(motor.getAbsoluteEncoder().getPosition());
   }
 
 

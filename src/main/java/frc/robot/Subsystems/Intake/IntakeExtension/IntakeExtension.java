@@ -5,6 +5,7 @@
 package frc.robot.Subsystems.Intake.IntakeExtension;
 
 import static edu.wpi.first.units.Units.Degree;
+import static edu.wpi.first.units.Units.Degrees;
 
 import com.revrobotics.PersistMode;
 import com.revrobotics.ResetMode;
@@ -15,6 +16,7 @@ import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.SparkFlexConfig;
 
+import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -109,8 +111,8 @@ public class IntakeExtension extends SubsystemBase {
     return setAngle(0);
   }
 
-  public double getAngle(){
-    return motor.getAbsoluteEncoder().getPosition();
+  public Angle getAngle(){
+    return Degrees.of(motor.getAbsoluteEncoder().getPosition());
   };
 
 
