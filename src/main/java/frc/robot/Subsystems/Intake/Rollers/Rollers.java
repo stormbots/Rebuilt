@@ -39,7 +39,7 @@ public class Rollers extends SubsystemBase {
     .sva(0, 12/6000.0/factor, 0);
 
     config.closedLoop
-    .p(0);
+    .p(1/1000.0);
 
     config.closedLoop.maxMotion
     .maxAcceleration(20)
@@ -61,6 +61,8 @@ public class Rollers extends SubsystemBase {
   public void periodic() {
     SmartDashboard.putNumber("Rollers/DutyCycle" , motor.getAppliedOutput());
     SmartDashboard.putNumber("Rollers/OutputCurrent" , motor.getOutputCurrent());
+    SmartDashboard.putNumber("Rollers/Position" , getPosition());
+    SmartDashboard.putNumber("Rollers/Velocity" , getVelocity());
   }
 
   @Override
@@ -74,23 +76,31 @@ public class Rollers extends SubsystemBase {
   return run(()->{
       motor
       .getClosedLoopController()
-      .setSetpoint(velocity, ControlType.kMAXMotionVelocityControl);
+      .setSetpoint(velocity, ControlType.kVelocity);
     });
   }
 
   public Command intake(){
-    return setVelocity(5);
+    return setVelocity(100);
   }
 
 
  public Command eject(){
-    return setVelocity(-5);
+    return setVelocity(-100);
   }
 
   public Command stop(){
     return run(()->{
         motor.stopMotor();
     });
+  }
+
+  public double getVelocity(){
+    return motor.getAbsoluteEncoder().getVelocity();
+  }
+
+  public double getPosition(){
+    return motor.getAbsoluteEncoder().getPosition();
   }
 
 

@@ -9,12 +9,11 @@ import static edu.wpi.first.units.Units.Degree;
 import com.revrobotics.PersistMode;
 import com.revrobotics.ResetMode;
 import com.revrobotics.spark.FeedbackSensor;
-import com.revrobotics.spark.SparkFlex;
-import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.SparkBase.ControlType;
+import com.revrobotics.spark.SparkFlex;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
-import com.revrobotics.spark.config.SparkFlexConfig;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
+import com.revrobotics.spark.config.SparkFlexConfig;
 
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -110,6 +109,9 @@ public class IntakeExtension extends SubsystemBase {
     return setAngle(0);
   }
 
+  public double getAngle(){
+    return motor.getAbsoluteEncoder().getPosition();
+  };
 
 
   private Command setIdleMode(IdleMode mode){

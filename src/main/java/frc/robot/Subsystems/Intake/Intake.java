@@ -6,20 +6,23 @@ package frc.robot.Subsystems.Intake;
 
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Subsystems.Intake.IntakeExtension.IntakeExtension;
 import frc.robot.Subsystems.Intake.Rollers.Rollers;
 
 /** Add your docs here. */
-public class Intake {
+public class Intake extends SubsystemBase {
     private IntakeExtension intakeExtension = new IntakeExtension();
     private Rollers rollers = new Rollers();
+    private IntakeVisualizer visual = new IntakeVisualizer();
 
-    //TODO: Create a lot of useful commands here
+    public Intake(){
+    }
 
-    // Interface: 
-    // intake
-    // eject / get rid of stuck things
-
+    @Override
+    public void periodic(){
+        visual.update(intakeExtension.getAngle(), rollers.getPosition(),rollers.getVelocity());
+    }
 
     public Command intake(){
         return Commands.parallel(
