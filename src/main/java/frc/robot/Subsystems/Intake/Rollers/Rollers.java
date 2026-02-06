@@ -50,8 +50,7 @@ public class Rollers extends SubsystemBase {
     .idleMode(IdleMode.kCoast)
     .inverted(false)
     .smartCurrentLimit(20)
-    .voltageCompensation(11)
-    ;
+    .voltageCompensation(11);
 
     motor.configure(config, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
 
@@ -60,10 +59,10 @@ public class Rollers extends SubsystemBase {
 
   @Override
   public void periodic() {
-    SmartDashboard.putNumber("Rollers/DutyCycle" , motor.getAppliedOutput());
-    SmartDashboard.putNumber("Rollers/OutputCurrent" , motor.getOutputCurrent());
-    SmartDashboard.putNumber("Rollers/Position" , getPosition().in(Units.Degrees));
-    SmartDashboard.putNumber("Rollers/Velocity" , getVelocity().in(Units.DegreesPerSecond));
+    SmartDashboard.putNumber("Rollers/DutyCycle", motor.getAppliedOutput());
+    SmartDashboard.putNumber("Rollers/OutputCurrent", motor.getOutputCurrent());
+    SmartDashboard.putNumber("Rollers/Position", getPosition().in(Units.Degrees));
+    SmartDashboard.putNumber("Rollers/Velocity", getVelocity().in(Units.DegreesPerSecond));
   }
 
   @Override
@@ -74,7 +73,7 @@ public class Rollers extends SubsystemBase {
 
 
   public Command setVelocity(double velocity){
-  return run(()->{
+    return run(()->{
       motor
       .getClosedLoopController()
       .setSetpoint(velocity, ControlType.kVelocity);
@@ -84,7 +83,6 @@ public class Rollers extends SubsystemBase {
   public Command intake(){
     return setVelocity(100);
   }
-
 
  public Command eject(){
     return setVelocity(-100);
@@ -103,6 +101,4 @@ public class Rollers extends SubsystemBase {
   public Angle getPosition(){
     return Units.Degrees.of(motor.getAbsoluteEncoder().getPosition());
   }
-
-
 }

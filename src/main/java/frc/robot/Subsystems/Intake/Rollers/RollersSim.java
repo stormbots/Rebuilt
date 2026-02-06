@@ -47,5 +47,4 @@ public class RollersSim {
   public AngularVelocity getVelocity(){
     return plant.getAngularVelocity();
   }
-
 }

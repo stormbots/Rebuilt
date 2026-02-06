@@ -24,7 +24,6 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 
-
 public class IntakeExtension extends SubsystemBase {
   SparkFlex motor = new SparkFlex(34, MotorType.kBrushless);
 
@@ -32,7 +31,7 @@ public class IntakeExtension extends SubsystemBase {
 
   /** Creates a new IntakeExtension. */
   public IntakeExtension() {
-     var config = new  SparkFlexConfig();
+    var config = new  SparkFlexConfig();
     double factor = 1;
     config.encoder
     .positionConversionFactor(factor)
@@ -46,7 +45,6 @@ public class IntakeExtension extends SubsystemBase {
 
     config.closedLoop.feedbackSensor(FeedbackSensor.kAbsoluteEncoder);
 
-    
     config.closedLoop.feedForward
     .svacr(0, 0, 0, 0, 0);
     
@@ -60,16 +58,13 @@ public class IntakeExtension extends SubsystemBase {
     .idleMode(IdleMode.kCoast)
     .inverted(false)
     .smartCurrentLimit(20)
-    .voltageCompensation(11)
-    ;
+    .voltageCompensation(11);
 
     motor.configure(config, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
   
-
     new Trigger(DriverStation::isEnabled)
     .onTrue(setIdleMode(IdleMode.kCoast))
-    .onFalse(setIdleMode(IdleMode.kBrake))
-    ;
+    .onFalse(setIdleMode(IdleMode.kBrake));
     
     setDefaultCommand(up());
   }
@@ -84,7 +79,6 @@ public class IntakeExtension extends SubsystemBase {
     SmartDashboard.putNumber("Intake/Extension/OutputCurrent", motor.getOutputCurrent());
     SmartDashboard.putNumber("Intake/Extension/Dutycycle", motor.getAppliedOutput());
     SmartDashboard.putNumber("Intake/Extension/enc angle", motor.getAbsoluteEncoder().getPosition());
-
   }
 
   @Override
@@ -119,9 +113,10 @@ public class IntakeExtension extends SubsystemBase {
   private Command setIdleMode(IdleMode mode){
     return Commands.runOnce(()->{
       var config = new SparkFlexConfig().idleMode(mode);
-      motor.configure(config,
-      ResetMode.kNoResetSafeParameters,
-      PersistMode.kNoPersistParameters);
+      motor.configure(
+        config,
+        ResetMode.kNoResetSafeParameters,
+        PersistMode.kNoPersistParameters);
     });
   }
 }

@@ -12,29 +12,28 @@ import frc.robot.Subsystems.Intake.Rollers.Rollers;
 
 /** Add your docs here. */
 public class Intake extends SubsystemBase {
-    private IntakeExtension intakeExtension = new IntakeExtension();
-    private Rollers rollers = new Rollers();
-    private IntakeVisualizer visual = new IntakeVisualizer();
+  private IntakeExtension intakeExtension = new IntakeExtension();
+  private Rollers rollers = new Rollers();
+  private IntakeVisualizer visual = new IntakeVisualizer();
 
-    public Intake(){
-    }
+  public Intake(){
+  }
 
-    @Override
-    public void periodic(){
-        visual.update(intakeExtension.getAngle(), rollers.getPosition(),rollers.getVelocity());
-    }
+  @Override
+  public void periodic(){
+    visual.update(intakeExtension.getAngle(), rollers.getPosition(),rollers.getVelocity());
+  }
 
-    public Command intake(){
-        return Commands.parallel(
-            rollers.intake(),
-            intakeExtension.down()
-        );
-    };
+  public Command intake(){
+    return Commands.parallel(
+      rollers.intake(),
+      intakeExtension.down()
+    );
+  };
 
-    public Command eject(){
-        return Commands.parallel(
-            rollers.eject()
-        );
-    }
-
+  public Command eject(){
+    return Commands.parallel(
+      rollers.eject()
+    );
+  }
 }
