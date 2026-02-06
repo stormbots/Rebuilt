@@ -11,6 +11,7 @@ import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Subsystems.Swerve.Swerve;
 import gg.questnav.questnav.PoseFrame;
@@ -42,6 +43,7 @@ public class QuestNavSubsystem extends SubsystemBase {
     // Loop over the pose data frames and send them to the pose estimator
     for (PoseFrame questFrame : questFrames) {
         // Make sure the Quest was tracking the pose for this frame
+        SmartDashboard.putBoolean("Questnav/isTracking", questFrame.isTracking());
         if (questFrame.isTracking()) {
             // Get the pose of the Quest
             Pose3d questPose = questFrame.questPose3d();
