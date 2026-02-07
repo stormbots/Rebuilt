@@ -4,14 +4,37 @@
 
 package frc.robot.Subsystems.Spindexer;
 
-import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
+import frc.robot.Subsystems.Spindexer.DyeRotor.DyeRotor;
+import frc.robot.Subsystems.Spindexer.UpGoer.UpGoer;
 
-public class Spindexer extends SubsystemBase {
+public class Spindexer {
+  private DyeRotor dyeRotor = new DyeRotor();
+  private UpGoer upGoer = new UpGoer();
+
   /** Creates a new Spindexer. */
-  public Spindexer() {}
+  public Spindexer(){
+  }
 
-  @Override
-  public void periodic() {
-    // This method will be called once per scheduler run
+  public Command feedToShooter(){
+    return Commands.parallel(
+      dyeRotor.spin(),
+      upGoer.load()
+    );
+  }
+
+  public Command unclog(){
+    return Commands.parallel(
+      dyeRotor.spinBackwards(),
+      upGoer.unclog()
+    );
+  }
+
+  public Command stop(){
+    return Commands.parallel(
+      dyeRotor.stop(),
+      upGoer.stop()
+    );
   }
 }
