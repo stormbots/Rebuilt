@@ -29,10 +29,10 @@ public class RobotContainer {
   QuestNavSubsystem questnav = new QuestNavSubsystem(swerve);
   //TODO: TargetingSystem targetingsystem = new TargetingSystem(swerve);
   Shooter shooter = new Shooter(/* targetingsystem */);
-  Intake Intake = new Intake();
+  Intake intake = new Intake();
   Spindexer spindexer = new Spindexer();
   Pathing pathing = new Pathing(swerve);
-
+  Autos autos = new Autos(swerve, shooter, intake, questnav, spindexer, pathing);
   CommandXboxController driver = new CommandXboxController(0);
   CommandXboxController operator = new CommandXboxController(1);
   Path testingPath = new Path("goCollect");
@@ -62,10 +62,5 @@ public class RobotContainer {
         ()->-driver.getRightX()
       ));
     }
-  }
-
-  public Command getAutonomousCommand() {
-    //TODO: Get this from Autos.java instead
-    return Commands.print("No autonomous command configured");
   }
 }
