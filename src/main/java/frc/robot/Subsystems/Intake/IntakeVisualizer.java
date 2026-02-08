@@ -17,14 +17,17 @@ import edu.wpi.first.wpilibj.util.Color8Bit;
 
 /** Add your docs here. */
 public class IntakeVisualizer {
-  double barlength = 24;
   double intakeArmLength = 7; //inches
+  double rollerDiameter=1; //inches
 
-  public Mechanism2d mech = new Mechanism2d(36, 72);
+  public Mechanism2d mech = new Mechanism2d(15+2+7+5, 15);
   MechanismRoot2d root = mech.getRoot("IntakeRoot", 18, 6);
 
   MechanismLigament2d intakeArm = root.append(new MechanismLigament2d("IntakeArm", intakeArmLength, 0));
-  MechanismLigament2d roller = intakeArm.append(new MechanismLigament2d("RotatorRelative", 13, 0));
+  MechanismLigament2d roller = intakeArm.append(new MechanismLigament2d("Roller", rollerDiameter/2, 0));
+  
+  //This is just to help provide a square, nice rotation
+  MechanismLigament2d rollerSecondary = intakeArm.append(new MechanismLigament2d("RollerSecondary", -rollerDiameter/2, 0));
 
   public IntakeVisualizer() {
     var barweight = 10;
@@ -32,9 +35,9 @@ public class IntakeVisualizer {
     intakeArm.setColor(new Color8Bit(Color.kGray));
     intakeArm.setLineWeight(barweight);
 
-    roller.setLength(barweight / 2);
-    roller.setColor(new Color8Bit(Color.kOrange));
-
+    roller.setLineWeight(barweight*2);
+    rollerSecondary.setLineWeight(barweight*2);
+    
     SmartDashboard.putData("mechanism/intake", mech);
   }
 
@@ -44,10 +47,18 @@ public class IntakeVisualizer {
       AngularVelocity rollerVelocity
     ) {
     intakeArm.setAngle(angle.in(Degrees));
-    roller.setAngle(rollerPosition.in(Degrees));
 
-    if(rollerVelocity.in(Units.DegreesPerSecond) == 0)roller.setColor(new Color8Bit(Color.kOrange));
-    if(rollerVelocity.in(Units.DegreesPerSecond) > 0)roller.setColor(new Color8Bit(Color.kGreen));
-    if(rollerVelocity.in(Units.DegreesPerSecond) < 0)roller.setColor(new Color8Bit(Color.kRed));
+    roller.setAngle(rollerPosition.in(Degrees));
+    rollerSecondary.setAngle(rollerPosition.in(Degrees));
+
+    var rollercolor = Color.kOrange;
+    if(rollerVelocity.in(Units.DegreesPerSecond) > 0.05){
+      rollercolor = Color.kGreen;
+    }
+    else if(rollerVelocity.in(Units.DegreesPerSecond) < 0.05){
+      rollercolor = Color.kRed;
+    }
+    roller.setColor(new Color8Bit(rollercolor));
+    rollerSecondary.setColor(new Color8Bit(rollercolor));
   }
 }
