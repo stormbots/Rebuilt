@@ -95,10 +95,10 @@ public class Rollers extends SubsystemBase {
   }
 
   public AngularVelocity getVelocity(){
-    return Units.DegreesPerSecond.of(motor.getAbsoluteEncoder().getVelocity());
+    return Units.DegreesPerSecond.of(motor.getEncoder().getVelocity());
   }
 
   public Angle getPosition(){
-    return Units.Degrees.of(motor.getAbsoluteEncoder().getPosition());
+    return Units.Degrees.of(motor.getEncoder().getPosition());
   }
 }
