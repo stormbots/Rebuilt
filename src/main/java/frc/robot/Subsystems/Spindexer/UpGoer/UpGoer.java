@@ -12,8 +12,6 @@ import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.SparkFlexConfig;
 
-import edu.wpi.first.math.controller.PIDController;
-import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
@@ -25,6 +23,10 @@ public class UpGoer extends SubsystemBase{
 
     public UpGoer(){
         var config = new SparkFlexConfig();
+
+        var conversionfactor = 1.0;
+        config.encoder.positionConversionFactor(1/conversionfactor);
+        config.encoder.velocityConversionFactor(1/conversionfactor/60);
 
         config
         .idleMode(IdleMode.kCoast)
@@ -69,6 +71,10 @@ public class UpGoer extends SubsystemBase{
 
     public Command unclog(){
         return setVelocity(-10);
+    }
+
+    public double getVelocity(){
+        return motor.getEncoder().getVelocity();
     }
         
 }
