@@ -25,7 +25,8 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 
 public class IntakeExtension extends SubsystemBase {
-  SparkFlex motor = new SparkFlex(34, MotorType.kBrushless);
+  SparkFlex motor = new SparkFlex(9, MotorType.kBrushless);
+  SparkFlex followerMotor = new SparkFlex(10, MotorType.kBrushless);
 
   IntakeExtensionSim sim = new IntakeExtensionSim(motor);
 
@@ -61,7 +62,11 @@ public class IntakeExtension extends SubsystemBase {
     .voltageCompensation(11);
 
     motor.configure(config, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
-  
+
+    //Apply the follower configuration, and re-use any applicable configs for the other side
+    config.follow(motor,true);
+    followerMotor.configure(config, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+
     new Trigger(DriverStation::isEnabled)
     .onTrue(setIdleMode(IdleMode.kCoast))
     .onFalse(setIdleMode(IdleMode.kBrake));
