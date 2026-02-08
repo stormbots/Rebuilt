@@ -36,4 +36,11 @@ public class Intake extends SubsystemBase {
       rollers.eject()
     );
   }
+
+  public Command stop(){
+    return Commands.parallel(
+      rollers.stop(),
+      intakeExtension.up()
+    );
+  }
 }
