@@ -43,4 +43,10 @@ public class Intake extends SubsystemBase {
       intakeExtension.up()
     );
   }
+
+  public Command testRollers(){
+    return Commands.parallel(
+      rollers.setVoltage(8)
+    );
+  }
 }
