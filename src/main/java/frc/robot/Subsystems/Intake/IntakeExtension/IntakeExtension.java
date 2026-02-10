@@ -71,7 +71,7 @@ public class IntakeExtension extends SubsystemBase {
     .onTrue(setIdleMode(IdleMode.kCoast))
     .onFalse(setIdleMode(IdleMode.kBrake));
     
-    setDefaultCommand(up());
+    // setDefaultCommand(up());
   }
 
   @Override
