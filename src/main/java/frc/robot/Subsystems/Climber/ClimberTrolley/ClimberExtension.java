@@ -28,12 +28,12 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
 
 public class ClimberExtension extends SubsystemBase {
 
-  SparkFlex motor = new SparkFlex(33, MotorType.kBrushless);
-  ClimberTrolleySim sim = new ClimberTrolleySim(motor);
+  SparkFlex motor; //handled in constructor
+  ClimberTrolleySim sim; //handled in constructor
 
   public boolean isHomed = false;
-  public final double kHomeCurrentThreshold = 4;
-  public final double kClimbingCurrentThreshold = 20;
+  public final int kHomeCurrentThreshold = 4;
+  public final int kClimbingCurrentThreshold = 20;
   public final double kHomePower = -0.1;
   public final Distance kMaxHeight = Inches.of(0);
   public final  Distance kClimbReadyPosition=Inches.of(0);
@@ -54,9 +54,12 @@ public class ClimberExtension extends SubsystemBase {
     boolean inverted,
     Distance movementRange
   ) {
+    motor = new SparkFlex(motorID, MotorType.kBrushless);
+    sim = new ClimberTrolleySim(motor);
+
     var config = new SparkFlexConfig();
     config.idleMode(IdleMode.kCoast);
-    config.inverted(false);
+    config.inverted(inverted);
     config.smartCurrentLimit(4);
     config.openLoopRampRate(0.05);
 
@@ -65,6 +68,13 @@ public class ClimberExtension extends SubsystemBase {
 		config.encoder
     .positionConversionFactor(1/conversionfactor)
     .velocityConversionFactor(1/conversionfactor/60.0)
+    ;
+
+    config.softLimit
+    .forwardSoftLimit(movementRange.in(Inches))
+    .reverseSoftLimit(0)
+    .forwardSoftLimitEnabled(true)
+    .reverseSoftLimitEnabled(false)
     ;
 
     motor.configure(
@@ -84,13 +94,15 @@ public class ClimberExtension extends SubsystemBase {
     return new FunctionalCommand(
       ()->{
         isHomed=false;
-        //TODO Set max output current
+        enableBottomLimit(false);
+        setCurrentLimit(kHomeCurrentThreshold);
       },
       ()->{motor.set(-0.5);}, 
       (cancelled)->{
         if(cancelled==false){
           isHomed = true;
-          //TODO Set max output current
+          enableBottomLimit(true);
+          setCurrentLimit(kClimbingCurrentThreshold);
         }
         else{}
       }, 
@@ -124,6 +136,16 @@ public class ClimberExtension extends SubsystemBase {
   private void setCurrentLimit(int amps){
     var config = new SparkFlexConfig();
     config.smartCurrentLimit(amps);
+
+    motor.configureAsync(
+      config,
+      ResetMode.kNoResetSafeParameters,
+      PersistMode.kNoPersistParameters
+    );
+  }
+  private void enableBottomLimit(boolean enabled){
+    var config = new SparkFlexConfig();
+    config.softLimit.reverseSoftLimitEnabled(enabled);
 
     motor.configureAsync(
       config,

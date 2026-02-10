@@ -4,6 +4,8 @@
 
 package frc.robot.Subsystems.Climber;
 
+import static edu.wpi.first.units.Units.Inches;
+
 import frc.robot.Subsystems.Climber.ClimberTrolley.ClimberExtension;
 
 /** Add your docs here. */
@@ -21,8 +23,12 @@ public class Climber {
         // name/description
         // invert/motor rotation direction
         
-    ClimberExtension stage1 = new ClimberExtension(/* differences */);
-    ClimberExtension stage2 = new ClimberExtension(/* differences */);
+    ClimberExtension stage1 = new ClimberExtension(
+        "Stage1", 19, false, Inches.of(6)
+    );
+    ClimberExtension stage2 = new ClimberExtension(
+        "Stage2", 20, false, Inches.of(6)
+    );
 
     public Climber(){
 
