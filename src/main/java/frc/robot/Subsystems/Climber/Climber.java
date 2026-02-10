@@ -4,8 +4,7 @@
 
 package frc.robot.Subsystems.Climber;
 
-import frc.robot.Subsystems.Climber.ClimberElevator.ClimberElevator;
-import frc.robot.Subsystems.Climber.ClimberTrolley.ClimberTrolley;
+import frc.robot.Subsystems.Climber.ClimberTrolley.ClimberExtension;
 
 /** Add your docs here. */
 public class Climber {
@@ -15,16 +14,18 @@ public class Climber {
 
     //Same
         //behaviours
-        //gearing?
-        //motor rotation?
+        //gearing
     //different
         // motor id
         // Range/limits?
+        // name/description
+        // invert/motor rotation direction
         
-    ClimberElevator stage1 = new ClimberElevator(/* differences */);
-    ClimberTrolley stage2 = new ClimberTrolley(/* differences */);
+    ClimberExtension stage1 = new ClimberExtension(/* differences */);
+    ClimberExtension stage2 = new ClimberExtension(/* differences */);
 
     public Climber(){
+
     }
     //helpful climber commands and groups to interface with things
 
