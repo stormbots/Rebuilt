@@ -6,19 +6,19 @@ package frc.robot.Subsystems.Shooter.Flywheel;
 
 import com.revrobotics.PersistMode;
 import com.revrobotics.ResetMode;
-import com.revrobotics.spark.ClosedLoopSlot;
 import com.revrobotics.spark.FeedbackSensor;
 import com.revrobotics.spark.SparkBase;
-import com.revrobotics.spark.SparkClosedLoopController;
 import com.revrobotics.spark.SparkFlex;
-import com.revrobotics.spark.SparkClosedLoopController.ArbFFUnits;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.config.SparkBaseConfig;
-import com.revrobotics.spark.config.SparkFlexConfig;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
+import com.stormbots.Clamp;
+import com.revrobotics.spark.config.SparkFlexConfig;
 
-import edu.wpi.first.math.controller.SimpleMotorFeedforward;
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class Flywheel extends SubsystemBase {
@@ -29,20 +29,7 @@ public class Flywheel extends SubsystemBase {
   SparkFlex followerMotor = new SparkFlex(9, MotorType.kBrushless);
 
   private double targetRPM = 0.0;
-
-  public static enum WantedState{
-    SETRPM,
-    STOP
-  }
-  
-  public static enum SystemState{
-    SETRPM,
-    STOP
-  }
-
-  private WantedState previousWantedState = WantedState.STOP;
-  private WantedState wantedState = WantedState.STOP;
-  private SystemState systemState = SystemState.STOP;
+  private double tolerance = 300.0;
 
   /** Creates a new Flywheel. */
   public Flywheel() {
@@ -55,17 +42,20 @@ public class Flywheel extends SubsystemBase {
 
   @Override
   public void periodic() {
-    systemState = handleStateTransitions();
-    applyStates();
-
     SmartDashboard.putNumber("shooter/flywheel/targetrpm", targetRPM);
     SmartDashboard.putNumber("shooter/flywheel/rpm", leaderMotor.getEncoder().getVelocity());
     SmartDashboard.putNumber("shooter/flywheel/rpmSetpoint", leaderMotor.getClosedLoopController().getSetpoint());
     SmartDashboard.putNumber("shooter/flywheel/rotations", leaderMotor.getEncoder().getPosition());
     SmartDashboard.putNumber("shooter/flywheel/voltage", leaderMotor.getAppliedOutput()*leaderMotor.getBusVoltage());
   }
+
+  public double getRPM(){
+    return leaderMotor.getEncoder().getVelocity();
+  }
   
-  private void setRPM(){
+  private void setRPM(double rpm, double tolerance){
+    this.targetRPM = rpm;
+    this.tolerance = tolerance;
     leaderMotor.getClosedLoopController().setSetpoint(
       targetRPM, 
       SparkBase.ControlType.kVelocity
@@ -73,39 +63,22 @@ public class Flywheel extends SubsystemBase {
   }
 
   private void stop(){
+    this.targetRPM = 0;
+    this.tolerance = 300; 
     leaderMotor.stopMotor();
   }
 
-  private SystemState handleStateTransitions(){
-    switch (wantedState){
-    case SETRPM:
-      return SystemState.SETRPM;
-    case STOP:
-      return SystemState.STOP;
-    }
-
-    return SystemState.STOP;
-  }
-  
-  private void applyStates(){
-    switch(systemState){
-      case SETRPM:
-        setRPM();
-        break;
-      case STOP:
-        targetRPM=0.0;
-        stop();
-        break;
-    }
+  public Command setRPMCommand(double rpm, double tolerance){
+    return run(()->setRPM(rpm, tolerance));
   }
 
-  public void setWantedState(WantedState wantedState){
-    this.wantedState = wantedState;
+  //Remove this once not needed
+  public Command setVoltageCommand(double volts){
+    return run(()->leaderMotor.setVoltage(volts));
   }
 
-  public void setWantedState(WantedState wantedState, double targetRPM){
-    this.wantedState = wantedState;
-    this.targetRPM = targetRPM;
+  public boolean getOnTarget(){
+    return MathUtil.isNear(targetRPM, leaderMotor.getEncoder().getVelocity(), tolerance);
   }
 
   private SparkBaseConfig getMotorConfig(){

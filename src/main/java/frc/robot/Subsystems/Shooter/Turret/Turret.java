@@ -16,10 +16,10 @@ import com.revrobotics.spark.config.SparkBaseConfig;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.SparkFlexConfig;
 import com.stormbots.CRTAbsoluteEncoder;
-import com.stormbots.Clamp;
 
-import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.units.measure.Angle;
+import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class Turret extends SubsystemBase {
@@ -32,6 +32,9 @@ public class Turret extends SubsystemBase {
 
   //How much in ONE direction, hence max range divided by 2
   public static final double kMaxRotation = 540.0 / 2.0;
+
+  Angle targetPosition = Degrees.of(0);
+  Angle tolerance = Degrees.of(3);
 
 
   SparkFlex motor = new SparkFlex(99, MotorType.kBrushless);
@@ -58,19 +61,21 @@ public class Turret extends SubsystemBase {
     return Degrees.of(motor.getEncoder().getPosition());
   }
 
-
-  /** Sets direct position does not consider coterminal angles */
-  private void setPosition(double degrees){
+  private void setAngle(Angle position, Angle tolerance) {
+    this.targetPosition = position;
+    this.tolerance = tolerance;
     motor.getClosedLoopController().setSetpoint(
-      degrees, 
+      position.in(Degrees), 
       ControlType.kPosition
     );
   }
 
-  // Rotation2d instead of angle to work with wpilib geometry classes
-  //Also cw vs ccw is enforced
-  public void setPosition(Rotation2d angle) {
-    setPosition(angle.getDegrees());
+  public Command setAngleCommand(Angle position, Angle tolerance){
+    return run(()->setAngle(position, tolerance));
+  }
+
+  public boolean getOnTarget(){
+    return MathUtil.isNear(targetPosition.in(Degrees), motor.getEncoder().getPosition(), tolerance.in(Degrees));
   }
 
   private SparkBaseConfig getMotorConfig(){

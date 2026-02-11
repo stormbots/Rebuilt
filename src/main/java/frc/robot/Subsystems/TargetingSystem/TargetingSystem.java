@@ -28,6 +28,37 @@ import frc.robot.Robot;
 import frc.robot.Subsystems.Swerve.Swerve;
 
 public class TargetingSystem extends SubsystemBase {
+
+  public static class ShooterMechanism {
+    public final Angle turretAngle;
+    public final Angle hoodAngle;
+    public final double flywheelRPM;
+
+    public final Angle turretTolerance;
+    public final Angle hoodTolerance;
+    public final double flywheelTolerance;
+
+    public ShooterMechanism(
+      Angle turretAngle, 
+      Angle hoodAngle, 
+      double flywheelRPM, 
+      Angle turretTolerance, 
+      Angle hoodTolerance, 
+      double flywheelTolerance
+    ){
+      this.turretAngle = turretAngle;
+      this.hoodAngle = hoodAngle;
+      this.flywheelRPM = flywheelRPM;
+      this.turretTolerance = turretTolerance;
+      this.hoodTolerance = hoodTolerance;
+      this.flywheelTolerance = flywheelTolerance;
+    }
+
+    public ShooterMechanism(Angle turretAngle, Angle hoodAngle, double flywheelRPM){
+      this(turretAngle, hoodAngle, flywheelRPM, Degrees.of(3), Degrees.of(3), 300);
+    }
+  }
+
   Swerve swerve;
 
   Field2d field = new Field2d();

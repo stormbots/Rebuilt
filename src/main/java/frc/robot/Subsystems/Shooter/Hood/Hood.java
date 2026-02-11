@@ -16,6 +16,7 @@ import com.revrobotics.spark.config.SparkBaseConfig;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.SparkMaxConfig;
 
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.FunctionalCommand;
@@ -40,6 +41,9 @@ public class Hood extends SubsystemBase {
   public static final double maxAngle = 0.0;
 
   private boolean homed = false;
+
+  private Angle targetAngle = Degrees.of(minAngle);
+  private Angle tolerance = Degrees.of(3); 
 
   SparkMax motor = new SparkMax(99, MotorType.kBrushless);
 
@@ -91,15 +95,23 @@ public class Hood extends SubsystemBase {
     return Degrees.of(motor.getEncoder().getPosition());
   }
 
-  private void setAngle(double degrees){
-    motor.getClosedLoopController().setSetpoint(
-      degrees,
-      ControlType.kPosition
-    );
+  private void setAngle(Angle angle, Angle tolerance){
+    if(homed){
+      this.targetAngle = angle;
+      this.tolerance = tolerance;
+      motor.getClosedLoopController().setSetpoint(
+        angle.in(Degrees),
+        ControlType.kPosition
+      );
+    }
   }
 
-  public void setAngle(Angle angle){
-    setAngle(angle.in(Degrees));
+  public Command setAngleCommand(Angle angle, Angle tolerance){
+    return run(()->setAngle(angle, tolerance));
+  }
+
+  public boolean getOnTarget(){
+    return homed && MathUtil.isNear(targetAngle.in(Degrees), motor.getEncoder().getPosition(), tolerance.in(Degrees));
   }
 
 

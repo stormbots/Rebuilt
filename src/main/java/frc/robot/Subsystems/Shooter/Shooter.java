@@ -10,29 +10,20 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.Robot;
 import frc.robot.Subsystems.HopperSensors.HopperSensors;
 import frc.robot.Subsystems.HopperSensors.FuelSim.FuelSim;
-import frc.robot.Subsystems.Shooter.Feeder.Feeder;
 import frc.robot.Subsystems.Shooter.Flywheel.Flywheel;
-import frc.robot.Subsystems.Shooter.Flywheel.Flywheel.WantedState;
 import frc.robot.Subsystems.Shooter.Hood.Hood;
 import frc.robot.Subsystems.Shooter.Turret.Turret;
 import frc.robot.Subsystems.TargetingSystem.TargetingSystem;
 
 public class Shooter {
-    Feeder feeder = new Feeder();
     Flywheel flywheel = new Flywheel();
     Turret turret = new Turret();
     Hood hood = new Hood();
 
-    // normed distance vector, flywheel rpm, hood angle, time of flight
-    LUT hubLUT = new LUT(new double[][]{
-        {0,0,0,0},
-        {1,1,1,1}
-    });
-
     TargetingSystem targeting;
 
     /** Just set up the mechanism2d so we can visualize the system all at once */
-    ShooterVisual visual = new ShooterVisual(feeder, flywheel, hood, turret);
+    ShooterVisual visual = new ShooterVisual(flywheel, hood, turret);
 
     //TODO create helpful commands and/or logic
     //Note, this is not a subsystem, but we can turn it into one
@@ -43,6 +34,17 @@ public class Shooter {
         this.targeting=targeting;
     }
 
+    public Command shoot(TargetingSystem.ShooterMechanism targets){
+        return Commands.parallel(
+            flywheel.setRPMCommand(targets.flywheelRPM, targets.flywheelTolerance),
+            hood.setAngleCommand(targets.hoodAngle, targets.hoodTolerance),
+            turret.setAngleCommand(targets.turretAngle, targets.turretTolerance)
+        );
+    }
+
+    public Command constantVoltage(double volts){
+        return flywheel.setVoltageCommand(volts);
+    }
 
     public Command simGetLaunchCommand(){
         //Don't do anything on a normal bot
