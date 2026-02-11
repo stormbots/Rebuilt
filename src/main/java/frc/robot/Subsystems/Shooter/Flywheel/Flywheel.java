@@ -23,10 +23,10 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class Flywheel extends SubsystemBase {
 
-  static final double kGearing = (18.0) / (24.0);
+  static final double kGearing = 1.0;
 
-  SparkFlex leaderMotor = new SparkFlex(13, MotorType.kBrushless);
-  SparkFlex followerMotor = new SparkFlex(9, MotorType.kBrushless);
+  SparkFlex leaderMotor = new SparkFlex(17, MotorType.kBrushless);
+  SparkFlex followerMotor = new SparkFlex(18, MotorType.kBrushless);
 
   private double targetRPM = 0.0;
   private double tolerance = 300.0;

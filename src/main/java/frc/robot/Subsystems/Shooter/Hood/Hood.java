@@ -28,7 +28,7 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
 
 public class Hood extends SubsystemBase {
 
-  public static final double kGearing = 1.0;
+  public static final double kGearing = (1.0 / 15.0) * ( 10.0 / 164.0 );
 
   public static final int kPreHomeCurrentLimit = 10;
   //CANNOT be higher than 20, ITS A NEO 550
@@ -45,9 +45,9 @@ public class Hood extends SubsystemBase {
   private Angle targetAngle = Degrees.of(minAngle);
   private Angle tolerance = Degrees.of(3); 
 
-  SparkMax motor = new SparkMax(99, MotorType.kBrushless);
+  SparkMax motor = new SparkMax(15, MotorType.kBrushless);
 
-  Trigger isAtHome = new Trigger(()->motor.getOutputCurrent()>kHomeCurrentThreshold);
+  Trigger isAtHome = new Trigger(()-> !homed && motor.getOutputCurrent()>kHomeCurrentThreshold );
 
   /** Creates a new Hood. */
   public Hood() {
@@ -65,14 +65,13 @@ public class Hood extends SubsystemBase {
     config.
       smartCurrentLimit(kPreHomeCurrentLimit)
       .idleMode(IdleMode.kBrake)
-      .inverted(false)
+      .inverted(true)
     ;
 
     
     config.encoder
       .positionConversionFactor(kGearing)
       .velocityConversionFactor(kGearing / 60.0)
-      .inverted(false)
     ;
 
     config.closedLoop

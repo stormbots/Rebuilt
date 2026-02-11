@@ -24,11 +24,11 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class Turret extends SubsystemBase {
 
-  public static final double kTurretGearToothCount = 100;
-  public static final double kGear1ToothCount = 16;
-  public static final double kGear2ToothCount = 17;
+  public static final double kTurretGearToothCount = 132;
+  public static final double kGear1ToothCount = 20;
+  public static final double kGear2ToothCount = 21;
   
-  public static final double kGearing = 1.0;
+  public static final double kGearing = (1.0 / 3.0) * (10.0 / 132.0);
 
   //How much in ONE direction, hence max range divided by 2
   public static final double kMaxRotation = 540.0 / 2.0;
@@ -37,7 +37,7 @@ public class Turret extends SubsystemBase {
   Angle tolerance = Degrees.of(3);
 
 
-  SparkFlex motor = new SparkFlex(99, MotorType.kBrushless);
+  SparkFlex motor = new SparkFlex(14, MotorType.kBrushless);
 
   /** Creates a new Turret. */
   public Turret() {
@@ -85,14 +85,12 @@ public class Turret extends SubsystemBase {
       .smartCurrentLimit(40)
       .idleMode(IdleMode.kBrake)
       //giving positive power should turn the turret CCW
-      .inverted(false)
+      .inverted(true)
     ;
 
     config.encoder
       .positionConversionFactor(kGearing)
       .velocityConversionFactor(kGearing / 60.0)
-      //Turning the turret CCW should increase position
-      .inverted(false)
     ;
 
     config.closedLoop
