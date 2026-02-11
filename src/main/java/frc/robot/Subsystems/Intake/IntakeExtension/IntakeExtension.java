@@ -40,7 +40,7 @@ public class IntakeExtension extends SubsystemBase {
 
     var absfactor = 360;
     config.absoluteEncoder
-    .inverted(false)
+    .inverted(true)
     .positionConversionFactor(absfactor)
     .velocityConversionFactor(absfactor / 60);
 

@@ -50,7 +50,7 @@ public class Rollers extends SubsystemBase {
 
     config
     .idleMode(IdleMode.kCoast)
-    .inverted(false)
+    .inverted(true)
     .smartCurrentLimit(20)
     .voltageCompensation(11);
 
