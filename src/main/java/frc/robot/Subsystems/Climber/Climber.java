@@ -24,10 +24,10 @@ public class Climber {
         // invert/motor rotation direction
         
     ClimberExtension stage1 = new ClimberExtension(
-        "Stage1", 19, false, Inches.of(6)
+        "Stage1", 19, true, Inches.of(6)
     );
     ClimberExtension stage2 = new ClimberExtension(
-        "Stage2", 20, false, Inches.of(6)
+        "Stage2", 20, true, Inches.of(6)
     );
 
     public Climber(){

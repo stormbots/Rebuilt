@@ -64,7 +64,7 @@ public class ClimberExtension extends SubsystemBase {
     config.openLoopRampRate(0.05);
 
     //TODO Configure the encoder conversion
-    var conversionfactor=1; //1 divided by whatever number you determined
+    var conversionfactor=6/57.71; //1 divided by whatever number you determined
 		config.encoder
     .positionConversionFactor(1/conversionfactor)
     .velocityConversionFactor(1/conversionfactor/60.0)
