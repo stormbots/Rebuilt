@@ -29,21 +29,16 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
 public class ClimberExtension extends SubsystemBase {
 
   SparkFlex motor; //handled in constructor
-  ClimberTrolleySim sim; //handled in constructor
+  ClimberExtensionSim sim; //handled in constructor
 
-  public boolean isHomed = false;
-  public final int kHomeCurrentThreshold = 4;
-  public final int kClimbingCurrentThreshold = 20;
-  public final double kHomePower = -0.1;
-  public final Distance kMaxHeight = Inches.of(0);
-  public final  Distance kClimbReadyPosition=Inches.of(0);
+  private boolean isHomed = false;
+  private final int kHomeCurrentThreshold = 4;
+  private final int kClimbingCurrentThreshold = 20;
 
-  public float forwardSoftLimit = (float)(kMaxHeight.in(Units.Inches)-0.2);
-  public float climbingReverseSoftLimit = (float)0.1;
-  public float defaultReverseSoftLimit = (float)11.5;
+  private  String name="";
 
   Trigger isHomingCurrentReached = new Trigger(()->{
-    return motor.getOutputCurrent() >= kHomeCurrentThreshold;
+    return motor.getOutputCurrent() <= kHomeCurrentThreshold;
   }).debounce(0.1)
   ;
 
@@ -55,7 +50,8 @@ public class ClimberExtension extends SubsystemBase {
     Distance movementRange
   ) {
     motor = new SparkFlex(motorID, MotorType.kBrushless);
-    sim = new ClimberTrolleySim(motor);
+    sim = new ClimberExtensionSim(motor);
+    this.name = name;
 
     var config = new SparkFlexConfig();
     config.idleMode(IdleMode.kCoast);
@@ -115,11 +111,14 @@ public class ClimberExtension extends SubsystemBase {
   }
   @Override
   public void periodic() {
-    SmartDashboard.putNumber("ClimberRight/height", motor.getEncoder().getPosition());
-    SmartDashboard.putNumber("ClimberRight/velocity", motor.getEncoder().getVelocity());
-    SmartDashboard.putBoolean("ClimberRight/homed", isHomed);
+    SmartDashboard.putNumber("Climber/"+name+"/height", motor.getEncoder().getPosition());
+    SmartDashboard.putNumber("Climber/"+name+"/velocity", motor.getEncoder().getVelocity());
+    SmartDashboard.putNumber("Climber/"+name+"/current", motor.getOutputCurrent());
+    SmartDashboard.putNumber("Climber/"+name+"/output", motor.getAppliedOutput());
+    SmartDashboard.putBoolean("Climber/"+name+"/homed", isHomed);
   }
 
+  @Override
   public void simulationPeriodic(){
     sim.update();
   }
@@ -143,6 +142,7 @@ public class ClimberExtension extends SubsystemBase {
       PersistMode.kNoPersistParameters
     );
   }
+
   private void enableBottomLimit(boolean enabled){
     var config = new SparkFlexConfig();
     config.softLimit.reverseSoftLimitEnabled(enabled);

@@ -18,11 +18,11 @@ import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.wpilibj.simulation.ElevatorSim;
 
 
-public class ClimberTrolleySim {
+public class ClimberExtensionSim {
   SparkFlex elevatorMotor;
   SparkFlexSim simElevatorMotor;
   
-  public ClimberTrolleySim(
+  public ClimberExtensionSim(
     SparkFlex elevatorMotor){
     this.elevatorMotor = elevatorMotor;
     simElevatorMotor = new SparkFlexSim(this.elevatorMotor, DCMotor.getNeoVortex(1));
@@ -31,12 +31,12 @@ public class ClimberTrolleySim {
 
   ElevatorSim simElevator = new ElevatorSim(
     DCMotor.getNeoVortex(1),
-    18, 
+    45, 
     1, 
-    Inches.of(1).in(Meter), 
+    Inches.of(0.8).in(Meter), 
     Inches.of(0).in(Meter), 
-    Inches.of(48).in(Meter), 
-    true, 
+    Inches.of(30).in(Meter), 
+    false, 
     0
   );
   

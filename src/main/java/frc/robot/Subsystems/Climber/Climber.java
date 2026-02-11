@@ -6,22 +6,12 @@ package frc.robot.Subsystems.Climber;
 
 import static edu.wpi.first.units.Units.Inches;
 
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.Subsystems.Climber.ClimberTrolley.ClimberExtension;
 
 /** Add your docs here. */
 public class Climber {
-
-    //first stage
-    //second stage 
-
-    //Same
-        //behaviours
-        //gearing
-    //different
-        // motor id
-        // Range/limits?
-        // name/description
-        // invert/motor rotation direction
         
     ClimberExtension stage1 = new ClimberExtension(
         "Stage1", 19, true, Inches.of(6)
@@ -39,4 +29,12 @@ public class Climber {
     //goback down and climb
 
     //maybe: Climb to L2? L3?
+
+    public Command goHome(){
+        return Commands.parallel(
+            stage1.goHome(),
+            stage2.goHome()
+        );
+    }
+
 }
