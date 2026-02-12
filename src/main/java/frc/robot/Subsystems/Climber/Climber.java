@@ -6,23 +6,42 @@ package frc.robot.Subsystems.Climber;
 
 import static edu.wpi.first.units.Units.Inches;
 
+import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Subsystems.Climber.ClimberExtension.ClimberExtension;
 
 /** Add your docs here. */
-public class Climber {
+public class Climber extends SubsystemBase {
+    public static Distance kStage1Range = Inches.of(6);
+    public static Distance kStage2Range = Inches.of(20);
 
     ClimberExtension stage1 = new ClimberExtension(
-        "Stage1", 19, true, Inches.of(6)
+        "Stage1", 19, true, kStage1Range
     );
     ClimberExtension stage2 = new ClimberExtension(
-        "Stage2", 20, true, Inches.of(6)
+        "Stage2", 20, true, kStage2Range
     );
+
+    public ClimberVisual visual = new ClimberVisual();
 
     public Climber(){
 
+
+        // new Trigger(()->stage1.isHomed() && stage2.isHomed())
+        // .whileTrue(
+        //     stage2.setHeight(kStage2Range.minus(Inches.of(3)))
+        //     .withName("PresetStage2")
+        // );
     }
+
+    @Override
+    public void periodic(){
+        visual.update(stage1.getHeight(), stage2.getHeight());
+    }
+
     //helpful climber commands and groups to interface with things
 
     //extend to L1 climb position

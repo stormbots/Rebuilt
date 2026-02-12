@@ -22,8 +22,7 @@ public class ClimberExtensionSim {
   SparkFlex elevatorMotor;
   SparkFlexSim simElevatorMotor;
   
-  public ClimberExtensionSim(
-    SparkFlex elevatorMotor){
+  public ClimberExtensionSim(SparkFlex elevatorMotor){
     this.elevatorMotor = elevatorMotor;
     simElevatorMotor = new SparkFlexSim(this.elevatorMotor, DCMotor.getNeoVortex(1));
   }
@@ -57,7 +56,7 @@ public class ClimberExtensionSim {
 
   }
 
-  public Distance getAngle(){
+  public Distance getPosition(){
     return Meters.of(simElevator.getPositionMeters());
   }
 }

@@ -37,10 +37,10 @@ public class RobotContainer {
 
 
     //Test code but it works
-    driver.povLeft().whileTrue(climber.setStage1Output(-1)); //stage1 up
-    driver.povUp().whileTrue(climber.setStage1Output(1)); //stage2 up
-    driver.povDown().whileTrue(climber.setStage2Output(-1)); //stage1 down
-    driver.povRight().whileTrue(climber.setStage2Output(1)); //stage2 down
+    driver.povLeft().whileTrue(climber.setStage1Output(-1)); //stage1 down
+    driver.povUp().whileTrue(climber.setStage1Output(1)); //stage1 up
+    driver.povDown().whileTrue(climber.setStage2Output(-1)); //stage2 down
+    driver.povRight().whileTrue(climber.setStage2Output(1)); //stage2 up
   }
 
 

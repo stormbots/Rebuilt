@@ -11,12 +11,10 @@ import com.revrobotics.PersistMode;
 import com.revrobotics.ResetMode;
 import com.revrobotics.spark.SparkBase.ControlType;
 import com.revrobotics.spark.SparkFlex;
-import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.SparkFlexConfig;
 
-import edu.wpi.first.units.Units;
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -29,7 +27,7 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
 public class ClimberExtension extends SubsystemBase {
 
   SparkFlex motor; //handled in constructor
-  ClimberExtensionSim sim; //handled in constructor
+  public ClimberExtensionSim sim; //handled in constructor
 
   private boolean isHomed = false;
   private final int kHomeCurrentThreshold = 4;
@@ -66,6 +64,10 @@ public class ClimberExtension extends SubsystemBase {
     .velocityConversionFactor(1/conversionfactor/60.0)
     ;
 
+    // config.closedLoop
+    // .p(12/6)
+    // ;
+
     config.softLimit
     .forwardSoftLimit(movementRange.in(Inches))
     .reverseSoftLimit(0)
@@ -78,8 +80,6 @@ public class ClimberExtension extends SubsystemBase {
       ResetMode.kResetSafeParameters,
       PersistMode.kPersistParameters
     );
-
-
 
     new Trigger(DriverStation::isEnabled)
 		.and(()->isHomed==false)
@@ -109,6 +109,7 @@ public class ClimberExtension extends SubsystemBase {
     )
     .withInterruptBehavior(InterruptionBehavior.kCancelIncoming)
 		.withTimeout(Seconds.of(5))
+    .withName(name+"goHome")
     ;
   }
   @Override
@@ -132,6 +133,14 @@ public class ClimberExtension extends SubsystemBase {
         .getClosedLoopController()
         .setSetpoint(inches, ControlType.kPosition);
     });
+  }
+
+  public Distance getHeight(){
+    return Inches.of(motor.getEncoder().getPosition());
+  }
+
+  public boolean isHomed(){
+    return isHomed;
   }
 
   private void setCurrentLimit(int amps){
