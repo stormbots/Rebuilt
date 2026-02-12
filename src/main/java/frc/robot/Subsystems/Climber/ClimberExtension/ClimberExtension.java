@@ -99,6 +99,7 @@ public class ClimberExtension extends SubsystemBase {
           isHomed = true;
           enableBottomLimit(true);
           setCurrentLimit(kClimbingCurrentThreshold);
+          motor.getEncoder().setPosition(0);
         }
         else{}
         motor.stopMotor();
