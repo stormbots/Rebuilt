@@ -2,7 +2,7 @@
 // Open Source Software; you can modify and/or share it under the terms of
 // the WPILib BSD license file in the root directory of this project.
 
-package frc.robot.Subsystems.Climber.ClimberTrolley;
+package frc.robot.Subsystems.Climber.ClimberExtension;
 
 import static edu.wpi.first.units.Units.Inches;
 import static edu.wpi.first.units.Units.Seconds;
@@ -101,6 +101,7 @@ public class ClimberExtension extends SubsystemBase {
           setCurrentLimit(kClimbingCurrentThreshold);
         }
         else{}
+        motor.stopMotor();
       }, 
       isHomingCurrentReached, 
       this
@@ -152,6 +153,14 @@ public class ClimberExtension extends SubsystemBase {
       ResetMode.kNoResetSafeParameters,
       PersistMode.kNoPersistParameters
     );
+  }
+
+  public Command setOutput(double output){
+    return run(() -> {
+      motor.set(output);
+    })
+    .finallyDo(motor::stopMotor)
+    ;
   }
 
 

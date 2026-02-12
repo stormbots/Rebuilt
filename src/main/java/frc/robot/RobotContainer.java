@@ -9,7 +9,6 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.Subsystems.Climber.Climber;
 import frc.robot.Subsystems.Intake.Intake;
-import frc.robot.Subsystems.Lighting.Lighting;
 import frc.robot.Subsystems.Photonvision.Photonvision;
 import frc.robot.Subsystems.Questnav.QuestNav;
 import frc.robot.Subsystems.Shooter.Shooter;
@@ -34,11 +33,21 @@ public class RobotContainer {
     configureBindings();
   }
 
-  private void configureBindings() {}
+  private void configureBindings() {
+
+
+    //Test code but it works
+    driver.povLeft().whileTrue(climber.setStage1Output(-1)); //stage1 up
+    driver.povUp().whileTrue(climber.setStage1Output(1)); //stage2 up
+    driver.povDown().whileTrue(climber.setStage2Output(-1)); //stage1 down
+    driver.povRight().whileTrue(climber.setStage2Output(1)); //stage2 down
+  }
+
 
   public Command getAutonomousCommand() {
     //TODO: Get this from Autos.java instead
     return Commands.print("No autonomous command configured");
+    // return climber.goHome();
   }
 
 }

@@ -8,11 +8,11 @@ import static edu.wpi.first.units.Units.Inches;
 
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
-import frc.robot.Subsystems.Climber.ClimberTrolley.ClimberExtension;
+import frc.robot.Subsystems.Climber.ClimberExtension.ClimberExtension;
 
 /** Add your docs here. */
 public class Climber {
-        
+
     ClimberExtension stage1 = new ClimberExtension(
         "Stage1", 19, true, Inches.of(6)
     );
@@ -37,4 +37,10 @@ public class Climber {
         );
     }
 
+    public Command setStage1Output(double output){
+        return stage1.setOutput(output);
+    }
+    public Command setStage2Output(double output){
+        return stage2.setOutput(output);
+    }
 }
