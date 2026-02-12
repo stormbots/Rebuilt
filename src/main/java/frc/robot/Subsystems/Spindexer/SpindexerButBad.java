@@ -47,11 +47,11 @@ public class SpindexerButBad extends SubsystemBase {
     // This method will be called once per scheduler run
   }
 
-  public Command rotate(double percent){
+  private Command rotate(double percent){
     return runEnd(()->dyerotor.set(percent), dyerotor::stopMotor);
   }
 
-  public Command feedUpward(double percent){
+  private Command feedUpward(double percent){
     return runEnd(()->upgoer.set(percent), upgoer::stopMotor);
   }
 

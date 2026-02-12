@@ -35,10 +35,10 @@ public class Hood extends SubsystemBase {
   public static final int kPostHomeCurrentLimit = 20;
   public static final double kHomeCurrentThreshold = 8.0;
 
-  public static final double homeAngle = 0.0;
+  public static final double homeAngle = 13.0;
   //minimum reachable should be slightly higher than hard limit
   public static final double minAngle = homeAngle+0.5;
-  public static final double maxAngle = 0.0;
+  public static final double maxAngle = 40.0;
 
   private boolean homed = false;
 

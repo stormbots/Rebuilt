@@ -15,6 +15,7 @@ import frc.robot.Subsystems.Photonvision.Photonvision;
 import frc.robot.Subsystems.Questnav.QuestNav;
 import frc.robot.Subsystems.Shooter.Shooter;
 import frc.robot.Subsystems.Spindexer.Spindexer;
+import frc.robot.Subsystems.Spindexer.SpindexerButBad;
 import frc.robot.Subsystems.Swerve.Swerve;
 import frc.robot.Subsystems.TargetingSystem.TargetingSystem;
 
@@ -26,7 +27,8 @@ public class RobotContainer {
   TargetingSystem targeting = new TargetingSystem(swerve);
   Shooter shooter = new Shooter(targeting);
   Intake intake = new Intake();
-  Spindexer spindexer = new Spindexer();
+  // Spindexer spindexer = new Spindexer();
+  SpindexerButBad spindexerButBad = new SpindexerButBad();
 
   CommandXboxController driver = new CommandXboxController(0);
   CommandXboxController operator = new CommandXboxController(1);
@@ -53,8 +55,12 @@ public class RobotContainer {
       ));
     }
 
-    driver.a().whileTrue(intake.smartIntake());
-    driver.b().whileTrue(shooter.simGetLaunchCommand());
+    // driver.a().whileTrue(intake.smartIntake());
+    // driver.b().whileTrue(shooter.simGetLaunchCommand());
+
+    driver.a().whileTrue(shooter.constantVoltage(6));
+    driver.b().whileTrue(spindexerButBad.feedToShooter());
+
   }
 
   public Command getAutonomousCommand() {
