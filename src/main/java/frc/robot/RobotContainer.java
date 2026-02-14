@@ -41,6 +41,7 @@ public class RobotContainer {
     driver.povUp().whileTrue(climber.setStage1Output(1)); //stage1 up
     driver.povDown().whileTrue(climber.setStage2Output(-1)); //stage2 down
     driver.povRight().whileTrue(climber.setStage2Output(1)); //stage2 up
+    driver.start().whileTrue(climber.goHome()); // go home
   }
 
 

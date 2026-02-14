@@ -30,7 +30,8 @@ public class ClimberExtension extends SubsystemBase {
   public ClimberExtensionSim sim; //handled in constructor
 
   private boolean isHomed = false;
-  private final int kHomeCurrentThreshold = 4;
+  private final int kHomeCurrentThreshold = 8;
+  private final int kHomeCurrentMaxOutput = (int)Math.ceil(kHomeCurrentThreshold*1.4);
   private final int kClimbingCurrentThreshold = 20;
 
   private  String name="";
@@ -52,13 +53,12 @@ public class ClimberExtension extends SubsystemBase {
     this.name = name;
 
     var config = new SparkFlexConfig();
-    config.idleMode(IdleMode.kCoast);
+    config.idleMode(IdleMode.kBrake);
     config.inverted(inverted);
-    config.smartCurrentLimit(4);
+    config.smartCurrentLimit(kHomeCurrentMaxOutput);
     config.openLoopRampRate(0.05);
-
     //TODO Configure the encoder conversion
-    var conversionfactor=6/57.71; //1 divided by whatever number you determined
+    var conversionfactor=1/(6/57.71); //1 divided by whatever number you determined
 		config.encoder
     .positionConversionFactor(1/conversionfactor)
     .velocityConversionFactor(1/conversionfactor/60.0)
@@ -81,9 +81,9 @@ public class ClimberExtension extends SubsystemBase {
       PersistMode.kPersistParameters
     );
 
-    new Trigger(DriverStation::isEnabled)
-		.and(()->isHomed==false)
-		.whileTrue(goHome());
+    // new Trigger(DriverStation::isEnabled)
+		// .and(()->isHomed==false)
+		// .whileTrue(goHome());
   }
 
   public Command goHome(){
@@ -91,7 +91,7 @@ public class ClimberExtension extends SubsystemBase {
       ()->{
         isHomed=false;
         enableBottomLimit(false);
-        setCurrentLimit(kHomeCurrentThreshold);
+        setCurrentLimit(kHomeCurrentMaxOutput);
       },
       ()->{motor.set(-0.5);}, 
       (cancelled)->{
@@ -119,6 +119,7 @@ public class ClimberExtension extends SubsystemBase {
     SmartDashboard.putNumber("Climber/"+name+"/current", motor.getOutputCurrent());
     SmartDashboard.putNumber("Climber/"+name+"/output", motor.getAppliedOutput());
     SmartDashboard.putBoolean("Climber/"+name+"/homed", isHomed);
+    SmartDashboard.putString("Climber/"+name+"/command", getCurrentCommand()==null ? "None" : getCurrentCommand().getName() );
   }
 
   @Override
