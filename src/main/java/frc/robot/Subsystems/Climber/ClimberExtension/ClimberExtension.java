@@ -30,9 +30,9 @@ public class ClimberExtension extends SubsystemBase {
   public ClimberExtensionSim sim; //handled in constructor
 
   private boolean isHomed = false;
-  private final int kHomeCurrentThreshold = 8;
+  private final int kHomeCurrentThreshold = 4;
   private final int kHomeCurrentMaxOutput = (int)Math.ceil(kHomeCurrentThreshold*1.4);
-  private final int kClimbingCurrentThreshold = 20;
+  private final int kClimbingCurrentThreshold = 60;
 
   private  String name="";
 
@@ -55,7 +55,7 @@ public class ClimberExtension extends SubsystemBase {
     var config = new SparkFlexConfig();
     config.idleMode(IdleMode.kBrake);
     config.inverted(inverted);
-    config.smartCurrentLimit(kHomeCurrentMaxOutput);
+    config.smartCurrentLimit(kClimbingCurrentThreshold);
     config.openLoopRampRate(0.05);
     //TODO Configure the encoder conversion
     var conversionfactor=1/(6/57.71); //1 divided by whatever number you determined
@@ -72,7 +72,7 @@ public class ClimberExtension extends SubsystemBase {
     .forwardSoftLimit(movementRange.in(Inches))
     .reverseSoftLimit(0)
     .forwardSoftLimitEnabled(true)
-    .reverseSoftLimitEnabled(false)
+    .reverseSoftLimitEnabled(true)
     ;
 
     motor.configure(
