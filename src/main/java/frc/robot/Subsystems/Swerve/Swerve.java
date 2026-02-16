@@ -40,7 +40,7 @@ public class Swerve extends SubsystemBase {
 
   /** Creates a new SwerveSubsystem. */
   public Swerve() {
-    var botname = Preferences.getString("BotName", "compbot");
+    var botname = Preferences.getString("BotName", "compBot");
     File swerveJsonDirectory = new File(Filesystem.getDeployDirectory(),botname);
     try
     {
