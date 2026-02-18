@@ -5,11 +5,18 @@
 package frc.robot.Subsystems.Lighting;
 
 
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.google.gson.JsonSerializationContext;
+import com.google.gson.JsonSerializer;
 
 import edu.wpi.first.wpilibj.SerialPort;
 import edu.wpi.first.wpilibj.SerialPort.Port;
@@ -22,26 +29,8 @@ import edu.wpi.first.wpilibj2.command.WaitCommand;
 
 public class WLED {
   static SerialPort serialport;
-  // SerialPort led = new SerialPort(115200, Port.kUSB1);
+  ArrayList<LedSegment> segments;
   int calls;
-  
-  CustomColor pink = new CustomColor(255, 28, 206);
-  CustomColor white = new CustomColor(255, 255, 255);
-  CustomColor babyBlue = new CustomColor(38, 14, 255);
-  CustomColor red = new CustomColor(255, 0, 0);
-  CustomColor orange = new CustomColor(255, 140, 0);
-  CustomColor yellow = new CustomColor(255, 215, 0);
-  CustomColor green = new CustomColor(0, 255, 0);
-  CustomColor blue = new CustomColor(0, 0, 255);
-  CustomColor purple = new CustomColor(255, 0, 255);
-  CustomColor black = new CustomColor(0, 0, 0);
-  CustomColor grey = new CustomColor(119, 119, 119);
-  CustomColor magenta = new CustomColor(255, 0, 111);
-  CustomColor lightGreen = new CustomColor(159, 255, 133); 
-// private Signals signlas = new Signals();
-  // private Bling bling = new Bling();
-  /** Creates a new Leds. */
-  // LedSegment segment =new LedSegment(0, 0, 30, false);
   public WLED() {
     try{
       serialport.toString();
@@ -60,375 +49,516 @@ public class WLED {
     return new CustomColor(r, g, b);
   }
 
+  public class LedSegmentData{
+    private int id; //set once
+    private Optional<Integer> start;// set once
+    private Optional<Integer> stop; //set once
+    private CustomColor[] col;
+    private Optional<Integer> fx;
+    private Optional<Integer> sx;
+    private Optional<Integer> ix;
+    private Optional<Integer> c1;
+    private Optional<Integer> c2;
+    private Optional<Integer> c3;
+    private Optional<Boolean> rev;
+    private Optional<Boolean> on;
+    private Optional<Integer> bri;
+    private frc.robot.Subsystems.Lighting.WLED.LedSegment.LedMultiRange i;
+    private Optional<Boolean> frz;
+    private transient boolean updated;
+
+    private void setID(int id){
+      this.id = id;
+      updated  = true;
+    }
+
+    private void setStart(int start){
+      this.start = Optional.of(start);
+      updated  = true;
+    }
+
+    private void setStop(int stop){
+      this.stop = Optional.of(stop);
+      updated  = true;
+    }
+
+    public void setColor(CustomColor... col){
+      this.col = col;
+      updated  = true;
+    }
+
+    public void setEffect(int fx){
+      this.fx = Optional.of(fx);
+      updated  = true;
+    }
+
+    public void setSpeed(int sx){
+      this.sx = Optional.of(sx);
+      updated  = true;
+    }
+
+    public void setIntensity(int ix){
+      this.ix = Optional.of(ix);
+      updated  = true;
+    }
+    
+    public void setCustomSlider1(int c1){
+      this.c1 = Optional.of(c1);
+      updated  = true;
+    }
+
+    public void setCustomSlider2(int c2){
+      this.c2 = Optional.of(c2);
+      updated  = true;
+    }
+
+    public void setCustomSlider3(int c3){
+      this.c3 = Optional.of(c3);
+      updated  = true;
+    }
+
+    public void setReverse(boolean rev){
+      this.rev = Optional.of(rev);
+      updated  = true;
+    }
+
+    public void setOn(boolean on){
+      this.on = Optional.of(on);
+      updated  = true;
+    }
+
+    public void setBrightness(int bri){
+      this.bri = Optional.of(bri);
+      updated  = true;
+    }
+
+    public void setIndividualControl(frc.robot.Subsystems.Lighting.WLED.LedSegment.LedMultiRange i){
+      this.i = i;
+      updated  = true;
+    }
+
+    public void setFreeze(boolean frz){
+      this.frz = Optional.of(frz);
+      updated  = true;
+    }
+
+    public void reset(){
+      start =Optional.empty();// set once
+      stop = Optional.empty(); //set once
+      col = null;
+      fx = Optional.empty();
+      sx = Optional.empty();
+      ix = Optional.empty();
+      c1 = Optional.empty();
+      c2 = Optional.empty();
+      c3 = Optional.empty();
+      rev = Optional.empty();
+      on = Optional.empty();
+      bri = Optional.empty();
+      i = null;
+      frz = Optional.empty();
+      updated = false;
+    }
+
+    public boolean isUpdated(){
+      return updated;
+    }
+
+
+  }
 
   public class LedSegment extends SubsystemBase {
-    int id;
-    int start;
-    int stop;
-    boolean reverse;
-    int length;
-    String[] lastKey;
-    String lastState; //for debug
-    List<Object> lastData;
-    LedSegment(int id, int start, int stop, boolean reverse){
-      this.id = id;
-      this.start = start;
-      this.stop = stop;
+    private int id; //set once
+    private int start;// set once
+    private int stop; //set once
+    private CustomColor[] col;
+    private int fx;
+    private int sx;
+    private int ix;
+    private int c1;
+    private int c2;
+    private int c3;
+    private boolean rev;
+    private boolean on;
+    private int bri;
+    private LedMultiRange i;
+    private boolean frz;
+    public LedSegmentData data = new LedSegmentData();
+    private int length;
+    private boolean[] valueUpdated = new boolean[15];
+    private String[] lastKey;
+    private String lastState; //for debug
+    private List<Object> lastData;
+    public LedSegment(int id, int start, int stop, boolean reverse){
+      setID(id);
+      setStart(start);
+      setStop(stop);
       this.length = stop - start;
-      String[] key = {"id","start","stop","rev"};
+    }
+
+    private void setID(int id){
+        this.id = id;
+        data.setID(id);
+    }
+
+    private void setStart(int start){
+      this.start = start;
+      data.setStart(start);
+      
+    }
+
+    private void setStop(int stop){
+      this.stop = stop;
+      data.setStop(stop);
+    }
+
+    public void setColor(CustomColor... col){
+      if(this.col == null ||!this.col.equals(col)){
+        this.col = col;
+        data.setColor(col);
+        setFreeze(false);
+      }
+    }
+
+    public void setEffect(int fx){
+      if(this.fx != fx){
+        this.fx = fx;
+        data.setEffect(fx);
+        setFreeze(false);
+      }
+    }
+
+    public void setSpeed(int sx){
+      if(this.sx != sx){
+        this.sx = sx;
+        data.setSpeed(sx);
+        setFreeze(false);
+      }
+    }
+
+    public void setIntensity(int ix){
+      if(this.ix != ix){
+        this.ix = ix;
+        data.setIntensity(ix);
+        setFreeze(false);
+      }
+    }
+    
+    public void setCustomSlider1(int c1){
+      if(this.c1 != c1){
+        this.c1 = c1;
+        data.setCustomSlider1(c1);
+        setFreeze(false);
+      }
+    }
+
+    public void setCustomSlider2(int c2){
+      if(this.c2 != c2){
+        this.c2 = c2;
+        data.setCustomSlider2(c2);
+        setFreeze(false);
+      }
+    }
+
+    public void setCustomSlider3(int c3){
+      if(this.c3 != c3){
+        this.c3 = c3;
+        data.setCustomSlider3(c3);
+        setFreeze(false);
+      }
+    }
+
+    public void setReverse(boolean rev){
+      if(this.rev != rev){
+        this.rev = rev;
+        data.setReverse(rev);
+        setFreeze(false);
+      }
+    }
+
+    public void setOn(boolean on){
+      if(this.on != on){
+        this.on = on;
+        data.setOn(on);
+        setFreeze(false);
+      }
+    }
+
+    public void setBrightness(int bri){
+      if(this.bri != bri){
+        this.bri = bri;
+        data.setBrightness(bri);
+        setFreeze(false);
+      }
+    }
+
+    public void setIndividualControl(LedMultiRange i){
+      if(this.i == null||!this.i.equals(i)){
+        this.i = i;
+        data.setIndividualControl(i);
+        frz = true;
+      }
+    }
+
+    public void setFreeze(boolean frz){
+      if(this.frz != frz){
+        this.frz = frz;
+        data.setFreeze(frz);
+      }
+    }
+
+    public void reset(){
+      data.reset();
+    }
+
+    public LedSegmentData getData(){
+      return data;
+    }
+
+    @Override
+    public void periodic() {
+        // TODO Auto-generated method stub
+        // GsonSerialize(this);
+        serialport.writeString(gsonSerialize(this));
+        SmartDashboard.putString("gson", gsonSerialize(this));
+        reset();
+    }
+
+    public Command solidColor(CustomColor color){
+      String[] key = {color.getHex()};
       List<Object> data = new ArrayList<>();
       data.add(id);
-      data.add(start);
-      data.add(stop);
-      data.add(reverse);
-
-      writeJSONUnchecked(key,data);
+      data.add(0);
+      data.add(color.getHex());
+      return new InstantCommand(()->{
+        setColor(color);
+        setEffect(0);
+      }, this);
     }
 
-    void writeJSON(String[] key, List<Object> data){
-      String state = lastState;
-      if (differentData(key, data)){
-        state = toJSON(key, data);
-        lastKey = key;
-        lastData = data;
-        lastState = state;
-        if (!state.equals("" )){
-          serialport.writeString(state);
-          calls++;
-        }
+    public Command blink(CustomColor color, int speed){
+      return new InstantCommand(()->{
+        setEffect(1);
+        setColor(color,CustomColor.kBlack);
+      }, this);
+    }
+    // TODO: Add compensation for unset start/stop
+    private class LedRange{
+      private int start;
+      private int stop;
+      CustomColor color;
+      public LedRange(int start, int stop, CustomColor color){
+        this.start =start;
+        this.stop = stop;
+        this.color = color;
       }
-      SmartDashboard.putString("JSON", state);
-      SmartDashboard.putNumber("calls", calls);
-      // SmartDashboard.putBoolean("different", differentData(key, data));
-  }
 
-  void writeJSONUnchecked(String state){
-      lastKey = null;
-      lastData = null;
-      lastState = state;
-      serialport.writeString(state);
-      SmartDashboard.putString("JSON", state);
-      SmartDashboard.putNumber("calls", calls);
-      calls++;
-  }
-
-  void writeJSONUnchecked(String[] key, List<Object> data){
-      lastKey = key;
-      lastData = data;
-      String state;
-      if (key.length != data.size()){
-        SmartDashboard.putString("lengthError", "true");
-        state = "";
+      public LedRange(CustomColor color){
+        start = -1;
+        stop = -1;
+        this.color = color;
       }
-      else{
-        state = toJSON(key, data);
+      public int getStart(){
+        return start;
+      } 
+      public int getStop(){
+        return stop;
       }
-      if (!state.equals("")){
-        serialport.writeString(state);
-        calls++;
+      public CustomColor getColor(){
+        return color;
       }
-      lastState = state;
-      
-      SmartDashboard.putString("JSON", state);
-      SmartDashboard.putNumber("calls", calls);
-      
-  }
-
-  private boolean differentData(String[] key, List<Object> data){
-    if(key == null || data == null){
-      return true;
-    }
-    if (key.length != data.size()){
-      SmartDashboard.putString("lengthError", "true");
-      SmartDashboard.putNumber("keyLength", key.length);
-      SmartDashboard.putNumber("dataLength", data.size());
-      SmartDashboard.putString("data", data.toString());
-      return false;
-    }
-    if(!key.equals(lastKey)){
-      return true;
-    }
-    if (!data.equals(lastData)){
-      return true;
-    }
-    return false;
-  }
-
-
-  public Command solidColor(CustomColor color){
-    String[] key = {"id","fx","col"};
-    List<Object> data = new ArrayList<>();
-    data.add(id);
-    data.add(0);
-    data.add(color.getHex());
-    return new InstantCommand(()->writeJSON(key, data), this);
-  }
-
-  public Command blink(CustomColor color, int speed){
-    String[] key = {"id", "fx","sx","col","col"};
-    List<Object> data = new ArrayList<>();
-    data.add(id);
-    data.add(1);
-    data.add(speed);
-    data.add(color.getHex());
-    data.add(black.getHex());
-    return new InstantCommand(()->writeJSON(key, data), this);
-  }
-
-  public Command stripes(CustomColor[] colors){
-    int j = 0;
-    int numStripes = colors.length;
-    int l = 0;
-    int num = 0;
-    boolean addColor;
-    boolean addNumber;
-    boolean end = false;
-    boolean sameLastColor = false;
-    boolean sameNextColor = false;
-    int fraction = length/numStripes;
-    if (fraction == 0){
-      fraction = 1;
-    }
-    for (int i=0; i<colors.length; i++){
-      if(i==0){
-        num++;
+      public void setStart(int start){
+        this.start = start;
+      } 
+      public void setStop(int stop){
+        this.stop = stop;
       }
-      else if (colors[i] != colors[i-1]){
-        num ++;
+      public void setColor(CustomColor color){
+        this.color = color;
+      } 
+    }
+    // TODO: Add compensation for unset start/stop
+    private class LedMultiRange{
+      private ArrayList<LedRange> list;
+      private boolean uniform = false;
+      public LedMultiRange(LedRange... list){
+        this.uniform = false;
+        this.list = correctList(list);
       }
-    }
-    
-    int instances =1;
-    String[] key = new String[(num*3)+1];
-    key[0] = "id";
-    List<Object> data = new ArrayList<>();
-    data.add(id);
-  for (int i = 0; i< numStripes*3; i++){
-    if (j!=0){
-      sameLastColor = (colors[Math.min(j, colors.length-1)]==colors[Math.min(j-1, colors.length-2)]);
-    }
-    
-    sameNextColor = (colors[Math.min(j, colors.length-2)]==colors[Math.min(j+1, colors.length-1)]);
-    
-    
-    addNumber = l < 2;
-    addNumber = addNumber || (data.get(l) instanceof String);
-    addNumber = addNumber || ((data.get(l) instanceof Number) && (data.get(l-1) instanceof String));
-    addNumber = addNumber && l<key.length-2;
-    addColor = !addNumber && l<=key.length-2;
-    
-    
-    if (addColor || end){
-      // data.add("j"+Integer.toString(j));
-      data.add(colors[j].getHex());
-      j++;
-      if (end){
-        end =false;
-      }
-      l++;
-      
-      key[l] = "i";
-    }
-    else if (addNumber) {
 
-      if(l==key.length-3){
-        // data.add(76);
-        data.add(length);
-        l++;
-        key[l] = "i";
-        end = true;
-      }
-      else if (l == 0){
-          // data.add(j);
-          data.add(0);
-          l++;
-          instances++;
-          key[l] = "i";
-          if (sameNextColor){
-            j++;
-          }
-          // j++;
-        }
-
-      else if (!sameLastColor && sameNextColor){
+      public LedMultiRange(boolean uniform, LedRange... list){
+        this.uniform = uniform;
+        this.list = correctList(list);
         
-        // data.add(25);
-        data.add((int)data.get(l-1));
-        l++;
-        key[l] = "i";
-        j++;
-        instances++;
+        
       }
 
-      else if(sameLastColor && !sameNextColor){
-        int newFraction = (int)(length * ((double)instances/numStripes));
-        if (newFraction == 0){
-          newFraction = 1;
-        }
-        // data.add(77);
-        data.add((int)data.get(l)+newFraction);
-        l++;
-        key[l] = "i";
-        instances = 1;
-        // j++;
-      }
-
-      else if (!sameLastColor && !sameNextColor){
-        if(data.get(l) instanceof Number){
-          data.add((int)data.get(l)+fraction);
-          // data.add(67);
-        }
-        else{
-          data.add((int)data.get(l-1));
-          // data.add(52);
-        }
-        l++;
-        key[l] = "i";
-        }
-      else if (sameNextColor && sameLastColor){
-        // data.add(addNumber);
-        instances++;
-        j++;
-      }
-    
-    }
-    // else{
-    //   data.add(67);
-    // }
-  }
-    SmartDashboard.putString("data", data.toString());
-    return new InstantCommand(()->writeJSON(key, data), this);//.handleInterrupt(()->setState("{\"seg\":[{\"id\":"+segment.id+",\"frz\":false}]}"));
-    // setState(toJSON(key, data));
-    
-  }
-
-  public Command pride(){
-    double duration = 2.5;
-    CustomColor[] colors1 = {babyBlue,pink,white,pink,babyBlue};
-    CustomColor[] colors2 = {red,orange,yellow,green,blue,purple};
-    CustomColor[] colors3 = {yellow,white,purple,black};
-    CustomColor[] colors4 = {magenta,magenta,purple,blue,blue};
-    CustomColor[] colors5 = {yellow,yellow,yellow,yellow,yellow,yellow,purple,yellow,yellow,yellow,yellow,purple,yellow,yellow,yellow,yellow,yellow,yellow};
-    CustomColor[] colors6 = {black,grey,white,purple};
-    CustomColor[] colors7 = {green,lightGreen,white,grey,black};
-
-    return new SequentialCommandGroup(stripes(colors1)
-    .andThen(new WaitCommand(duration))
-    .andThen(stripes(colors2))
-    .andThen(new WaitCommand(duration))
-    .andThen(stripes(colors3))
-    .andThen(new WaitCommand(duration))
-    .andThen(stripes(colors4))
-    .andThen(new WaitCommand(duration))
-    .andThen(stripes(colors5))
-    .andThen(new WaitCommand(duration))
-    .andThen(stripes(colors6))
-    .andThen(new WaitCommand(duration))
-    .andThen(stripes(colors7))
-    .andThen(new WaitCommand(duration))).handleInterrupt(()->writeJSONUnchecked("{\"seg\":[{\"id\":"+id+",\"frz\":false}]}"));
-  }
-
-  private String toJSON(String[] key, List<Object> data){
-    //ADD EXCEPTION IF LEGTHS UNEQUAL
-    // if (key.length != data.size()){
-    //   SmartDashboard.putString("lengthError", "true");
-    //   SmartDashboard.putNumber("keyLength", key.length);
-    //   SmartDashboard.putNumber("dataLength", data.size());
-    //   SmartDashboard.putString("data", data.toString());
-    //   return "";
-    // }
-    JsonObject json = new JsonObject();
-    JsonObject tempObject = new JsonObject();
-    JsonArray colorArray = new JsonArray();
-    JsonArray indexArray = new JsonArray();
-    boolean col = false;
-    boolean index = false;
-    
-    for (int i = 0; i < key.length; i++){
-      if (key[i]== "col" && data.get(i) instanceof String){
-        colorArray.add((String)data.get(i));
-        col = true;
-      }
-
-      else if (key[i]== "i" && (data.get(i) instanceof String || data.get(i) instanceof Number)){
-        if (data.get(i) instanceof String){
-          indexArray.add((String)data.get(i));
+      private ArrayList<LedRange> correctList(LedRange[] list){
+        ArrayList<LedRange> correctList = new ArrayList<LedRange>();
+        if (!uniform){
+          for(int i=0; i<list.length; i++){
+            if (i>0 && list[i].getColor() == list[i-1].getColor()){
+              correctList.get(correctList.size()-1).setStop(list[1].getStop());
+            }
+            else if (list[i].getStart() == -1){
+              correctList.add(new LedRange(list[i].getColor()));
+              if (i ==0){
+                correctList.get(i).setStart(0);
+              }
+              else{
+                correctList.get(i).setStart(correctList.get(i-1).getStop());
+              }
+              if (i == list.length-1){
+                correctList.get(i).setStop(length);
+              }
+              else{
+                correctList.get(i).setStop(list[i+1].getStart());
+              }
+              
+            }
+            else{
+              correctList.add(new LedRange(list[i].getStart(), list[i].getStop(), list[i].getColor()));
+            }
+          }
+          return correctList;
+          
         }
         else{
-          indexArray.add((Number)data.get(i));
+          int instances = 1;
+          int fraction = length/list.length;
+          if (fraction == 0){
+            fraction = 1;
+          }
+
+          for(int i=0; i<list.length; i++){
+            if (i>0 && list[i].getColor() == list[i-1].getColor()){
+              instances++;
+              int newFraction = instances*length/list.length;
+              if (newFraction == 0){
+                newFraction = 1;
+              }
+              correctList.get(correctList.size()-1).setStop(correctList.get(correctList.size()-1).getStart() + newFraction);
+            }
+            else{
+              if (i == list.length-1){
+                correctList.add(new LedRange(correctList.get(i-1).getStop(), length, list[i].getColor()));
+              }
+              else if(i == 0){
+                correctList.add(new LedRange(0, fraction, list[i].getColor()));
+              }
+              else{
+                correctList.add(new LedRange(correctList.get(i-1).getStop(), correctList.get(i-1).getStop()+fraction, list[i].getColor()));
+              }
+              instances = 1;
+            }
+          }
+          return correctList;
         }
-        index = true;
       }
 
-      else if ((key[i]=="rev" || key[i]=="on") && data.get(i) instanceof Boolean){
-        tempObject.addProperty(key[i], (Boolean)data.get(i));
-      }
-
-      else if (data.get(i) instanceof Number){
-        tempObject.addProperty(key[i], (Number)data.get(i));
-      }
-
-      else{
-        // SmartDashboard.putString("typeErrorColor", colorArray.toString());
-        // SmartDashboard.putString("typeErrorIndex", indexArray.toString());
-        // SmartDashboard.putString("typeError", tempObject.toString());
-        // // SmartDashboard.putString("key", key[i]);
-        // SmartDashboard.putString("data",(String)data.get(i));
-        // SmartDashboard.putBoolean("string",data.get(i) instanceof String);
-        // SmartDashboard.putNumber("index", i);
-        return "";
+      public ArrayList<LedRange> getLedRanges(){
+        return list;
       }
     }
 
-    if (col){
-      tempObject.add("col", colorArray);
-    }
-
-    if (index){
-      tempObject.add("i", indexArray);
-    }
-
-    json.add("seg", tempObject);
     
-    return json.toString();
+
+    public Command stripes(LedMultiRange colors){
+      return new InstantCommand(()->{
+        setIndividualControl(colors);
+      }, this);      
+    }
+
+    public Command pride(){
+      double duration = 2.5;
+      LedMultiRange colors1 = new LedMultiRange(true, new LedRange(CustomColor.kBabyBlue),new LedRange(CustomColor.kPink), new LedRange(CustomColor.kWhite),new LedRange(CustomColor.kPink),new LedRange(CustomColor.kBabyBlue));
+      LedMultiRange colors2 = new LedMultiRange(true, new LedRange(CustomColor.kRed),new LedRange(CustomColor.kOrange), new LedRange(CustomColor.kYellow),new LedRange(CustomColor.kGreen),new LedRange(CustomColor.kBlue),new LedRange(CustomColor.kPurple));
+      LedMultiRange colors3 = new LedMultiRange(true, new LedRange(CustomColor.kYellow),new LedRange(CustomColor.kWhite), new LedRange(CustomColor.kPurple),new LedRange(CustomColor.kBlack));
+      LedMultiRange colors4 = new LedMultiRange(new LedRange(CustomColor.kMagenta),new LedRange((int)(length/5.0*2),(int)(length/5.0*3),CustomColor.kPurple), new LedRange(CustomColor.kBlue));
+      LedMultiRange colors5 = new LedMultiRange(new LedRange(CustomColor.kYellow),new LedRange((int)(length/18.0*6),(int)(length/18.0*7),CustomColor.kPurple), new LedRange(CustomColor.kYellow),new LedRange((int)(length/18.0*11),(int)(length/18.0*12),CustomColor.kPurple),new LedRange(CustomColor.kYellow));
+      LedMultiRange colors6 = new LedMultiRange(true, new LedRange(CustomColor.kBlack),new LedRange(CustomColor.kGrey), new LedRange(CustomColor.kWhite),new LedRange(CustomColor.kPurple));
+      LedMultiRange colors7 = new LedMultiRange(true, new LedRange(CustomColor.kGreen),new LedRange(CustomColor.kLightGreen), new LedRange(CustomColor.kWhite),new LedRange(CustomColor.kGrey),new LedRange(CustomColor.kBlack));
+
+      return new SequentialCommandGroup(stripes(colors1)
+      .andThen(new WaitCommand(duration))
+      .andThen(stripes(colors2))
+      .andThen(new WaitCommand(duration))
+      .andThen(stripes(colors3))
+      .andThen(new WaitCommand(duration))
+      .andThen(stripes(colors4))
+      .andThen(new WaitCommand(duration))
+      .andThen(stripes(colors5))
+      .andThen(new WaitCommand(duration))
+      .andThen(stripes(colors6))
+      .andThen(new WaitCommand(duration))
+      .andThen(stripes(colors7))
+      .andThen(new WaitCommand(duration)));
+    }
+
+    //seguimos aquí
+    //chile {"seg":{"i":[0,8,"0000FF",8,12,"FFFFFF",12,20,"0000FF",20,40,"FFFFFF",40,60,"FF0000"]}}
+    //argentina {"seg":{"i":[0,20,"6CACE4",20,25,"FFFFFF",25,35,"FFB81C",35,40,"FFFFFF",40,60,"6CACE4"]}}
+    //uruguay {"seg":{"i":[0,7,"FFFFFF",7,23,"FFCD00",23,30,"FFFFFF",30,37,"0000FF",37,44,"FFFFFF",44,51,"0000FF",51,60,"FFFFFF"]}} 9 stripes
+    //paraguay {"seg":{"i":[0,20,"FF0000",20,25,"FFFFFF",25,27,"1ccc00",27,28,"FFFFFF",28,32,"FFCD00",32,33,"FFFFFF",33,35,"1ccc00",35,40,"FFFFFF",40,60,"0000FF"]}}
+    //bolivia {"seg":{"i":[0,20,"DA291C",20,26,"F8E600",26,29,"DA291C",29,31,"F8E600",31,34,"DA291C",34,40,"F8E600",40,60,"007A33"]}}
+    //        {"seg":{"i":[0,20,"DA291C",20,40,"F8E600",40,60,"007A33"]}}
+    //perú {"seg":{"i":[0,20,"FF0000",20,25,"FFFFFF",25,27,"1ccc00",27,28,"FFFFFF",28,32,"FF0000",32,33,"FFFFFF",33,35,"1ccc00",35,40,"FFFFFF",40,60,"FF0000"]}}
+    //     {"seg":{"i":[0,20,"FF0000",20,40,"FFFFFF",40,60,"FF0000"]}}
+    //Ecuador 
 
   }
 
-
+  public String gsonSerialize(LedSegment segment){
+    if(segment.getData().isUpdated()){
+      GsonBuilder builder = new GsonBuilder();
+      builder.registerTypeAdapter(frc.robot.Subsystems.Lighting.WLED.LedSegment.LedMultiRange.class, new LedMultiRangeSerializer());
+      builder.registerTypeAdapter(Optional.class, new OptionalSerializer());
+      builder.registerTypeAdapter(CustomColor.class, new ColorSerializer());
+      Gson gson = builder.create();
+      String json = gson.toJson(segment.getData());
+      return "{\"seg\":"+json +"}";
+    }
+    else{
+      return "";
+    }
+    
   }
 
-  public class CustomColor {
-    int r;
-    int g;
-    int b;
-    public CustomColor(int r, int g, int b){
-      this.r =r;
-      this.g = g;
-      this.b = b;
+  private class LedRangeSerializer implements JsonSerializer<frc.robot.Subsystems.Lighting.WLED.LedSegment.LedRange>{
+    public JsonElement serialize(frc.robot.Subsystems.Lighting.WLED.LedSegment.LedRange ledRange, Type type, JsonSerializationContext jsonSerializationContext){
+      JsonArray array = new JsonArray();
+      array.add(ledRange.getStart());
+      array.add(ledRange.getStop());
+      array.add(ledRange.getColor().getHex());
+      return array;
     }
+  }
 
-    private int toInteger(){
-      return (255 << 24) | (r << 16) | (g << 8) | b;
-    }
 
-    public String getHex(){
-      String hex = Integer.toString(toInteger() & 0x00ffffff, 16);
-      if (r == 0){
-        hex = "00"+hex;
+
+  public class LedMultiRangeSerializer implements JsonSerializer<frc.robot.Subsystems.Lighting.WLED.LedSegment.LedMultiRange>{
+    public JsonElement serialize(frc.robot.Subsystems.Lighting.WLED.LedSegment.LedMultiRange ledRange, Type type, JsonSerializationContext jsonSerializationContext){
+      JsonArray array = new JsonArray();
+      for (int i = 0; i<ledRange.getLedRanges().size();i++){
+        array.add(ledRange.getLedRanges().get(i).getStart());
+        array.add(ledRange.getLedRanges().get(i).getStop());
+        array.add(ledRange.getLedRanges().get(i).getColor().getHex());
       }
-      if (g == 0 && r == 0){
-        hex = "00"+hex;
-      }
-      return hex;
+      return array;
     }
   }
 
-  
+  private class OptionalSerializer implements JsonSerializer<Optional<?>> {
+    public JsonElement serialize(Optional<?> optional, Type type, JsonSerializationContext jsonSerializationContext){
+      return jsonSerializationContext.serialize(optional.orElse(null));
+    }
+  }
 
-  
-
-   
-
-  
+  private class ColorSerializer implements JsonSerializer<CustomColor> {
+    public JsonElement serialize(CustomColor color, Type type, JsonSerializationContext jsonSerializationContext){
+      return jsonSerializationContext.serialize(color.getHex());
+    }
+  }
 }
+
 
