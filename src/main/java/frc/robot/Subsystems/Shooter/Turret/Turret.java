@@ -19,6 +19,7 @@ import com.stormbots.CRTAbsoluteEncoder;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.units.measure.Angle;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
@@ -31,7 +32,7 @@ public class Turret extends SubsystemBase {
   public static final double kGearing = (1.0 / 3.0) * (10.0 / 132.0);
 
   //How much in ONE direction, hence max range divided by 2
-  public static final double kMaxRotation = 540.0 / 2.0;
+  public static final double kMaxRotation = 90.0; //540.0 / 2.0;
 
   Angle targetPosition = Degrees.of(0);
   Angle tolerance = Degrees.of(3);
@@ -46,12 +47,22 @@ public class Turret extends SubsystemBase {
 
     CRTAbsoluteEncoder.getInstance().setParams(kTurretGearToothCount, kGear1ToothCount, kGear2ToothCount, true);
     CRTAbsoluteEncoder.getInstance().setRelativeEncoder(motor.getEncoder());
+    CRTAbsoluteEncoder.getInstance().setEncoder1(motor.getAbsoluteEncoder());
 
+    setDefaultCommand(run(()->motor.stopMotor()));
   }
 
   @Override
   public void periodic() {
     // This method will be called once per scheduler run
+    SmartDashboard.putNumber("/turret/applied", motor.getAppliedOutput());
+    SmartDashboard.putNumber("/turret/outc", motor.getOutputCurrent());
+    SmartDashboard.putNumber("/turret/target", targetPosition.in(Degrees));
+    SmartDashboard.putNumber("/turret/tolerance", tolerance.in(Degrees));
+    SmartDashboard.putBoolean("/turret/ontarget", getOnTarget());
+    SmartDashboard.putNumber("/turret/CRTpos", CRTAbsoluteEncoder.getInstance().getPosition().in(Degrees));
+    SmartDashboard.putNumber("/turret/e1", motor.getAbsoluteEncoder().getPosition());
+    SmartDashboard.putNumber("/turret/relPos", motor.getEncoder().getPosition());
   }
 
   /**
@@ -82,20 +93,20 @@ public class Turret extends SubsystemBase {
     SparkFlexConfig config = new SparkFlexConfig();
 
     config
-      .smartCurrentLimit(40)
+      .smartCurrentLimit(60)
       .idleMode(IdleMode.kBrake)
       //giving positive power should turn the turret CCW
       .inverted(true)
     ;
 
     config.encoder
-      .positionConversionFactor(kGearing)
-      .velocityConversionFactor(kGearing / 60.0)
+      .positionConversionFactor(kGearing * 360.0)
+      .velocityConversionFactor(kGearing * 360.0 / 60.0)
     ;
 
     config.closedLoop
       .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
-      .p(0.0)
+      .p(0.3 * 12 * 2 / 90.0)
     ;
 
     config.softLimit
@@ -103,6 +114,11 @@ public class Turret extends SubsystemBase {
       .forwardSoftLimitEnabled(true)
       .reverseSoftLimit(-kMaxRotation)
       .reverseSoftLimitEnabled(true)
+    ;
+
+    config.absoluteEncoder
+      .positionConversionFactor(360.0)
+      .inverted(true)
     ;
 
     return config;

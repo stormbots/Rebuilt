@@ -68,9 +68,6 @@ public class CRTAbsoluteEncoder {
 
     /** Return the absolute rotation of the system, derived from the CRT process */
     public Angle getPosition(){
-        //TEMPORARY, just so sim works
-        if(encoder1 == null || encoder2 == null) { return Degrees.of(0); }
-        
         double difference = encoder2.getPosition() - encoder1.getPosition();
         
         if(kInverted){
