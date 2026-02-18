@@ -33,7 +33,8 @@ public class Intake extends SubsystemBase {
 
   public Command eject(){
     return Commands.parallel(
-      rollers.eject()
+      rollers.eject(),
+      intakeExtension.down()
     );
   }
 
@@ -46,7 +47,14 @@ public class Intake extends SubsystemBase {
 
   public Command testRollers(){
     return Commands.parallel(
-      rollers.setVoltage(8)
+      rollers.setVoltage(2)
     );
   }
+
+  public Command testDown(){
+    return Commands.parallel(
+      intakeExtension.down()
+    );
+  }
+  
 }

@@ -19,13 +19,11 @@ import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.Commands;
-import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class Rollers extends SubsystemBase {
 
-  SparkFlex motor = new SparkFlex(35, MotorType.kBrushless);
+  SparkFlex motor = new SparkFlex(11, MotorType.kBrushless);
 
   RollersSim sim = new RollersSim(motor);
 
@@ -65,6 +63,7 @@ public class Rollers extends SubsystemBase {
     SmartDashboard.putNumber("Rollers/OutputCurrent", motor.getOutputCurrent());
     SmartDashboard.putNumber("Rollers/Position", getPosition().in(Units.Degrees));
     SmartDashboard.putNumber("Rollers/Velocity", getVelocity().in(Units.DegreesPerSecond));
+    SmartDashboard.putString("Rollers/Command", getCurrentCommand()==null ? "None" : getCurrentCommand().getName() );
   }
 
   @Override
@@ -103,8 +102,10 @@ public class Rollers extends SubsystemBase {
   public Angle getPosition(){
     return Units.Degrees.of(motor.getEncoder().getPosition());
   }
-  
+
   public Command setVoltage(double volts){
-    return Commands.parallel(new InstantCommand(()->motor.setVoltage(volts)));
+    return run(()->{
+      motor.setVoltage(volts);
+    });
   }
 }

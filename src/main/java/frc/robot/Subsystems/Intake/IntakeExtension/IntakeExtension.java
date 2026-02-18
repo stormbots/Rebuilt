@@ -28,7 +28,7 @@ public class IntakeExtension extends SubsystemBase {
   SparkFlex motor = new SparkFlex(9, MotorType.kBrushless);
   SparkFlex followerMotor = new SparkFlex(10, MotorType.kBrushless);
 
-  IntakeExtensionSim sim = new IntakeExtensionSim(motor);
+  // IntakeExtensionSim sim = new IntakeExtensionSim(motor);
 
   /** Creates a new IntakeExtension. */
   public IntakeExtension() {
@@ -36,35 +36,37 @@ public class IntakeExtension extends SubsystemBase {
     double factor = 1;
     config.encoder
     .positionConversionFactor(factor)
-    .velocityConversionFactor(factor / 60);
+    .velocityConversionFactor(factor / 60.0);
 
     var absfactor = 360;
     config.absoluteEncoder
-    .inverted(true)
+    .inverted(false)
     .positionConversionFactor(absfactor)
-    .velocityConversionFactor(absfactor / 60);
+    .velocityConversionFactor(absfactor / 60.0);
 
     config.closedLoop.feedbackSensor(FeedbackSensor.kAbsoluteEncoder);
 
     config.closedLoop.feedForward
     .svacr(0, 0, 0, 0, 0);
     
-    config.closedLoop.p(8/90.0);
+    config.closedLoop.p(3/12.0 / 45.0);
 
     config.closedLoop.maxMotion
     .maxAcceleration(360/2*4)
-    .cruiseVelocity(360/2);
+    .cruiseVelocity(360/2)
+    .allowedProfileError(10)
+    ;
 
     config
     .idleMode(IdleMode.kCoast)
     .inverted(false)
-    .smartCurrentLimit(20)
+    .smartCurrentLimit(5)
     .voltageCompensation(11);
 
     motor.configure(config, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
 
     //Apply the follower configuration, and re-use any applicable configs for the other side
-    config.follow(motor,true);
+    config.follow(motor,false);
     followerMotor.configure(config, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
 
     new Trigger(DriverStation::isEnabled)
@@ -83,13 +85,14 @@ public class IntakeExtension extends SubsystemBase {
     motor.getAbsoluteEncoder().getPosition();
     SmartDashboard.putNumber("Intake/Extension/OutputCurrent", motor.getOutputCurrent());
     SmartDashboard.putNumber("Intake/Extension/Dutycycle", motor.getAppliedOutput());
-    SmartDashboard.putNumber("Intake/Extension/enc angle", motor.getAbsoluteEncoder().getPosition());
+    SmartDashboard.putNumber("Intake/Extension/abs enc angle", motor.getAbsoluteEncoder().getPosition());
+    SmartDashboard.putNumber("Intake/Extension/rel enc angle", motor.getEncoder().getPosition());
   }
 
   @Override
   public void simulationPeriodic(){
-    sim.update();
-    SmartDashboard.putNumber("Intake/Extension/SimAngle", sim.getAngle().in(Degree));
+    // sim.update();
+    // SmartDashboard.putNumber("Intake/Extension/SimAngle", sim.getAngle().in(Degree));
   }
 
   public Command setAngle(double degrees){
@@ -103,7 +106,7 @@ public class IntakeExtension extends SubsystemBase {
 
 
   public Command up(){
-    return setAngle(90);
+    return setAngle(42.4);
   }
 
   public Command down(){

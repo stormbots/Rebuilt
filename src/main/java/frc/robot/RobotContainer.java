@@ -32,10 +32,11 @@ public class RobotContainer {
     configureBindings();
   }
 
-  private void configureBindings() {
-    // driver.a().whileTrue(intake.intake());
-    // driver.b().whileTrue(intake.eject());
-    // driver.a().whileTrue(intake.testRollers());
+  private void configureBindings()  {
+    driver.x().whileTrue(intake.intake());
+    driver.y().whileTrue(intake.eject());
+    driver.a().whileTrue(intake.testRollers());
+    driver.b().whileTrue(intake.testDown());
   }
 
   public Command getAutonomousCommand() {
