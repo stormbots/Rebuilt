@@ -42,12 +42,6 @@ public class Climber extends SubsystemBase {
         visual.update(stage1.getHeight(), stage2.getHeight());
     }
 
-    //helpful climber commands and groups to interface with things
-
-    //extend to L1 climb position
-    //goback down and climb
-
-    //maybe: Climb to L2? L3?
 
     public Command goHome(){
         return Commands.parallel(
@@ -56,10 +50,23 @@ public class Climber extends SubsystemBase {
         );
     }
 
-    public Command setStage1Output(double output){
-        return stage1.setOutput(output);
+    public Command setStage1Voltage(double voltage){
+        return stage1.setVoltage(voltage);
     }
-    public Command setStage2Output(double output){
-        return stage2.setOutput(output);
+    public Command setStage2Voltage(double voltage){
+        return stage2.setVoltage(voltage);
+    }
+
+    public Command prepareForClimbL1(){
+        //move stage 1 up to a specific height
+        return stage1.setHeight(Inches.of(6))
+        .finallyDo(stage1::stopMotor)
+        .withName("PrepareToClimb");
+    }
+
+    public Command climbL1(){
+        return stage1.setHeight(Inches.of(0))
+        .finallyDo(stage1::stopMotor)
+        .withName("Climb");
     }
 }

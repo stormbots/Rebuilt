@@ -65,12 +65,12 @@ public class ClimberExtension extends SubsystemBase {
     ;
 
     // config.closedLoop
-    // .p(12/6)
+    // .p(12/2.0)
     // ;
 
     config.softLimit
     .forwardSoftLimit(movementRange.in(Inches))
-    .reverseSoftLimit(0)
+    .reverseSoftLimit(0.1)
     .forwardSoftLimitEnabled(true)
     .reverseSoftLimitEnabled(true)
     ;
@@ -127,6 +127,10 @@ public class ClimberExtension extends SubsystemBase {
     sim.update();
   }
 
+  public void stopMotor(){
+    motor.stopMotor();
+  }
+
   public Command setHeight(Distance height){
     var inches = height.in(Inches);
     return run(()->{
@@ -166,9 +170,9 @@ public class ClimberExtension extends SubsystemBase {
     );
   }
 
-  public Command setOutput(double output){
+  public Command setVoltage(double voltage){
     return run(() -> {
-      motor.set(output);
+      motor.setVoltage(voltage);
     })
     .finallyDo(motor::stopMotor)
     ;
