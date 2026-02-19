@@ -46,7 +46,8 @@ public class Climber extends SubsystemBase {
     public Command goHome(){
         return Commands.parallel(
             stage1.goHome(),
-            stage2.goHome()
+            stage2.goHome(),
+            Commands.none()
         );
     }
 

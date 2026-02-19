@@ -16,7 +16,6 @@ import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.SparkFlexConfig;
 
 import edu.wpi.first.units.measure.Distance;
-import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Command.InterruptionBehavior;
@@ -30,15 +29,15 @@ public class ClimberExtension extends SubsystemBase {
   public ClimberExtensionSim sim; //handled in constructor
 
   private boolean isHomed = false;
-  private final int kHomeCurrentThreshold = 4;
-  private final int kHomeCurrentMaxOutput = (int)Math.ceil(kHomeCurrentThreshold*1.4);
-  private final int kClimbingCurrentThreshold = 60;
+  private final int kHomeCurrentThreshold = 12;
+  private final int kHomeCurrentMaxOutput = 16;
+  private final int kClimbingCurrentMax = 60;
 
   private  String name="";
 
   Trigger isHomingCurrentReached = new Trigger(()->{
-    return motor.getOutputCurrent() <= kHomeCurrentThreshold;
-  }).debounce(0.1)
+    return Math.abs(motor.getOutputCurrent()) <= kHomeCurrentThreshold;
+  }).debounce(0.5)
   ;
 
   /** Creates a new ClimberRight. */
@@ -55,7 +54,7 @@ public class ClimberExtension extends SubsystemBase {
     var config = new SparkFlexConfig();
     config.idleMode(IdleMode.kBrake);
     config.inverted(inverted);
-    config.smartCurrentLimit(kClimbingCurrentThreshold);
+    config.smartCurrentLimit(kClimbingCurrentMax);
     config.openLoopRampRate(0.05);
     //TODO Configure the encoder conversion
     var conversionfactor=1/(6/57.71); //1 divided by whatever number you determined
@@ -64,9 +63,9 @@ public class ClimberExtension extends SubsystemBase {
     .velocityConversionFactor(1/conversionfactor/60.0)
     ;
 
-    // config.closedLoop
-    // .p(12/2.0)
-    // ;
+    config.closedLoop
+    .p(12/2.0)
+    ;
 
     config.softLimit
     .forwardSoftLimit(movementRange.in(Inches))
@@ -93,12 +92,12 @@ public class ClimberExtension extends SubsystemBase {
         enableBottomLimit(false);
         setCurrentLimit(kHomeCurrentMaxOutput);
       },
-      ()->{motor.set(-0.5);}, 
+      ()->{motor.setVoltage(-12);},
       (cancelled)->{
         if(cancelled==false){
           isHomed = true;
           enableBottomLimit(true);
-          setCurrentLimit(kClimbingCurrentThreshold);
+          setCurrentLimit(kClimbingCurrentMax);
           motor.getEncoder().setPosition(0);
         }
         else{}
