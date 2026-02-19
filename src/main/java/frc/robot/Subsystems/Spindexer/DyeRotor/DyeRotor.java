@@ -5,9 +5,9 @@
 package frc.robot.Subsystems.Spindexer.DyeRotor;
 
 import static edu.wpi.first.units.Units.Degrees;
+import static edu.wpi.first.units.Units.DegreesPerSecond;
 
 import com.revrobotics.PersistMode;
-import com.revrobotics.RelativeEncoder;
 import com.revrobotics.ResetMode;
 import com.revrobotics.spark.SparkBase.ControlType;
 import com.revrobotics.spark.SparkFlex;
@@ -16,6 +16,7 @@ import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.SparkFlexConfig;
 
 import edu.wpi.first.units.measure.Angle;
+import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
@@ -24,8 +25,6 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 public class DyeRotor extends SubsystemBase{
     SparkFlex motor = new SparkFlex(12, MotorType.kBrushless);
     DyeRotorSim sim = new DyeRotorSim(motor);
-
-    RelativeEncoder encoder = motor.getEncoder();
     
     public DyeRotor(){
         var config = new SparkFlexConfig();
@@ -40,14 +39,16 @@ public class DyeRotor extends SubsystemBase{
         .smartCurrentLimit(30)
         ;
 
-        config.closedLoop
-        .p(0)
-        ;
+        // config.closedLoop
+        // .p(0)
+        // ;
         config.closedLoop.feedForward
         .kV(12/7600.0)
         ;
 
         motor.configure(config , ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+
+        setDefaultCommand(stop());
     }
 
     @Override
@@ -61,9 +62,14 @@ public class DyeRotor extends SubsystemBase{
     }
 
     public Command setVelocity (double targetVelocity){
-        return Commands.run(()->{ 
-            motor.getClosedLoopController().setSetpoint(targetVelocity, ControlType.kVelocity);
+        return run(()->{ 
+            //TODO Change this from voltage to velocity,  very important!!!!!!!!!!
+            motor.getClosedLoopController().setSetpoint(targetVelocity, ControlType.kVoltage);
         });
+    }
+
+    public void setVoltage(double volt){
+        motor.setVoltage(volt);
     }
 
     public Command stop(){
@@ -71,19 +77,27 @@ public class DyeRotor extends SubsystemBase{
     }
 
     public Command spin(){
-        return setVelocity(10);
+        return setVelocity(5);
+    }
+
+    public Command load(){
+        return setVelocity(5);
     }
 
     public Command spinBackwards(){
-        return setVelocity(-10);
+        return setVelocity(-5);
     }
 
-    public double getVelocity(){
-        return encoder.getVelocity();
+    public AngularVelocity getVelocity(){
+        return DegreesPerSecond.of(motor.getEncoder().getVelocity());
     }
 
-    public Angle getPosition(){
-        return Degrees.of(encoder.getPosition());
+    public double getPosition(){
+        return motor.getEncoder().getPosition();
+    }
+
+    public double getCurrent(){
+        return motor.getOutputCurrent();
     }
     
 }

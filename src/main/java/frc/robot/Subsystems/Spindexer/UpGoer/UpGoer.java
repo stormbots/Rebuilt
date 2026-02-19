@@ -31,18 +31,20 @@ public class UpGoer extends SubsystemBase{
         config
         .idleMode(IdleMode.kCoast)
         .inverted(false)
-        .smartCurrentLimit(30)
+        .smartCurrentLimit(10)
         ;
 
-        config.closedLoop
-        .p(0)
-        ;
+        // config.closedLoop
+        // .p(0)
+        // ;
         
         config.closedLoop.feedForward
         .kV(12/7600.0)
         ;
 
         motor.configure(config , ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+
+        setDefaultCommand(stop());
     }
 
     @Override
@@ -56,7 +58,7 @@ public class UpGoer extends SubsystemBase{
     }
 
     public Command setVelocity(double velocity){
-        return Commands.run(()->{ 
+        return run(()->{ 
             motor.getClosedLoopController().setSetpoint(velocity, ControlType.kVelocity);
         });
     }
@@ -69,8 +71,16 @@ public class UpGoer extends SubsystemBase{
         return setVelocity(10);
     }
 
+    public Command spin(){
+        return setVelocity(1);
+    }
+
     public Command unclog(){
-        return setVelocity(-10);
+        return setVelocity(60);
+    }
+
+    public void setVoltage(double volt){
+        motor.setVoltage(volt);
     }
 
     public double getVelocity(){

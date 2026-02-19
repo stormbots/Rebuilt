@@ -19,9 +19,21 @@ public class Spindexer extends SubsystemBase{
   public Spindexer(){
   }
 
+  private Command spinDyeRotor(){
+    return dyeRotor.spin();
+  }
+
+  public Command spinUpGoer(){
+    return upGoer.spin();
+  }
+
+  public Command intake(){
+    return dyeRotor.spin();
+  }
+
   public Command feedToShooter(){
     return Commands.parallel(
-      dyeRotor.spin(),
+      dyeRotor.load(),
       upGoer.load()
     );
   }
@@ -38,6 +50,11 @@ public class Spindexer extends SubsystemBase{
       dyeRotor.stop(),
       upGoer.stop()
     );
+  }
+
+  private void setVoltages(){
+    dyeRotor.setVoltage(5);
+    upGoer.setVoltage(5);
   }
 
   public void periodic(){

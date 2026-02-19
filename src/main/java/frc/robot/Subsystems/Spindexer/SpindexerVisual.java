@@ -4,6 +4,7 @@
 
 package frc.robot.Subsystems.Spindexer;
 
+import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.wpilibj.smartdashboard.Mechanism2d;
 import edu.wpi.first.wpilibj.smartdashboard.MechanismLigament2d;
 import edu.wpi.first.wpilibj.smartdashboard.MechanismRoot2d;
@@ -29,7 +30,7 @@ public class SpindexerVisual{
     public SpindexerVisual(){
         var barWeight = 5;
 
-        upGoerMech.setColor(new Color8Bit(Color.kRed));
+        upGoerMech.setColor(new Color8Bit(Color.kOrange));
         upGoerMech.setLineWeight(barWeight + 5);
 
         upGoerOffset.setColor(new Color8Bit(Color.kBlack));
@@ -51,6 +52,10 @@ public class SpindexerVisual{
         spindexerArm.setAngle(angle);
         if(upGoerVelocity > 0){
             upGoerMech.setColor(new Color8Bit(Color.kGreen));
+        } else if(upGoerVelocity < .1 && upGoerVelocity > -.1){
+             upGoerMech.setColor(new Color8Bit(Color.kOrange));
+        } else {
+            upGoerMech.setColor(new Color8Bit(Color.kRed));
         }
     }
 }

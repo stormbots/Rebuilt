@@ -27,7 +27,7 @@ public class DyeRotorSim {
 
     FlywheelSim DyeRotorFlywheelSim = new FlywheelSim(
     LinearSystemId.createFlywheelSystem(
-      DCMotor.getNeoVortex(1),
+      DCMotor.getNeoVortex(1).withReduction(100),
       0.2,
       1
     ),
