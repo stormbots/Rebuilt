@@ -8,7 +8,6 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.Subsystems.Intake.Intake;
-import frc.robot.Subsystems.Lighting.Lighting;
 import frc.robot.Subsystems.Photonvision.Photonvision;
 import frc.robot.Subsystems.Questnav.QuestNav;
 import frc.robot.Subsystems.Shooter.Shooter;
@@ -33,10 +32,8 @@ public class RobotContainer {
   }
 
   private void configureBindings()  {
-    driver.x().whileTrue(intake.intake());
-    driver.y().whileTrue(intake.eject());
-    driver.a().whileTrue(intake.testRollers());
-    driver.b().whileTrue(intake.testDown());
+    // driver.x().whileTrue(intake.intake());
+    // driver.y().whileTrue(intake.stop());
   }
 
   public Command getAutonomousCommand() {

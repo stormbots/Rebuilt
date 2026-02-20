@@ -5,6 +5,7 @@
 package frc.robot.Subsystems.Intake.Rollers;
 
 import static edu.wpi.first.units.Units.RPM;
+import static edu.wpi.first.units.Units.Rotations;
 
 import com.revrobotics.PersistMode;
 import com.revrobotics.ResetMode;
@@ -44,7 +45,9 @@ public class Rollers extends SubsystemBase {
 
     config.closedLoop.maxMotion
     .maxAcceleration(20)
-    .cruiseVelocity(6000/60);
+    .cruiseVelocity(6000/60)
+    .allowedProfileError(50)
+    ;
 
     config
     .idleMode(IdleMode.kCoast)
@@ -59,25 +62,25 @@ public class Rollers extends SubsystemBase {
 
   @Override
   public void periodic() {
-    SmartDashboard.putNumber("Rollers/DutyCycle", motor.getAppliedOutput());
-    SmartDashboard.putNumber("Rollers/OutputCurrent", motor.getOutputCurrent());
-    SmartDashboard.putNumber("Rollers/Position", getPosition().in(Units.Degrees));
-    SmartDashboard.putNumber("Rollers/Velocity", getVelocity().in(Units.DegreesPerSecond));
-    SmartDashboard.putString("Rollers/Command", getCurrentCommand()==null ? "None" : getCurrentCommand().getName() );
+    SmartDashboard.putNumber("Intake/Rollers/DutyCycle", motor.getAppliedOutput());
+    SmartDashboard.putNumber("Intake/Rollers/OutputCurrent", motor.getOutputCurrent());
+    SmartDashboard.putNumber("Intake/Rollers/Position", getPosition().in(Units.Degrees));
+    SmartDashboard.putNumber("Intake/Rollers/Velocity", getVelocity().in(Units.DegreesPerSecond));
+    SmartDashboard.putString("Intake/Rollers/Command", getCurrentCommand()==null ? "None" : getCurrentCommand().getName() );
   }
 
   @Override
   public void simulationPeriodic(){
     sim.update();
-    SmartDashboard.putNumber("Rollers/SimVelocity" , sim.getVelocity().in(RPM));
+    SmartDashboard.putNumber("Intake/Rollers/SimVelocity" , sim.getVelocity().in(RPM));
   }
 
 
-  public Command setVelocity(double velocity){
+  public Command setVelocity(double rpm){
     return run(()->{
       motor
       .getClosedLoopController()
-      .setSetpoint(velocity, ControlType.kVelocity);
+      .setSetpoint(rpm, ControlType.kVelocity);
     });
   }
 
@@ -96,11 +99,11 @@ public class Rollers extends SubsystemBase {
   }
 
   public AngularVelocity getVelocity(){
-    return Units.DegreesPerSecond.of(motor.getEncoder().getVelocity());
+    return RPM.of(motor.getEncoder().getVelocity());
   }
 
   public Angle getPosition(){
-    return Units.Degrees.of(motor.getEncoder().getPosition());
+    return Rotations.of(motor.getEncoder().getPosition());
   }
 
   public Command setVoltage(double volts){

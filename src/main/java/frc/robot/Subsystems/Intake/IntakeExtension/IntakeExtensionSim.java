@@ -22,7 +22,7 @@ public class IntakeExtensionSim {
     SparkFlex armMotor;
     SparkFlexSim simArmMotor;
 
-    final Angle startingAngle=Degree.of(40);
+    final Angle startingAngle=Degree.of(90);
 
     public IntakeExtensionSim(SparkFlex armMotor){
         this.armMotor = armMotor;
@@ -37,9 +37,9 @@ public class IntakeExtensionSim {
     20*90/30.362,
     0.2,
     0.5,
-    Degrees.of(-40).in(Radians),
-    Degrees.of(100).in(Radians),
-    false,
+    Degrees.of(-10).in(Radians),
+    Degrees.of(90).in(Radians),
+    true,
     startingAngle.in(Radians)
   );
 

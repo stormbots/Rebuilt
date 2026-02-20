@@ -9,8 +9,9 @@ import static edu.wpi.first.units.Units.Degrees;
 
 import com.revrobotics.PersistMode;
 import com.revrobotics.ResetMode;
-import com.revrobotics.spark.FeedbackSensor;
+import com.revrobotics.spark.ClosedLoopSlot;
 import com.revrobotics.spark.SparkBase.ControlType;
+import com.revrobotics.spark.SparkClosedLoopController.ArbFFUnits;
 import com.revrobotics.spark.SparkFlex;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
@@ -28,28 +29,28 @@ public class IntakeExtension extends SubsystemBase {
   SparkFlex motor = new SparkFlex(9, MotorType.kBrushless);
   SparkFlex followerMotor = new SparkFlex(10, MotorType.kBrushless);
 
+  // Breaks on real robot? It shouldn't....
   // IntakeExtensionSim sim = new IntakeExtensionSim(motor);
 
   /** Creates a new IntakeExtension. */
   public IntakeExtension() {
     var config = new  SparkFlexConfig();
-    double factor = 1;
+    double factor = 1/9.0 * 1/5.0 * 12*36 / 360.0 ;
+    //90 = all the way
+    //0  = resting on top of fuel on the ground
+    factor = 90/11.309586;
     config.encoder
     .positionConversionFactor(factor)
-    .velocityConversionFactor(factor / 60.0);
+    .velocityConversionFactor(factor / 60.0)
+    ;
 
-    var absfactor = 360;
-    config.absoluteEncoder
-    .inverted(false)
-    .positionConversionFactor(absfactor)
-    .velocityConversionFactor(absfactor / 60.0);
-
-    config.closedLoop.feedbackSensor(FeedbackSensor.kAbsoluteEncoder);
-
-    config.closedLoop.feedForward
-    .svacr(0, 0, 0, 0, 0);
+    //TODO Set feed-forwards for intake arm?
+    // config.closedLoop.feedForward
+    // .svacr(0, 0, 0, 0, 0);
     
-    config.closedLoop.p(3/12.0 / 45.0);
+    config.closedLoop
+    .p(3/12.0 / 45.0)
+    ;
 
     config.closedLoop.maxMotion
     .maxAcceleration(360/2*4)
@@ -59,9 +60,10 @@ public class IntakeExtension extends SubsystemBase {
 
     config
     .idleMode(IdleMode.kCoast)
-    .inverted(false)
+    .inverted(true)
     .smartCurrentLimit(5)
-    .voltageCompensation(11);
+    .voltageCompensation(11)
+    ;
 
     motor.configure(config, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
 
@@ -72,6 +74,9 @@ public class IntakeExtension extends SubsystemBase {
     new Trigger(DriverStation::isEnabled)
     .onTrue(setIdleMode(IdleMode.kCoast))
     .onFalse(setIdleMode(IdleMode.kBrake));
+    
+    //Assume the proper startup position
+    motor.getEncoder().setPosition(90);
     
     // setDefaultCommand(up());
   }
@@ -87,6 +92,7 @@ public class IntakeExtension extends SubsystemBase {
     SmartDashboard.putNumber("Intake/Extension/Dutycycle", motor.getAppliedOutput());
     SmartDashboard.putNumber("Intake/Extension/abs enc angle", motor.getAbsoluteEncoder().getPosition());
     SmartDashboard.putNumber("Intake/Extension/rel enc angle", motor.getEncoder().getPosition());
+    SmartDashboard.putString("Intake/Extension/Command", getCurrentCommand()==null ? "None" : getCurrentCommand().getName() );
   }
 
   @Override
@@ -95,28 +101,9 @@ public class IntakeExtension extends SubsystemBase {
     // SmartDashboard.putNumber("Intake/Extension/SimAngle", sim.getAngle().in(Degree));
   }
 
-  public Command setAngle(double degrees){
-    return run(()->{
-      motor
-      .getClosedLoopController()
-      //FIXME: Get kSmartMaxMotion working. Weird issues in sim.
-      .setSetpoint(degrees, ControlType.kPosition);
-    });
-  }
-
-
-  public Command up(){
-    return setAngle(42.4);
-  }
-
-  public Command down(){
-    return setAngle(0);
-  }
-
   public Angle getAngle(){
     return Degrees.of(motor.getAbsoluteEncoder().getPosition());
   };
-
 
   private Command setIdleMode(IdleMode mode){
     return Commands.runOnce(()->{
@@ -126,5 +113,43 @@ public class IntakeExtension extends SubsystemBase {
         ResetMode.kNoResetSafeParameters,
         PersistMode.kNoPersistParameters);
     });
+  }
+
+  private Command setAngle(double degrees, double arbitraryFFVolts){
+    return run(()->{
+      motor
+      .getClosedLoopController()
+      .setSetpoint(
+        degrees, 
+        ControlType.kPosition, 
+        ClosedLoopSlot.kSlot0, 
+        arbitraryFFVolts, 
+        ArbFFUnits.kVoltage
+      );
+      //FIXME: Get kSmartMaxMotion working. Weird issues in sim.
+    });
+  }
+
+  public Command up(){
+    return Commands.sequence(
+      setAngle(90, 0).until(()->getAngle().in(Degree) > 80),
+      setAngle(90, 0.5)
+    )
+    .withName("Up")
+    ;
+  }
+
+  public Command down(){
+    double downTransitionAngle = 60;
+    return Commands.repeatingSequence(
+      run(()->motor.setVoltage(-5)).until(()->getAngle().in(Degree)<=downTransitionAngle),
+      run(()->motor.stopMotor()).until(()->getAngle().in(Degree)>downTransitionAngle)
+    )
+    .withName("Down")
+    ;
+  }
+
+  private Command setVoltage(double volts){
+    return run(()->motor.setVoltage(volts));
   }
 }

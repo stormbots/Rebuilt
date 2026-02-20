@@ -28,8 +28,10 @@ public class Intake extends SubsystemBase {
     return Commands.parallel(
       rollers.intake(),
       intakeExtension.down()
-    );
-  };
+    )    
+    .withName("Intake")
+    ;    
+  }
 
   public Command eject(){
     return Commands.parallel(
@@ -42,18 +44,14 @@ public class Intake extends SubsystemBase {
     return Commands.parallel(
       rollers.stop(),
       intakeExtension.up()
-    );
+    )
+    .withName("Stop")
+    ;
   }
 
   public Command testRollers(){
     return Commands.parallel(
       rollers.setVoltage(2)
-    );
-  }
-
-  public Command testDown(){
-    return Commands.parallel(
-      intakeExtension.down()
     );
   }
   
