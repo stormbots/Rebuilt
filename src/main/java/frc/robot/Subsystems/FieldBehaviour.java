@@ -84,10 +84,10 @@ public class FieldBehaviour{
            return avoidWallsY(robotPosition, redUpperTrench);
 
         } else if(blueUpperBump.contains(robotPosition)){
-           return getSwerveBumpInputs(robotPosition);
+           return getSwerveBumpInputs();
 
         } else if(redUpperBump.contains(robotPosition)){
-           return getSwerveBumpInputs(robotPosition);
+           return getSwerveBumpInputs();
 
         } else if(blueLowerTrench.contains(robotPosition)){
            return avoidWallsY(robotPosition, blueLowerTrench);
@@ -96,15 +96,34 @@ public class FieldBehaviour{
            return avoidWallsY(robotPosition, redLowerTrench);
 
         } else if(blueLowerBump.contains(robotPosition)){
-           return getSwerveBumpInputs(robotPosition);
+           return getSwerveBumpInputs();
 
         } else if(redLowerBump.contains(robotPosition)){
-           return getSwerveBumpInputs(robotPosition);
+           return getSwerveBumpInputs();
            
         } else {
             return new SwerveInputs();
         }
     }
+
+    public boolean getRetractHood(Pose2d robotPosition){
+        if(blueUpperBump.contains(robotPosition)){
+           return true;
+
+        } else if(redUpperBump.contains(robotPosition)){
+           return true;
+
+        } else if(blueLowerBump.contains(robotPosition)){
+           return true;
+
+        } else if(redLowerBump.contains(robotPosition)){
+           return true;
+           
+        } else {
+            return false;
+        }
+    }
+
 
     //TODO Get Position and Define Field Pos
     //TODO Make changeDriveTrainBehaviour do stuffs
@@ -118,7 +137,7 @@ public class FieldBehaviour{
         return response;
     }
 
-    private SwerveInputs getSwerveBumpInputs(Pose2d robotPose){
+    private SwerveInputs getSwerveBumpInputs(){
         var bumpSwerveInputs = new SwerveInputs();
         bumpSwerveInputs.r += 45.0;
         return bumpSwerveInputs;
@@ -129,12 +148,6 @@ public class FieldBehaviour{
         return new SwerveInputs();
 
     }
-
-    private boolean getRetractHood(){
-        return false;
-    }
-
-    
 
     private int boxserialnumber=0;
     public void plotBoundingBox(BoundingBox box){
