@@ -1,5 +1,6 @@
 package frc.robot.Subsystems.Shooter;
 
+import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Subsystems.Shooter.Feeder.Feeder;
 import frc.robot.Subsystems.Shooter.Flywheel.Flywheel;
 import frc.robot.Subsystems.Shooter.Hood.Hood;
@@ -17,5 +18,8 @@ public class Shooter {
     //TODO create helpful commands and/or logic
     //Note, this is not a subsystem, but we can turn it into one
     //There's some considerations in doing so worth working through
+
+    //TODO: Sync this method/concept with shooter code
+    public Trigger isReadyToAcceptFuel = new Trigger(()->true);
 
 }
