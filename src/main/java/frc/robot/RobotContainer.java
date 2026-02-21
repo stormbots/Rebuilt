@@ -35,7 +35,7 @@ public class RobotContainer {
   CommandXboxController driver = new CommandXboxController(0);
   CommandXboxController operator = new CommandXboxController(1);
 
-  Field2d gavinTestField = new Field2d();
+  Field2d fieldBehaviourTestField = new Field2d();
 
   public RobotContainer() {
     configureBindings();
@@ -47,18 +47,20 @@ public class RobotContainer {
       ()->driver.getLeftY(), 
       ()->driver.getRightX());
 
-      SmartDashboard.putData("GavinTestField",gavinTestField);
-      gavinTestField.getObject("fakedrive").setPose(new Pose2d());
+      SmartDashboard.putData("fieldBehaviourTestField",fieldBehaviourTestField);
+      fieldBehaviourTestField.getObject("fakedrive").setPose(new Pose2d());
 
-      gavinTestField.getObject("BlueTrench").setPoses(new Pose2d(),new Pose2d(1,1,new Rotation2d()));
+      //fieldBehaviourTestField.getObject("BlueTrench").setPoses(new Pose2d(),new Pose2d(1,1,new Rotation2d()));
 
+     
       new Trigger(DriverStation::isEnabled)
       .whileTrue(
-          swerve.addFieldInputs( ()->fieldBehaviour.getSwerveAction(gavinTestField.getObject("fakedrive").getPose()) )
+          swerve.addFieldInputs( ()->fieldBehaviour.getSwerveInputs(swerve.getSwervePose()) )
       );
   
 
   }
+
 
   public Command getAutonomousCommand() {
     //TODO: Get this from Autos.java instead

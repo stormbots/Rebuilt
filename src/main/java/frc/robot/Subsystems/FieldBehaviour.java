@@ -79,25 +79,28 @@ public class FieldBehaviour{
     private SwerveInputs changeDriveTrainBehaviour(Pose2d robotPosition){
         if(blueUpperTrench.contains(robotPosition)){
            return avoidWallsY(robotPosition, blueUpperTrench);
-        } 
-        if(redUpperTrench.contains(robotPosition)){
+
+        } else if(redUpperTrench.contains(robotPosition)){
            return avoidWallsY(robotPosition, redUpperTrench);
-        } 
-        if(blueUpperBump.contains(robotPosition)){
-           return avoidWallsY(robotPosition, blueUpperBump);
-        } 
-        if(redUpperBump.contains(robotPosition)){
-           return avoidWallsY(robotPosition, redUpperBump);
-        }
-        if(blueLowerTrench.contains(robotPosition)){
+
+        } else if(blueUpperBump.contains(robotPosition)){
+           return getSwerveBumpInputs(robotPosition);
+
+        } else if(redUpperBump.contains(robotPosition)){
+           return getSwerveBumpInputs(robotPosition);
+
+        } else if(blueLowerTrench.contains(robotPosition)){
            return avoidWallsY(robotPosition, blueLowerTrench);
-        }
-        if(redLowerTrench.contains(robotPosition)){
+
+        } else if(redLowerTrench.contains(robotPosition)){
            return avoidWallsY(robotPosition, redLowerTrench);
+
         } else if(blueLowerBump.contains(robotPosition)){
-           return avoidWallsY(robotPosition, blueLowerBump);
+           return getSwerveBumpInputs(robotPosition);
+
         } else if(redLowerBump.contains(robotPosition)){
-           return avoidWallsY(robotPosition, redLowerBump);
+           return getSwerveBumpInputs(robotPosition);
+           
         } else {
             return new SwerveInputs();
         }
@@ -106,7 +109,7 @@ public class FieldBehaviour{
     //TODO Get Position and Define Field Pos
     //TODO Make changeDriveTrainBehaviour do stuffs
 
-    public SwerveInputs getSwerveAction(Pose2d robotPos){
+    public SwerveInputs getSwerveInputs(Pose2d robotPos){
         var response = changeDriveTrainBehaviour(robotPos);
         
                 // field.getObject("testpose").setPose(new Pose2d());
@@ -115,6 +118,23 @@ public class FieldBehaviour{
         return response;
     }
 
+    private SwerveInputs getSwerveBumpInputs(Pose2d robotPose){
+        var bumpSwerveInputs = new SwerveInputs();
+        bumpSwerveInputs.r += 45.0;
+        return bumpSwerveInputs;
+
+    }
+
+    private SwerveInputs getTrenchActions(Pose2d robotPose){
+        return new SwerveInputs();
+
+    }
+
+    private boolean getRetractHood(){
+        return false;
+    }
+
+    
 
     private int boxserialnumber=0;
     public void plotBoundingBox(BoundingBox box){
