@@ -34,7 +34,7 @@ public class Shooter {
         this.targeting=targeting;
     }
 
-    public Command shoot(TargetingSystem.ShooterMechanism targets){
+    public Command shoot(TargetingSystem.ShooterState targets){
         return Commands.parallel(
             flywheel.setRPMCommand(targets.flywheelRPM, targets.flywheelTolerance),
             hood.setAngleCommand(targets.hoodAngle, targets.hoodTolerance),

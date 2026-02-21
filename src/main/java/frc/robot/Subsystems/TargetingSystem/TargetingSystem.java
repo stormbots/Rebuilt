@@ -5,10 +5,13 @@
 package frc.robot.Subsystems.TargetingSystem;
 
 import static edu.wpi.first.units.Units.Degrees;
+import static edu.wpi.first.units.Units.Inches;
 import static edu.wpi.first.units.Units.InchesPerSecond;
 import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.Radians;
+
+import com.stormbots.LUT;
 
 import dev.doglog.DogLog;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -29,35 +32,46 @@ import frc.robot.Subsystems.Swerve.Swerve;
 
 public class TargetingSystem extends SubsystemBase {
 
-  public static class ShooterMechanism {
-    public final Angle turretAngle;
-    public final Angle hoodAngle;
-    public final double flywheelRPM;
+  public static class ShooterState {
+    public Angle turretAngle;
+    public Angle hoodAngle;
+    public double flywheelRPM;
 
-    public final Angle turretTolerance;
-    public final Angle hoodTolerance;
-    public final double flywheelTolerance;
+    public Angle turretTolerance = Degrees.of(3);
+    public Angle hoodTolerance = Degrees.of(3);
+    public double flywheelTolerance = 300;
 
-    public ShooterMechanism(
-      Angle turretAngle, 
-      Angle hoodAngle, 
-      double flywheelRPM, 
-      Angle turretTolerance, 
-      Angle hoodTolerance, 
-      double flywheelTolerance
-    ){
+    public ShooterState(Angle turretAngle, Angle hoodAngle, double flywheelRPM){
       this.turretAngle = turretAngle;
       this.hoodAngle = hoodAngle;
       this.flywheelRPM = flywheelRPM;
-      this.turretTolerance = turretTolerance;
-      this.hoodTolerance = hoodTolerance;
-      this.flywheelTolerance = flywheelTolerance;
     }
 
-    public ShooterMechanism(Angle turretAngle, Angle hoodAngle, double flywheelRPM){
-      this(turretAngle, hoodAngle, flywheelRPM, Degrees.of(3), Degrees.of(3), 300);
+    public ShooterState withTurretTolerance(Angle tolerance){
+      this.turretAngle = tolerance;
+      return this;
+    }
+
+    public ShooterState withHoodTolerance(Angle tolerance){
+      this.hoodAngle = tolerance;
+      return this;
+    }
+
+    public ShooterState withFlywheelTolerance(double tolerance){
+      this.flywheelTolerance = tolerance;
+      return this;
     }
   }
+
+  //distance, hoodangle, flywheel rpm
+  LUT hubLUT = new LUT(new double[][]{
+    {0, 0, 0}
+  });
+
+  //distance, hoodangle, flywheel rpm
+  LUT passLUT = new LUT(new double[][]{
+    {0, 0, 0}
+  });
 
   Swerve swerve;
 
@@ -65,6 +79,7 @@ public class TargetingSystem extends SubsystemBase {
 
   /** Creates a new TargetingSubsystem. */
   public TargetingSystem(Swerve swerve){
+    
     this.swerve = swerve;
     SmartDashboard.putData("targeting/field",field);
 
@@ -81,15 +96,15 @@ public class TargetingSystem extends SubsystemBase {
     var pass=field.getObject("pass").getPoses();
     if(botPosition.getX()<4.6) return new Pose2d(Constants.Field.blueHub,new Rotation2d());
     if(botPosition.getY()>=4) return pass.get(1);
-    if(botPosition.getY()<4) pass.get(0);
+    if(botPosition.getY()<4) return pass.get(0);
     return pass.get(0);
   }
 
   /** Generate a fieldcentric heading from bot location to target */
-  public Angle getHeadingToTarget(Pose2d botPose,Translation2d target){
+  public Rotation2d getHeadingToTarget(Pose2d botPose,Translation2d target){
     var translation=botPose.getTranslation();
     var angle = target.minus(translation).getAngle();
-    return angle.getMeasure();
+    return angle;
   }
 
   /** Return the distance between bot position and target */
@@ -104,6 +119,19 @@ public class TargetingSystem extends SubsystemBase {
     return new Translation3d(swerve.getSwervePose().getTranslation()).plus(Constants.Shooter.botToTurretOffset);
   }
 
+  
+  public ShooterState getShooterStateForHubTarget(Pose2d botPose, Translation2d target){
+    Translation2d turretTranslation = botPose.getTranslation().plus(Constants.Shooter.botToTurretOffset.toTranslation2d());
+    
+    Distance magnitude = getDistanceToTarget(botPose, target);
+
+    var hubOut = hubLUT.get(magnitude.in(Inches));   
+    var angle = hubOut[1];
+    var rpm = hubOut[2];
+
+    return new ShooterState(Degrees.of(target.minus(turretTranslation).getAngle().getDegrees()), Degrees.of(angle), rpm);
+  }
+
   @Override
   public void periodic() {
     var botpose = swerve.getSwervePose();
@@ -113,7 +141,7 @@ public class TargetingSystem extends SubsystemBase {
     if(DriverStation.isDisabled()) botpose = field.getObject("testbot").getPose();
 
     var target = getBestTarget(botpose);
-    var angle = new Rotation2d(getHeadingToTarget(botpose,target.getTranslation()));
+    var angle = getHeadingToTarget(botpose,target.getTranslation());
     var turret = new Pose2d(botpose.getX(),botpose.getY(),angle);
 
     field.getObject("turret").setPose(turret);
@@ -138,12 +166,12 @@ public class TargetingSystem extends SubsystemBase {
    */
   public Translation3d simGenerateIdealShot(){
     var target = getBestTarget(swerve.getSwervePose()).getTranslation();
-    var heading = getHeadingToTarget(swerve.getSwervePose(),target).in(Radians);
+    var heading = getHeadingToTarget(swerve.getSwervePose(),target);
     var hoodangle=Degrees.of(60).in(Radians);
 
     return new Translation3d(
       InchesPerSecond.of(300).in(MetersPerSecond),
-      new Rotation3d(0, hoodangle, heading)
+      new Rotation3d(0, hoodangle, heading.getRadians())
     );
   }
 

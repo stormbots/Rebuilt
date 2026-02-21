@@ -6,8 +6,11 @@ package frc.robot;
 
 import com.stormbots.CRTAbsoluteEncoder;
 
+import static edu.wpi.first.units.Units.Degrees;
+
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.Subsystems.HopperSensors.HopperSensors;
 import frc.robot.Subsystems.Intake.Intake;
@@ -39,22 +42,22 @@ public class RobotContainer {
   }
 
   private void configureBindings() {
-    swerve.setDefaultCommand(swerve.addDriverInputs(
-      ()->-driver.getLeftY(), 
-      ()->-driver.getLeftX(), 
-      ()->-driver.getRightX()
-    ));
-    if(Robot.isSimulation()){
-      //Make it "drive right" on the sim field using default Red1
-      swerve.setDefaultCommand(swerve.addDriverInputs(
-        ()->-driver.getLeftX()/2.0, 
-        ()->driver.getLeftY()/2.0, 
-        ()->-driver.getRightX()/2.0
-      ));
-    }
+    // swerve.setDefaultCommand(swerve.addDriverInputs(
+    //   ()->-driver.getLeftY(), 
+    //   ()->-driver.getLeftX(), 
+    //   ()->-driver.getRightX()
+    // ));
+    // if(Robot.isSimulation()){
+    //   //Make it "drive right" on the sim field using default Red1
+    //   swerve.setDefaultCommand(swerve.addDriverInputs(
+    //     ()->-driver.getLeftX()/2.0, 
+    //     ()->driver.getLeftY()/2.0, 
+    //     ()->-driver.getRightX()/2.0
+    //   ));
+    // }
 
-    driver.a().whileTrue(intake.smartIntake());
-    driver.b().whileTrue(shooter.simGetLaunchCommand());
+    // driver.a().whileTrue(intake.smartIntake());
+    // driver.b().whileTrue(shooter.simGetLaunchCommand());
   }
 
   public Command getAutonomousCommand() {

@@ -70,8 +70,8 @@ public class Hood extends SubsystemBase {
 
     
     config.encoder
-      .positionConversionFactor(kGearing)
-      .velocityConversionFactor(kGearing / 60.0)
+      .positionConversionFactor(kGearing * 360.0)
+      .velocityConversionFactor(kGearing * 360.0 / 60.0)
     ;
 
     config.closedLoop
