@@ -2,9 +2,11 @@ package frc.robot.Subsystems.Shooter;
 
 import com.stormbots.LUT;
 
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.Robot;
@@ -13,6 +15,7 @@ import frc.robot.Subsystems.HopperSensors.FuelSim.FuelSim;
 import frc.robot.Subsystems.Shooter.Flywheel.Flywheel;
 import frc.robot.Subsystems.Shooter.Hood.Hood;
 import frc.robot.Subsystems.Shooter.Turret.Turret;
+import frc.robot.Subsystems.Shooter.Turret.TurretVisual;
 import frc.robot.Subsystems.TargetingSystem.TargetingSystem;
 
 public class Shooter {
@@ -23,7 +26,12 @@ public class Shooter {
     TargetingSystem targeting;
 
     /** Just set up the mechanism2d so we can visualize the system all at once */
-    ShooterVisual visual = new ShooterVisual(flywheel, hood, turret);
+    // ShooterVisual visual = new ShooterVisual(flywheel, hood, turret);
+    TurretVisual visual = new TurretVisual(turret);
+    Trigger visualUpdater = new Trigger(DriverStation::isEnabled).onTrue(
+        Commands.run(()->visual.update(turret.getAngle()))
+    );
+
 
     //TODO create helpful commands and/or logic
     //Note, this is not a subsystem, but we can turn it into one
@@ -68,5 +76,28 @@ public class Shooter {
         )
         .repeatedly();
     }
+
+    //setTurretAngle independently
+    //setHood Angle indepenedenyt
+    //setflywheel rpm
+
+    public Command shootHub(){
+        return shoot(targeting.getShotForHub());
+    }
+    public Command pass(){
+        return shoot(targeting.getPass());
+    }
+
+    public Command doTheObviousThingDriversWant(){
+        var target = targeting.getBestTarget();
+        targeting.getShotForHub();
+        targeting.getPass();
+
+        // return shoot(ShooterState);
+        return Commands.none();
+    }
+
+
+
 
 }

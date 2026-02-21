@@ -8,6 +8,7 @@ import static edu.wpi.first.units.Units.Meter;
 
 import au.grapplerobotics.CanBridge;
 import edu.wpi.first.net.PortForwarder;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Preferences;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.Timer;
@@ -104,6 +105,7 @@ public class Robot extends TimedRobot {
   @Override
   public void simulationInit() {
     super.simulationInit();
+    if(DriverStation.isDisabled()) return;
     setupFuelSimulation();
   }
 

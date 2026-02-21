@@ -4,6 +4,7 @@
 
 package frc.robot.Subsystems.Shooter.Turret;
 
+import static edu.wpi.first.units.Units.Degree;
 import static edu.wpi.first.units.Units.Degrees;
 
 import com.revrobotics.PersistMode;
@@ -32,13 +33,16 @@ public class Turret extends SubsystemBase {
   public static final double kGearing = (1.0 / 3.0) * (10.0 / 132.0);
 
   //How much in ONE direction, hence max range divided by 2
-  public static final double kMaxRotation = 90.0; //540.0 / 2.0;
+  // public static final double kMaxRotation = 90.0; //540.0 / 2.0;
+  public static final double kMinRotation = 0;
+  public static final double kMaxRotation = 360;
+  public static final double kRotationToRobotForward = 180;
 
   Angle targetPosition = Degrees.of(0);
   Angle tolerance = Degrees.of(3);
 
-
   SparkFlex motor = new SparkFlex(14, MotorType.kBrushless);
+  TurretSim sim = new TurretSim(motor);
 
   /** Creates a new Turret. */
   public Turret() {

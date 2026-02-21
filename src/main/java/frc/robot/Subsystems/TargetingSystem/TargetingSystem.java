@@ -65,11 +65,13 @@ public class TargetingSystem extends SubsystemBase {
 
   //distance, hoodangle, flywheel rpm
   LUT hubLUT = new LUT(new double[][]{
+    {0, 0, 0},
     {0, 0, 0}
   });
 
   //distance, hoodangle, flywheel rpm
   LUT passLUT = new LUT(new double[][]{
+    {0, 0, 0},
     {0, 0, 0}
   });
 
@@ -100,6 +102,10 @@ public class TargetingSystem extends SubsystemBase {
     return pass.get(0);
   }
 
+  public Pose2d getBestTarget(){
+    return getBestTarget(swerve.getSwervePose());
+  }
+
   /** Generate a fieldcentric heading from bot location to target */
   public Rotation2d getHeadingToTarget(Pose2d botPose,Translation2d target){
     var translation=botPose.getTranslation();
@@ -120,7 +126,7 @@ public class TargetingSystem extends SubsystemBase {
   }
 
   
-  public ShooterState getShooterStateForHubTarget(Pose2d botPose, Translation2d target){
+  private ShooterState getShooterStateForHubTarget(Pose2d botPose, Translation2d target){
     Translation2d turretTranslation = botPose.getTranslation().plus(Constants.Shooter.botToTurretOffset.toTranslation2d());
     
     Distance magnitude = getDistanceToTarget(botPose, target);
@@ -131,6 +137,19 @@ public class TargetingSystem extends SubsystemBase {
 
     return new ShooterState(Degrees.of(target.minus(turretTranslation).getAngle().getDegrees()), Degrees.of(angle), rpm);
   }
+
+  private ShooterState getShooterStateForGroundTarget(Pose2d botPose, Translation2d target){
+    Translation2d turretTranslation = botPose.getTranslation().plus(Constants.Shooter.botToTurretOffset.toTranslation2d());
+    
+    Distance magnitude = getDistanceToTarget(botPose, target);
+
+    var hubOut = passLUT.get(magnitude.in(Inches));   
+    var angle = hubOut[1];
+    var rpm = hubOut[2];
+
+    return new ShooterState(Degrees.of(target.minus(turretTranslation).getAngle().getDegrees()), Degrees.of(angle), rpm);
+  }
+
 
   @Override
   public void periodic() {
@@ -175,6 +194,19 @@ public class TargetingSystem extends SubsystemBase {
     );
   }
 
+  public ShooterState getShotForHub(){
+    Translation2d target = new Translation2d(); //get best target
+    return getShooterStateForHubTarget(swerve.getSwervePose(), target );
+  }
+
+  public ShooterState getPass(){
+    Translation2d target = new Translation2d(); //get best target
+    return getShooterStateForGroundTarget(swerve.getSwervePose(),target);
+  }
+
+  public ShooterState getGroundShot(Pose2d target){
+    return getShooterStateForGroundTarget(swerve.getSwervePose(),target.getTranslation());
+  }
 
 
 }
