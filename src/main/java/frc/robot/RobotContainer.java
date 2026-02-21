@@ -13,6 +13,7 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.Subsystems.HopperSensors.HopperSensors;
+import frc.robot.Subsystems.HopperSensors.FuelSim.FuelSim.Hub;
 import frc.robot.Subsystems.Intake.Intake;
 import frc.robot.Subsystems.Photonvision.Photonvision;
 import frc.robot.Subsystems.Questnav.QuestNav;
@@ -58,6 +59,8 @@ public class RobotContainer {
 
     // driver.a().whileTrue(intake.smartIntake());
     // driver.b().whileTrue(shooter.simGetLaunchCommand());
+
+    driver.a().whileTrue(shooter.shoot(targeting.getShooterStateForHubTarget(swerve.getSwervePose(), targeting.getBestTarget(swerve.getSwervePose()).getTranslation())));
   }
 
   public Command getAutonomousCommand() {
