@@ -4,6 +4,9 @@
 
 package frc.robot.Subsystems.Shooter.Flywheel;
 
+import java.util.function.DoubleSupplier;
+import java.util.function.Supplier;
+
 import com.revrobotics.PersistMode;
 import com.revrobotics.ResetMode;
 import com.revrobotics.spark.FeedbackSensor;
@@ -20,6 +23,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Subsystems.TargetingSystem.TargetingSystem;
 
 public class Flywheel extends SubsystemBase {
 
@@ -53,23 +57,26 @@ public class Flywheel extends SubsystemBase {
     return leaderMotor.getEncoder().getVelocity();
   }
   
-  private void setRPM(double rpm, double tolerance){
-    this.targetRPM = rpm;
-    this.tolerance = tolerance;
-    leaderMotor.getClosedLoopController().setSetpoint(
-      targetRPM, 
-      SparkBase.ControlType.kVelocity
-    );
-  }
-
   private void stop(){
     this.targetRPM = 0;
     this.tolerance = 300; 
     leaderMotor.stopMotor();
   }
 
-  public Command setRPMCommand(double rpm, double tolerance){
-    return run(()->setRPM(rpm, tolerance));
+  public Command setRPM(DoubleSupplier rpm, DoubleSupplier tolerance){
+    return run(()->{
+      this.targetRPM = rpm.getAsDouble();
+      this.tolerance = tolerance.getAsDouble();
+      leaderMotor.getClosedLoopController().setSetpoint(
+        targetRPM, 
+        SparkBase.ControlType.kVelocity
+      );
+    });
+
+  }
+
+  public Command setRPM(Supplier<TargetingSystem.ShooterState> targetSupplier){
+    return setRPM(()->targetSupplier.get().flywheelRPM,()->targetSupplier.get().flywheelRPM);
   }
 
   //Remove this once not needed

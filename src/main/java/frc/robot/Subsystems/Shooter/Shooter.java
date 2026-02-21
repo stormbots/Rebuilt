@@ -1,14 +1,15 @@
 package frc.robot.Subsystems.Shooter;
 
-import com.stormbots.LUT;
+import static edu.wpi.first.units.Units.Degrees;
 
+import java.lang.annotation.Target;
+import java.util.function.Supplier;
+
+import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.RunCommand;
-import edu.wpi.first.wpilibj2.command.WaitCommand;
-import edu.wpi.first.wpilibj2.command.button.Trigger;
-import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Robot;
 import frc.robot.Subsystems.HopperSensors.HopperSensors;
 import frc.robot.Subsystems.HopperSensors.FuelSim.FuelSim;
@@ -42,16 +43,28 @@ public class Shooter {
         this.targeting=targeting;
     }
 
-    public Command shoot(TargetingSystem.ShooterState targets){
+    // public TargetingSystem.ShooterState getCurrentState(){
+    //     return new TargetingSystem.ShooterState(turret.getAngle(), hood.getAngle(), flywheel.getRPM());
+    // }
+
+    public Command shoot(Supplier<TargetingSystem.ShooterState> targets){
         return Commands.parallel(
-            flywheel.setRPMCommand(targets.flywheelRPM, targets.flywheelTolerance),
-            hood.setAngleCommand(targets.hoodAngle, targets.hoodTolerance),
-            turret.setAngleCommand(targets.turretAngle, targets.turretTolerance)
+            flywheel.setRPM(targets),
+            hood.setAngle(targets),
+            turret.setAngle(targets)
         );
     }
 
-    public Command constantVoltage(double volts){
-        return flywheel.setVoltageCommand(volts);
+    public Command testSetTurretAngle(Angle angle){
+        return turret.setAngle(()->angle, ()->Degrees.of(3));
+    }
+
+    public Command testSetHoodAngle(Angle angle){
+        return hood.setAngle(()->angle, ()->Degrees.of(3));
+    }
+
+    public Command testSetFlywheelRPM(double rpm){
+        return flywheel.setRPM(()->rpm, ()->300);
     }
 
     public Command simGetLaunchCommand(){
@@ -77,27 +90,25 @@ public class Shooter {
         .repeatedly();
     }
 
-    //setTurretAngle independently
-    //setHood Angle indepenedenyt
-    //setflywheel rpm
-
     public Command shootHub(){
-        return shoot(targeting.getShotForHub());
+        return shoot(targeting::getHub);
     }
+
     public Command pass(){
-        return shoot(targeting.getPass());
+        return shoot(targeting::getPass);
     }
 
     public Command doTheObviousThingDriversWant(){
-        var target = targeting.getBestTarget();
-        targeting.getShotForHub();
-        targeting.getPass();
+        Supplier<TargetingSystem.ShooterState> bestState = ()->{
 
-        // return shoot(ShooterState);
-        return Commands.none();
+            //some logic. not in.
+            var target = targeting.getBestTarget();
+            targeting.getHub();
+            return targeting.getPass();
+            
+        };
+
+        return shoot(bestState);
     }
-
-
-
 
 }

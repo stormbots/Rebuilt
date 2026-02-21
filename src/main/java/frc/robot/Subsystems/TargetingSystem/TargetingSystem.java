@@ -94,7 +94,7 @@ public class TargetingSystem extends SubsystemBase {
   }
 
   /** Figure out the best target based on conditions or field position */
-  public Pose2d getBestTarget(Pose2d botPosition){
+  private Pose2d getBestTarget(Pose2d botPosition){
     var pass=field.getObject("pass").getPoses();
     if(botPosition.getX()<4.6) return new Pose2d(Constants.Field.blueHub,new Rotation2d());
     if(botPosition.getY()>=4) return pass.get(1);
@@ -107,47 +107,35 @@ public class TargetingSystem extends SubsystemBase {
   }
 
   /** Generate a fieldcentric heading from bot location to target */
-  public Rotation2d getHeadingToTarget(Pose2d botPose,Translation2d target){
-    var translation=botPose.getTranslation();
-    var angle = target.minus(translation).getAngle();
+  public Rotation2d getHeadingToTarget(Translation2d botTranslation,Translation2d target){
+    var angle = target.minus(botTranslation).getAngle();
     return angle;
   }
 
   /** Return the distance between bot position and target */
-  public Distance getDistanceToTarget(Pose2d botPose,Translation2d target){
-    return Meters.of(botPose.getTranslation().minus(target).getNorm());
+  public Distance getDistanceToTarget(Translation2d botTranslation,Translation2d target){
+    return Meters.of(botTranslation.minus(target).getNorm());
   }
 
   /** Generate a field-centric location of the turret's physical position. 
-   * Mostly needed for sim and visualization.
    * */
   public Translation3d getTurretCenterpoint(){
     return new Translation3d(swerve.getSwervePose().getTranslation()).plus(Constants.Shooter.botToTurretOffset);
   }
 
   
-  private ShooterState getShooterStateForHubTarget(Pose2d botPose, Translation2d target){
-    Translation2d turretTranslation = botPose.getTranslation().plus(Constants.Shooter.botToTurretOffset.toTranslation2d());
+  private ShooterState getLUTShooterState(Pose2d botPose, Translation2d target, LUT lut){
     
-    Distance magnitude = getDistanceToTarget(botPose, target);
-
-    var hubOut = hubLUT.get(magnitude.in(Inches));   
-    var angle = hubOut[1];
-    var rpm = hubOut[2];
-
-    return new ShooterState(Degrees.of(target.minus(turretTranslation).getAngle().getDegrees()), Degrees.of(angle), rpm);
-  }
-
-  private ShooterState getShooterStateForGroundTarget(Pose2d botPose, Translation2d target){
-    Translation2d turretTranslation = botPose.getTranslation().plus(Constants.Shooter.botToTurretOffset.toTranslation2d());
+    Distance magnitude = getDistanceToTarget(botPose.getTranslation(), target);
     
-    Distance magnitude = getDistanceToTarget(botPose, target);
+    var entry = lut.get(magnitude.in(Inches));   
+    var angle = entry[1];
+    var rpm = entry[2];
+    
+    Translation2d turretTranslation = getTurretCenterpoint().toTranslation2d();
+    Rotation2d heading = getHeadingToTarget(turretTranslation, target);
 
-    var hubOut = passLUT.get(magnitude.in(Inches));   
-    var angle = hubOut[1];
-    var rpm = hubOut[2];
-
-    return new ShooterState(Degrees.of(target.minus(turretTranslation).getAngle().getDegrees()), Degrees.of(angle), rpm);
+    return new ShooterState(heading.minus(botPose.getRotation()).getMeasure(), Degrees.of(angle), rpm);
   }
 
 
@@ -160,7 +148,7 @@ public class TargetingSystem extends SubsystemBase {
     if(DriverStation.isDisabled()) botpose = field.getObject("testbot").getPose();
 
     var target = getBestTarget(botpose);
-    var angle = getHeadingToTarget(botpose,target.getTranslation());
+    var angle = getHeadingToTarget(botpose.getTranslation(),target.getTranslation());
     var turret = new Pose2d(botpose.getX(),botpose.getY(),angle);
 
     field.getObject("turret").setPose(turret);
@@ -185,7 +173,7 @@ public class TargetingSystem extends SubsystemBase {
    */
   public Translation3d simGenerateIdealShot(){
     var target = getBestTarget(swerve.getSwervePose()).getTranslation();
-    var heading = getHeadingToTarget(swerve.getSwervePose(),target);
+    var heading = getHeadingToTarget(swerve.getSwervePose().getTranslation(),target);
     var hoodangle=Degrees.of(60).in(Radians);
 
     return new Translation3d(
@@ -194,19 +182,21 @@ public class TargetingSystem extends SubsystemBase {
     );
   }
 
-  public ShooterState getShotForHub(){
+  public ShooterState getHub(){
     Translation2d target = new Translation2d(); //get best target
-    return getShooterStateForHubTarget(swerve.getSwervePose(), target );
+    return getLUTShooterState(swerve.getSwervePose(), target, hubLUT);
   }
+
+  //IDT this is needed for now. We'll see. if it is, i'd like getPass() to use this method
+  // public ShooterState getGroundShot(Pose2d target){
+  //   return getGroundShooterState(swerve.getSwervePose(),target.getTranslation(), passLUT);
+  // }
 
   public ShooterState getPass(){
     Translation2d target = new Translation2d(); //get best target
-    return getShooterStateForGroundTarget(swerve.getSwervePose(),target);
+    return getLUTShooterState(swerve.getSwervePose(),target, passLUT);
   }
 
-  public ShooterState getGroundShot(Pose2d target){
-    return getShooterStateForGroundTarget(swerve.getSwervePose(),target.getTranslation());
-  }
 
 
 }

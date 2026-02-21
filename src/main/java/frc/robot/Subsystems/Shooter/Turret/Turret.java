@@ -7,6 +7,8 @@ package frc.robot.Subsystems.Shooter.Turret;
 import static edu.wpi.first.units.Units.Degree;
 import static edu.wpi.first.units.Units.Degrees;
 
+import java.util.function.Supplier;
+
 import com.revrobotics.PersistMode;
 import com.revrobotics.ResetMode;
 import com.revrobotics.spark.FeedbackSensor;
@@ -23,6 +25,7 @@ import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Subsystems.TargetingSystem.TargetingSystem;
 
 public class Turret extends SubsystemBase {
 
@@ -33,10 +36,8 @@ public class Turret extends SubsystemBase {
   public static final double kGearing = (1.0 / 3.0) * (10.0 / 132.0);
 
   //How much in ONE direction, hence max range divided by 2
-  // public static final double kMaxRotation = 90.0; //540.0 / 2.0;
-  public static final double kMinRotation = 0;
-  public static final double kMaxRotation = 360;
-  public static final double kRotationToRobotForward = 180;
+  public static final double kMinRotation = -180;
+  public static final double kMaxRotation = 180;
 
   Angle targetPosition = Degrees.of(0);
   Angle tolerance = Degrees.of(3);
@@ -76,17 +77,19 @@ public class Turret extends SubsystemBase {
     return Degrees.of(motor.getEncoder().getPosition());
   }
 
-  private void setAngle(Angle position, Angle tolerance) {
-    this.targetPosition = position;
-    this.tolerance = tolerance;
-    motor.getClosedLoopController().setSetpoint(
-      position.in(Degrees), 
-      ControlType.kPosition
-    );
+  public Command setAngle(Supplier<Angle> position, Supplier<Angle> tolerance){
+    return run(()->{
+      this.targetPosition = position.get();
+      this.tolerance = tolerance.get();
+      motor.getClosedLoopController().setSetpoint(
+        targetPosition.in(Degrees), 
+        ControlType.kPosition
+      );
+    });
   }
 
-  public Command setAngleCommand(Angle position, Angle tolerance){
-    return run(()->setAngle(position, tolerance));
+  public Command setAngle(Supplier<TargetingSystem.ShooterState> targetSupplier){
+    return setAngle(()->targetSupplier.get().turretAngle, ()->targetSupplier.get().turretTolerance);
   }
 
   public boolean getOnTarget(){
@@ -116,7 +119,7 @@ public class Turret extends SubsystemBase {
     config.softLimit
       .forwardSoftLimit(kMaxRotation)
       .forwardSoftLimitEnabled(true)
-      .reverseSoftLimit(-kMaxRotation)
+      .reverseSoftLimit(kMinRotation)
       .reverseSoftLimitEnabled(true)
     ;
 

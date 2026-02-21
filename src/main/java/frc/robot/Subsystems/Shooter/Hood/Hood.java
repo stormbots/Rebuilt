@@ -6,6 +6,8 @@ package frc.robot.Subsystems.Shooter.Hood;
 
 import static edu.wpi.first.units.Units.Degrees;
 
+import java.util.function.Supplier;
+
 import com.revrobotics.PersistMode;
 import com.revrobotics.ResetMode;
 import com.revrobotics.spark.FeedbackSensor;
@@ -25,6 +27,7 @@ import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.Command.InterruptionBehavior;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
+import frc.robot.Subsystems.TargetingSystem.TargetingSystem;
 
 public class Hood extends SubsystemBase {
 
@@ -94,19 +97,21 @@ public class Hood extends SubsystemBase {
     return Degrees.of(motor.getEncoder().getPosition());
   }
 
-  private void setAngle(Angle angle, Angle tolerance){
-    if(homed){
-      this.targetAngle = angle;
-      this.tolerance = tolerance;
-      motor.getClosedLoopController().setSetpoint(
-        angle.in(Degrees),
-        ControlType.kPosition
-      );
-    }
+  public Command setAngle(Supplier<Angle> angle, Supplier<Angle> tolerance){
+    return run(()->{
+      if(homed){
+        this.targetAngle = angle.get();
+        this.tolerance = tolerance.get();
+        motor.getClosedLoopController().setSetpoint(
+          targetAngle.in(Degrees),
+          ControlType.kPosition
+        );
+      }
+    });
   }
 
-  public Command setAngleCommand(Angle angle, Angle tolerance){
-    return run(()->setAngle(angle, tolerance));
+  public Command setAngle(Supplier<TargetingSystem.ShooterState> targetSupplier){
+    return setAngle(()->targetSupplier.get().hoodAngle, ()->targetSupplier.get().hoodTolerance);
   }
 
   public boolean getOnTarget(){
