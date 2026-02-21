@@ -22,7 +22,7 @@ public class RobotContainer {
   //TODO: TargetingSystem targetingsystem = new TargetingSystem(swerve);
   Shooter shooter = new Shooter(/* targetingsystem */);
   Intake Intake = new Intake();
-  Spindexer spindexer = new Spindexer();
+  Spindexer spindexer = new Spindexer(shooter.isReadyToAcceptFuel);
 
   CommandXboxController driver = new CommandXboxController(0);
   CommandXboxController operator = new CommandXboxController(1);
