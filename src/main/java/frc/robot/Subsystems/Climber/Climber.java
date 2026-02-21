@@ -10,8 +10,8 @@ import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Subsystems.Climber.ClimberExtension.ClimberExtension;
+import frc.robot.Subsystems.Climber.Grabber.Grabber;
 
 /** Add your docs here. */
 public class Climber extends SubsystemBase {
@@ -24,6 +24,8 @@ public class Climber extends SubsystemBase {
     ClimberExtension stage2 = new ClimberExtension(
         "Stage2", 20, true, kStage2Range
     );
+
+    Grabber grabber = new Grabber();
 
     public ClimberVisual visual = new ClimberVisual();
 
@@ -47,6 +49,7 @@ public class Climber extends SubsystemBase {
         return Commands.parallel(
             stage1.goHome(),
             stage2.goHome(),
+            grabber.retract(),
             Commands.none()
         );
     }
@@ -54,20 +57,51 @@ public class Climber extends SubsystemBase {
     public Command setStage1Voltage(double voltage){
         return stage1.setVoltage(voltage);
     }
+
     public Command setStage2Voltage(double voltage){
         return stage2.setVoltage(voltage);
     }
 
     public Command prepareForClimbL1(){
-        //move stage 1 up to a specific height
-        return stage1.setHeight(Inches.of(6))
+        return Commands.parallel(
+            stage1.setHeight(Inches.of(6)),
+            grabber.retract()
+        )
+        .until(grabber.isRetracted.and(stage1.isAtTargetPosition))
         .finallyDo(stage1::stopMotor)
         .withName("PrepareToClimb");
     }
 
     public Command climbL1(){
-        return stage1.setHeight(Inches.of(0))
+        return Commands.sequence(
+            grabber.grab().until(grabber.isPossiblyConnected),
+            stage1.setHeight(Inches.of(0))
+        )
         .finallyDo(stage1::stopMotor)
         .withName("Climb");
+    }
+
+    public Command declimbL1() {
+        return Commands.sequence(
+            stage1.setHeight(Inches.of(6))
+            .until(stage1.isAtTargetPosition),
+            grabber.retract()
+        )
+        .finallyDo(stage1::stopMotor)
+        .withName("declimb")
+        ;
+        //at end, not sure if actually away from post
+    }
+
+    public Command stow(){
+        return Commands.parallel(
+            stage1.setHeight(Inches.of(0)),
+            // stage2.setHeight(Inches.of(10)),
+            grabber.retract()
+        )
+        .until(grabber.isRetracted.and(stage1.isAtTargetPosition))
+        .andThen(Commands.idle().withTimeout(1))
+        .finallyDo(stage1::stopMotor)
+        .withName("stow");
     }
 }
