@@ -67,12 +67,8 @@ public class UpGoer extends SubsystemBase{
         return setVelocity(0);
     }
 
-    public Command load(){
+    public Command feed(){
         return setVelocity(10);
-    }
-
-    public Command spin(){
-        return setVelocity(1);
     }
 
     public Command unclog(){

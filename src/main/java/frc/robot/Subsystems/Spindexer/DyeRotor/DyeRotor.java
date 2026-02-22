@@ -25,6 +25,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 public class DyeRotor extends SubsystemBase{
     SparkFlex motor = new SparkFlex(12, MotorType.kBrushless);
     DyeRotorSim sim = new DyeRotorSim(motor);
+    int maxCurrent = 30;
     
     public DyeRotor(){
         var config = new SparkFlexConfig();
@@ -36,7 +37,7 @@ public class DyeRotor extends SubsystemBase{
         config
         .idleMode(IdleMode.kCoast)
         .inverted(false)
-        .smartCurrentLimit(30)
+        .smartCurrentLimit(maxCurrent)
         ;
 
         // config.closedLoop
@@ -61,11 +62,12 @@ public class DyeRotor extends SubsystemBase{
         sim.update();
     }
 
-    public Command setVelocity (double targetVelocity){
+    public Command setVelocity(double targetVelocity, double currentLimit){
         return run(()->{ 
-            //TODO Change this from voltage to velocity,  very important!!!!!!!!!!
-            motor.getClosedLoopController().setSetpoint(targetVelocity, ControlType.kVoltage);
-        });
+            motor.getClosedLoopController().setSetpoint(targetVelocity, ControlType.kVelocity);
+        }).beforeStarting(runOnce(()-> setCurrentLimits(currentLimit)))
+        .finallyDo(()->setCurrentLimits(maxCurrent))
+        ;
     }
 
     public void setVoltage(double volt){
@@ -73,19 +75,19 @@ public class DyeRotor extends SubsystemBase{
     }
 
     public Command stop(){
-        return setVelocity(0);
+        return run(motor::stopMotor);
     }
 
-    public Command spin(){
-        return setVelocity(5);
+    public Command feed(){
+        return setVelocity(5, maxCurrent);
     }
 
-    public Command load(){
-        return setVelocity(5);
+    public Command intake(){
+        return setVelocity(5, 10);
     }
 
-    public Command spinBackwards(){
-        return setVelocity(-5);
+    public Command unclog(){
+        return setVelocity(-5, 10);
     }
 
     public AngularVelocity getVelocity(){
@@ -98,6 +100,10 @@ public class DyeRotor extends SubsystemBase{
 
     public double getCurrent(){
         return motor.getOutputCurrent();
+    }
+
+    public void setCurrentLimits(double amps){
+        // motor.configureAsync(config, resetMode, persistMode)
     }
     
 }

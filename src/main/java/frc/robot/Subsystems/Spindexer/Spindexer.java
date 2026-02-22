@@ -23,22 +23,22 @@ public class Spindexer extends SubsystemBase{
   }
 
   private Command spinDyeRotor(){
-    return dyeRotor.spin();
+    return dyeRotor.feed();
   }
 
   public Command spinUpGoer(){
-    return upGoer.spin();
+    return upGoer.feed();
   }
 
   public Command intake(){
     //TODO impliment spin, but lower power, current, or agitate
-    return dyeRotor.spin();
+    return dyeRotor.intake();
   }
 
   public Command feedToShooter(){
     var feed = Commands.parallel(
-      dyeRotor.load(),
-      upGoer.load()
+      dyeRotor.feed(),
+      upGoer.feed()
     );
 
     return Commands.repeatingSequence(
@@ -48,9 +48,19 @@ public class Spindexer extends SubsystemBase{
   }
 
   public Command unclog(){
-    return Commands.parallel(
-      dyeRotor.spinBackwards(),
-      upGoer.unclog()
+    var reverse = Commands.parallel(
+      dyeRotor.unclog(),
+      upGoer.stop()
+    ).withTimeout(0.5);
+
+    var forward = Commands.parallel(
+      dyeRotor.feed(),
+      upGoer.stop()
+    );
+
+    return Commands.repeatingSequence(
+      reverse,
+      forward
     );
   }
 
@@ -61,9 +71,11 @@ public class Spindexer extends SubsystemBase{
     );
   }
 
-  private void setVoltages(){
-    dyeRotor.setVoltage(5);
-    upGoer.setVoltage(5);
+  private Command setVoltages(double rotor, double upgoer){
+    return run(()->{
+      dyeRotor.setVoltage(rotor);
+      upGoer.setVoltage(upgoer);
+    });
   }
 
   public void periodic(){
