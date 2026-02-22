@@ -26,6 +26,7 @@ public class DyeRotor extends SubsystemBase{
     SparkFlex motor = new SparkFlex(12, MotorType.kBrushless);
     DyeRotorSim sim = new DyeRotorSim(motor);
     int maxCurrent = 30;
+    int currentLimit = 10;
     
     public DyeRotor(){
         var config = new SparkFlexConfig();
@@ -62,16 +63,16 @@ public class DyeRotor extends SubsystemBase{
         sim.update();
     }
 
-    public Command setVelocity(double targetVelocity, double currentLimit){
+    public Command setVelocity(double targetVelocity){
         return run(()->{ 
             motor.getClosedLoopController().setSetpoint(targetVelocity, ControlType.kVelocity);
-        }).beforeStarting(runOnce(()-> setCurrentLimits(currentLimit)))
-        .finallyDo(()->setCurrentLimits(maxCurrent))
-        ;
+        });
     }
 
-    public void setVoltage(double volt){
-        motor.setVoltage(volt);
+    public Command setVoltage(double volt){
+        return run(() ->{
+            motor.setVoltage(volt);
+        });
     }
 
     public Command stop(){
@@ -79,15 +80,15 @@ public class DyeRotor extends SubsystemBase{
     }
 
     public Command feed(){
-        return setVelocity(5, maxCurrent);
+        return setVelocity(5);
     }
 
     public Command intake(){
-        return setVelocity(5, 10);
+        return setVoltage(5).beforeStarting(runOnce(()-> setCurrentLimits(currentLimit))).finallyDo(()->setCurrentLimits(maxCurrent));
     }
 
     public Command unclog(){
-        return setVelocity(-5, 10);
+        return setVoltage(-5).beforeStarting(runOnce(()-> setCurrentLimits(currentLimit))).finallyDo(()->setCurrentLimits(maxCurrent));
     }
 
     public AngularVelocity getVelocity(){
@@ -103,7 +104,8 @@ public class DyeRotor extends SubsystemBase{
     }
 
     public void setCurrentLimits(double amps){
-        // motor.configureAsync(config, resetMode, persistMode)
+        motor.configureAsync(config.smartCurrentLimit(amps)
+        , resetMode, persistMode)
     }
     
 }
