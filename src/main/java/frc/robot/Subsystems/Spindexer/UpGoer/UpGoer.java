@@ -24,14 +24,14 @@ public class UpGoer extends SubsystemBase{
     public UpGoer(){
         var config = new SparkFlexConfig();
 
-        var conversionfactor = 1.0;
+        var conversionfactor = 5.0;
         config.encoder.positionConversionFactor(1/conversionfactor);
         config.encoder.velocityConversionFactor(1/conversionfactor/60);
 
         config
         .idleMode(IdleMode.kCoast)
-        .inverted(false)
-        .smartCurrentLimit(10)
+        .inverted(true)
+        .smartCurrentLimit(20)
         ;
 
         // config.closedLoop
@@ -39,17 +39,20 @@ public class UpGoer extends SubsystemBase{
         // ;
         
         config.closedLoop.feedForward
-        .kV(12/7600.0)
+        .kV(1/(7600.0/conversionfactor))
         ;
 
         motor.configure(config , ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
 
+        motor.getEncoder().setPosition(0);
         setDefaultCommand(stop());
     }
 
     @Override
     public void periodic(){
         SmartDashboard.putNumber("UpGoer/Output", motor.getAppliedOutput());
+        SmartDashboard.putNumber("UpGoer/Position",motor.getEncoder().getPosition());
+        SmartDashboard.putNumber("UpGoer/Velocity",motor.getEncoder().getVelocity());
     }
 
     
@@ -64,19 +67,19 @@ public class UpGoer extends SubsystemBase{
     }
 
     public Command stop(){
-        return setVelocity(0);
+        return run(motor::stopMotor);
     }
 
     public Command feed(){
-        return setVelocity(10);
+        return setVelocity(1000);
     }
 
     public Command unclog(){
-        return setVelocity(60);
+        return setVelocity(1000);
     }
 
-    public void setVoltage(double volt){
-        motor.setVoltage(volt);
+    public Command setVoltage(double volts){
+        return run(()->motor.setVoltage(volts));
     }
 
     public double getVelocity(){

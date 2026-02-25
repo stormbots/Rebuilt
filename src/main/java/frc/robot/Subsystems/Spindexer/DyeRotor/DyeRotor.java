@@ -4,7 +4,6 @@
 
 package frc.robot.Subsystems.Spindexer.DyeRotor;
 
-import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.DegreesPerSecond;
 
 import com.revrobotics.PersistMode;
@@ -15,11 +14,9 @@ import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.SparkFlexConfig;
 
-import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class DyeRotor extends SubsystemBase{
@@ -31,7 +28,7 @@ public class DyeRotor extends SubsystemBase{
     public DyeRotor(){
         var config = new SparkFlexConfig();
 
-        var conversionfactor = 1.0;
+        var conversionfactor = 57.0;
         config.encoder.positionConversionFactor(1/conversionfactor);
         config.encoder.velocityConversionFactor(1/conversionfactor/60);
 
@@ -45,17 +42,20 @@ public class DyeRotor extends SubsystemBase{
         // .p(0)
         // ;
         config.closedLoop.feedForward
-        .kV(12/7600.0)
+        .kV(12/(7600.0/conversionfactor)*3)
         ;
 
         motor.configure(config , ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
 
+        motor.getEncoder().setPosition(0);
         setDefaultCommand(stop());
     }
 
     @Override
     public void periodic(){
-        SmartDashboard.putNumber("DyeRotar/Output", motor.getAppliedOutput());
+        SmartDashboard.putNumber("DyeRotor/Output", motor.getAppliedOutput());
+        SmartDashboard.putNumber("DyeRotor/Position",motor.getEncoder().getPosition());
+        SmartDashboard.putNumber("DyeRotor/Velocity",motor.getEncoder().getVelocity());
     }
 
     @Override
@@ -80,7 +80,7 @@ public class DyeRotor extends SubsystemBase{
     }
 
     public Command feed(){
-        return setVelocity(5);
+        return setVelocity(2);
     }
 
     public Command intake(){
@@ -95,7 +95,7 @@ public class DyeRotor extends SubsystemBase{
         return DegreesPerSecond.of(motor.getEncoder().getVelocity());
     }
 
-    public double getPosition(){
+    public double getPosition(){ 
         return motor.getEncoder().getPosition();
     }
 
@@ -103,9 +103,9 @@ public class DyeRotor extends SubsystemBase{
         return motor.getOutputCurrent();
     }
 
-    public void setCurrentLimits(double amps){
-        motor.configureAsync(config.smartCurrentLimit(amps)
-        , resetMode, persistMode)
+    private void setCurrentLimits(int amps){
+        var config = new SparkFlexConfig();
+        motor.configureAsync(config.smartCurrentLimit(amps), ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
     }
     
 }
