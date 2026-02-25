@@ -71,6 +71,10 @@ Flywheel flywheel = new Flywheel();
         return flywheel.setVoltageCommand(volts);
     }
 
+    public Command testHome(){
+        return hood.homingCommand();
+    }
+
     public Command simGetLaunchCommand(){
         //Don't do anything on a normal bot
         if(Robot.isReal())return Commands.idle();

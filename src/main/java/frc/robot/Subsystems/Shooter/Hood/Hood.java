@@ -20,6 +20,7 @@ import com.revrobotics.spark.config.SparkMaxConfig;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.units.measure.Angle;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.FunctionalCommand;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
@@ -41,7 +42,7 @@ public class Hood extends SubsystemBase {
   public static final double homeAngle = 0.0;
   //minimum reachable should be slightly higher than hard limit
   public static final double minAngle = homeAngle+0.5;
-  public static final double maxAngle = 0.0;
+  public static final double maxAngle = 43.0;
 
   private boolean homed = false;
 
@@ -55,11 +56,17 @@ public class Hood extends SubsystemBase {
   /** Creates a new Hood. */
   public Hood() {
     motor.configure(getMotorConfig(), ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+
+    setDefaultCommand(run(this::stop));
   }
 
   @Override
   public void periodic() {
     // This method will be called once per scheduler run
+    SmartDashboard.putNumber("shooter/hood/current", motor.getOutputCurrent());
+    SmartDashboard.putNumber("shooter/hood/voltage", motor.getAppliedOutput()*motor.getBusVoltage());
+    SmartDashboard.putNumber("shooter/hood/position", motor.getEncoder().getPosition());
+    SmartDashboard.putBoolean("shooter/hood/homed", homed);
   }
 
   private SparkBaseConfig getMotorConfig(){
@@ -79,7 +86,7 @@ public class Hood extends SubsystemBase {
 
     config.closedLoop
       .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
-      .p(0.0)
+      .p(0.3/30)
     ;
 
     //do not enable soft limits until homed
@@ -108,6 +115,10 @@ public class Hood extends SubsystemBase {
         );
       }
     });
+  }
+
+  public void stop(){
+    motor.stopMotor();
   }
 
   public Command setAngle(Supplier<TargetingSystem.ShooterState> targetSupplier){

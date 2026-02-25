@@ -9,9 +9,11 @@ import java.util.function.Supplier;
 
 import com.revrobotics.PersistMode;
 import com.revrobotics.ResetMode;
+import com.revrobotics.spark.ClosedLoopSlot;
 import com.revrobotics.spark.FeedbackSensor;
 import com.revrobotics.spark.SparkBase;
 import com.revrobotics.spark.SparkFlex;
+import com.revrobotics.spark.SparkClosedLoopController.ArbFFUnits;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.config.SparkBaseConfig;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
@@ -19,6 +21,7 @@ import com.stormbots.Clamp;
 import com.revrobotics.spark.config.SparkFlexConfig;
 
 import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
@@ -34,6 +37,8 @@ public class Flywheel extends SubsystemBase {
 
   private double targetRPM = 0.0;
   private double tolerance = 300.0;
+
+  SimpleMotorFeedforward ff = new SimpleMotorFeedforward(0.0, 0.0);
 
   /** Creates a new Flywheel. */
   public Flywheel() {
@@ -71,7 +76,10 @@ public class Flywheel extends SubsystemBase {
       this.tolerance = tolerance.getAsDouble();
       leaderMotor.getClosedLoopController().setSetpoint(
         targetRPM, 
-        SparkBase.ControlType.kVelocity
+        SparkBase.ControlType.kVelocity,
+        ClosedLoopSlot.kSlot0,
+        ff.calculate(targetRPM),
+        ArbFFUnits.kVoltage
       );
     });
 
@@ -105,7 +113,7 @@ public class Flywheel extends SubsystemBase {
       .d(0.0)
     .feedForward
       .kV(0)
-      .kV(0.0024309/12.0)
+      // .kV(0.0024309/12.0)
     ;
 
     config.encoder

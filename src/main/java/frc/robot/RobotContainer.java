@@ -5,6 +5,7 @@
 package frc.robot;
 
 import static edu.wpi.first.units.Units.Degree;
+import static edu.wpi.first.units.Units.Degrees;
 
 import com.stormbots.CRTAbsoluteEncoder;
 
@@ -56,7 +57,10 @@ public class RobotContainer {
     // }
 
     // driver.a().whileTrue(shooter.testSetFlywheelRPM(1000));
-    // driver.a().whileTrue(shooter.testFlywheelVoltage(6));
+    driver.a().whileTrue(shooter.testFlywheelVoltage(6));
+    driver.b().whileTrue(spindexer.bruh());
+    // driver.a().whileTrue(shooter.testHome());
+    // driver.b().whileTrue(shooter.testSetHoodAngle(Degrees.of(30)));
   }
 
   public Command getAutonomousCommand() {
