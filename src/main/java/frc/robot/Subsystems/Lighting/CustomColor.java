@@ -39,7 +39,9 @@ public class CustomColor {
   }
 
   private int toInteger(){
-    return (255 << 24) | (red << 16) | (green << 8) | blue;
+    // return (255 << 24) | (red << 16) | (green << 8) | blue;
+    return (red << 16) | (green << 8) | blue;
+
   }
 
   private int toRed(String hex){
@@ -55,12 +57,22 @@ public class CustomColor {
   }
 
   public String getHex(){
-    String hex = Integer.toString(toInteger() & 0x00ffffff, 16);
+    // String hex = Integer.toString(toInteger() & 0x00ffffff, 16);
+    String hex = Integer.toString(toInteger() & 0xffffff, 16);
+    if (red <= 16){
+      hex = "0"+hex;
+    }
     if (red == 0){
-      hex = "00"+hex;
+      hex = "0"+hex;
     }
     if (green == 0 && red == 0){
       hex = "00"+hex;
+    }
+    if (hex.length()<6){
+      hex= hex+"0";
+    }
+    if (hex.length()<6){
+      hex= hex+"0";
     }
     return hex;
   }
@@ -80,7 +92,7 @@ public class CustomColor {
   public static final CustomColor kLightGreen = new CustomColor(159, 255, 133);
 
   public static final CustomColor kChileBlue = new CustomColor(0, 50, 160);
-  public static final CustomColor kArgentinaBlue = new CustomColor(108, 172, 288);
+  public static final CustomColor kArgentinaBlue = new CustomColor(108, 172, 228);
   public static final CustomColor kArgentinaYellow = new CustomColor(255, 184, 28);
   public static final CustomColor kUruguayYellow = new CustomColor(255,205,0);
   public static final CustomColor kParaguayGreen = new CustomColor(28, 204, 0);

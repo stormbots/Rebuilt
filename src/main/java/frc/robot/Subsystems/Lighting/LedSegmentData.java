@@ -6,11 +6,13 @@ package frc.robot.Subsystems.Lighting;
 
 import java.util.Optional;
 
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+
 /** Add your docs here. */
 public class LedSegmentData extends LedBase{
     
 private transient boolean updated = true;
-private transient static int index;
+private transient int index;
 
     public LedSegmentData(int id, int start, int stop, boolean rev){
         super(id, start, stop, rev);
@@ -93,6 +95,7 @@ private transient static int index;
         i = null;
         frz = Optional.empty();
         updated = false;
+        WLED.updateState(updated, index);
     }
 
     public boolean isUpdated(){
@@ -102,6 +105,8 @@ private transient static int index;
     @Override
     public void periodic() {
         WLED.updateState(updated, index);
+        SmartDashboard.putNumber("index", index);
+        SmartDashboard.putBoolean("isUpdated", updated);
     }
 
 

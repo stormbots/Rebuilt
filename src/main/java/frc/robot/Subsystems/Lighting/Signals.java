@@ -8,7 +8,9 @@ import java.util.HashMap;
 import java.util.Optional;
 
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.SerialPort;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
+import edu.wpi.first.wpilibj.SerialPort.Port;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -16,13 +18,13 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 public class Signals extends SubsystemBase {
 
   double[] ownedSegments=new double[]{0,1,2,3};
-  public WLED wled = new WLED();
+  public WLED wled = new WLED(new SerialPort(11520, Port.kUSB1));
   LedSegment segment = new LedSegment(0, 0, 60, false);
   LedSegment seg2 = new LedSegment(1, 60, 120, false);
 
   public Signals(){
-    seg2.setDefaultCommand(seg2.seguimosAquí());
-    segment.setDefaultCommand(showAllianceColorBoring(segment));
+    // seg2.setDefaultCommand(seg2.seguimosAquí());
+    segment.setDefaultCommand(segment.seguimosAquí());
   }
 
   private Command showAllianceColorBoring(LedSegment segment){

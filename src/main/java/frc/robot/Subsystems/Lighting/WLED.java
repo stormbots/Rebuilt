@@ -27,12 +27,12 @@ public class WLED extends SubsystemBase{
   private static ArrayList<LedSegment> segments = new ArrayList<LedSegment>();
   private static ArrayList<Boolean> updated = new ArrayList<Boolean>();
   private static int calls;
-  public WLED() {
+  public WLED(SerialPort serialPort) {
     try{
       serialport.toString();
     }
     catch (NullPointerException n){
-      serialport = new SerialPort(115200, Port.kUSB1);
+      this.serialport = serialPort;
     }
     calls = 0; 
   }
@@ -44,6 +44,7 @@ public class WLED extends SubsystemBase{
   @Override
   public void periodic() {
     serializeSegments();
+    SmartDashboard.putString("updated",updated.toString());
   }
 
   private static String gsonSerialize(LedSegment segment){
