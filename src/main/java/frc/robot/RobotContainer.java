@@ -55,10 +55,8 @@ public class RobotContainer {
     //   ));
     // }
 
-    // driver.a().whileTrue(intake.smartIntake());
-    // driver.b().whileTrue(shooter.simGetLaunchCommand());
-
-    // driver.a().whileTrue(shooter.shoot(targeting.getShooterStateForHubTarget(swerve.getSwervePose(), targeting.getBestTarget(swerve.getSwervePose()).getTranslation())));
+    // driver.a().whileTrue(shooter.testSetFlywheelRPM(1000));
+    // driver.a().whileTrue(shooter.testFlywheelVoltage(6));
   }
 
   public Command getAutonomousCommand() {

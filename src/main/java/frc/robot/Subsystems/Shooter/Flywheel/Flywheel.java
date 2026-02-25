@@ -42,6 +42,8 @@ public class Flywheel extends SubsystemBase {
 
     leaderMotor.configure(getMotorConfig(), ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
     followerMotor.configure(followerConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+
+    setDefaultCommand(run(this::stop));
   }
 
   @Override
@@ -92,8 +94,8 @@ public class Flywheel extends SubsystemBase {
     SparkBaseConfig config = new SparkFlexConfig();
 
     config
-      .smartCurrentLimit(100)
-      .inverted(false)
+      .smartCurrentLimit(60)
+      .inverted(true)
       .idleMode(IdleMode.kCoast);
 
     config.closedLoop
@@ -102,8 +104,8 @@ public class Flywheel extends SubsystemBase {
       .i(0.0)
       .d(0.0)
     .feedForward
-      .kS(0.0) //0.22
-      .kV(0.0024309)
+      .kV(0)
+      .kV(0.0024309/12.0)
     ;
 
     config.encoder

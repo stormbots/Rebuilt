@@ -20,7 +20,7 @@ import frc.robot.Subsystems.Shooter.Turret.TurretVisual;
 import frc.robot.Subsystems.TargetingSystem.TargetingSystem;
 
 public class Shooter {
-    Flywheel flywheel = new Flywheel();
+Flywheel flywheel = new Flywheel();
     Turret turret = new Turret();
     Hood hood = new Hood();
 
@@ -65,6 +65,10 @@ public class Shooter {
 
     public Command testSetFlywheelRPM(double rpm){
         return flywheel.setRPM(()->rpm, ()->300);
+    }
+    
+    public Command testFlywheelVoltage(double volts){
+        return flywheel.setVoltageCommand(volts);
     }
 
     public Command simGetLaunchCommand(){
