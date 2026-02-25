@@ -71,11 +71,11 @@ public class UpGoer extends SubsystemBase{
     }
 
     public Command feed(){
-        return setVelocity(1000);
+        return setVoltage(1000);
     }
 
     public Command unclog(){
-        return setVelocity(1000);
+        return setVoltage(1000);
     }
 
     public Command setVoltage(double volts){

@@ -80,7 +80,8 @@ public class DyeRotor extends SubsystemBase{
     }
 
     public Command feed(){
-        return setVelocity(2);
+        //return setVelocity(2);
+        return setVoltage(6);
     }
 
     public Command intake(){

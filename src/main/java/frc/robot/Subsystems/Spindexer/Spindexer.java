@@ -30,19 +30,6 @@ public class Spindexer extends SubsystemBase{
     return upGoer.feed();
   }
 
-  public Command testStraightVolts(){
-    return Commands.parallel(
-      dyeRotor.setVoltage(6),
-      upGoer.setVoltage(18)
-    );
-  }
-
-  public Command testUpgoerVolts(){
-    return upGoer.setVoltage(6);
-  }
-
-
-
   public Command intake(){
     //TODO impliment spin, but lower power, current, or agitate
     return dyeRotor.intake();
