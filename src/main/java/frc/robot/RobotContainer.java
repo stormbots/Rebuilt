@@ -29,7 +29,7 @@ public class RobotContainer {
   TargetingSystem targeting = new TargetingSystem(swerve);
   Shooter shooter = new Shooter(targeting);
   Intake intake = new Intake();
-  Spindexer spindexer = new Spindexer();
+  Spindexer spindexer = new Spindexer(shooter.isReadyToAcceptFuel);
 
   CommandXboxController driver = new CommandXboxController(0);
   CommandXboxController operator = new CommandXboxController(1);
@@ -58,7 +58,8 @@ public class RobotContainer {
 
     // driver.a().whileTrue(shooter.testSetFlywheelRPM(1000));
     driver.a().whileTrue(shooter.testFlywheelVoltage(6));
-    driver.b().whileTrue(spindexer.bruh());
+    driver.b().whileTrue(spindexer.feedToShooter());
+    driver.x().whileTrue(spindexer.intake());
     // driver.a().whileTrue(shooter.testHome());
     // driver.b().whileTrue(shooter.testSetHoodAngle(Degrees.of(30)));
   }

@@ -53,6 +53,7 @@ public class Turret extends SubsystemBase {
     CRTAbsoluteEncoder.getInstance().setParams(kTurretGearToothCount, kGear1ToothCount, kGear2ToothCount, true);
     CRTAbsoluteEncoder.getInstance().setRelativeEncoder(motor.getEncoder());
     CRTAbsoluteEncoder.getInstance().setEncoder1(motor.getAbsoluteEncoder());
+    CRTAbsoluteEncoder.getInstance().setEncoder2(motor.getAbsoluteEncoder());
 
     setDefaultCommand(run(()->motor.stopMotor()));
   }

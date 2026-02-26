@@ -26,6 +26,10 @@ Flywheel flywheel = new Flywheel();
 
     TargetingSystem targeting;
 
+    //TODO: Sync this method/concept with shooter code
+    public Trigger isReadyToAcceptFuel = new Trigger(()->true);
+
+
     /** Just set up the mechanism2d so we can visualize the system all at once */
     // ShooterVisual visual = new ShooterVisual(flywheel, hood, turret);
     TurretVisual visual = new TurretVisual(turret);
@@ -118,5 +122,5 @@ Flywheel flywheel = new Flywheel();
 
         return shoot(bestState);
     }
-
+    
 }
