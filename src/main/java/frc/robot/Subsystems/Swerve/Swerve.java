@@ -9,10 +9,13 @@ import java.util.Optional;
 import java.util.function.DoubleSupplier;
 
 import dev.doglog.DogLog;
+import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.math.numbers.N1;
+import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.Filesystem;
@@ -30,18 +33,13 @@ import swervelib.telemetry.SwerveDriveTelemetry.TelemetryVerbosity;
 
 public class Swerve extends SubsystemBase {
 
-  final double maximumSpeed = 5.0;
-
-  SwerveDrive swerveDrive; 
-
+  final double maximumSpeed = 2.0;
+  public SwerveDrive swerveDrive; 
   Field2d odometryField = new Field2d();
-
 
   /** Creates a new SwerveSubsystem. */
   public Swerve() {
-
-    //this needs to be changed once final frame is decided
-    var botname = Preferences.getString("BotName", "tabisim");
+    var botname = Preferences.getString("BotName", "compBot");
     File swerveJsonDirectory = new File(Filesystem.getDeployDirectory(),botname);
     try
     {
@@ -56,11 +54,8 @@ public class Swerve extends SubsystemBase {
     swerveDrive.setMotorIdleMode(true);
     swerveDrive.setModuleStateOptimization(true);
     swerveDrive.setCosineCompensator(false);
-
     SwerveDriveTelemetry.verbosity = TelemetryVerbosity.HIGH;
-
     SmartDashboard.putData("odometryField", odometryField);
-    
   }
 
   static class SwerveInputs{
@@ -83,6 +78,7 @@ public class Swerve extends SubsystemBase {
 
   SwerveInputs driverInputs = new SwerveInputs();
   SwerveInputs fieldInputs = new SwerveInputs();
+  SwerveInputs autoInputs = new SwerveInputs();
 
   @Override
   public void periodic() {
@@ -92,13 +88,12 @@ public class Swerve extends SubsystemBase {
     DogLog.log("Swerve/pose", swerveDrive.getPose());
 
     odometryField.setRobotPose(swerveDrive.getPose());
-
     var inputs = new SwerveInputs()
     .add(driverInputs)
     .add(fieldInputs)
+    .add(autoInputs)
     ;
     if(DriverStation.isDisabled())inputs.clear();
-
     swerveDrive.drive(
         new Translation2d(
           inputs.tx * swerveDrive.getMaximumChassisVelocity(),
@@ -128,6 +123,31 @@ public class Swerve extends SubsystemBase {
     ;
   }
 
+  public Command addAutoInputs(DoubleSupplier translationX, DoubleSupplier translationY, DoubleSupplier angularRotationX){
+    return Commands.either(
+      run(()->{
+        autoInputs.tx = 1 * translationX.getAsDouble();
+        autoInputs.ty = 1 * translationY.getAsDouble();
+        autoInputs.r = angularRotationX.getAsDouble();
+      }), 
+      run(()->{
+        autoInputs.tx = -1 * translationX.getAsDouble();
+        autoInputs.ty = -1 * translationY.getAsDouble();
+        autoInputs.r = angularRotationX.getAsDouble();
+      }),
+      ()->DriverStation.getAlliance().equals(Optional.of(Alliance.Blue))
+    )
+    .finallyDo(autoInputs::clear)
+    ;
+  }
+
+  public void addAutoInputsVoid(DoubleSupplier translationX, DoubleSupplier translationY, DoubleSupplier angularRotationX)
+  {
+    autoInputs.tx = 1 * translationX.getAsDouble();
+    autoInputs.ty = 1 * translationY.getAsDouble();
+    autoInputs.r = angularRotationX.getAsDouble();
+  }
+
   public Command zeroGyro(){
     return Commands.runOnce(swerveDrive::zeroGyro);
   }
@@ -148,5 +168,15 @@ public class Swerve extends SubsystemBase {
         fieldInputs.r = angularRotationX.getAsDouble();
       });
     };
+  public void addVisionMeasurement(Pose2d pose2d, double timestamp, Matrix<N3, N1> STD_DEVS){
+    swerveDrive.addVisionMeasurement(pose2d, timestamp, STD_DEVS);
+  }
 
+  public ChassisSpeeds getChassisSpeedsRobotRelative(){
+    return swerveDrive.getRobotVelocity();
+  }
+
+  public ChassisSpeeds getChassisSpeedsFieldRelative(){
+    return swerveDrive.getFieldVelocity();
+  }
 }
