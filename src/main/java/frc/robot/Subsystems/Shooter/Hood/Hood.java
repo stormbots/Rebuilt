@@ -51,7 +51,7 @@ public class Hood extends SubsystemBase {
 
   SparkMax motor = new SparkMax(15, MotorType.kBrushless);
 
-  Trigger isAtHome = new Trigger(()-> !homed && motor.getOutputCurrent()>kHomeCurrentThreshold );
+  Trigger isAtHome = new Trigger(()-> !homed && motor.getOutputCurrent()>kHomeCurrentThreshold ).debounce(0.1);
 
   /** Creates a new Hood. */
   public Hood() {
@@ -86,7 +86,7 @@ public class Hood extends SubsystemBase {
 
     config.closedLoop
       .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
-      .p(0.3/30)
+      .p(2*0.3/30)
     ;
 
     //do not enable soft limits until homed
@@ -135,7 +135,7 @@ public class Hood extends SubsystemBase {
     
     config.smartCurrentLimit(limit);
 
-    motor.configureAsync(config, ResetMode.kNoResetSafeParameters, PersistMode.kPersistParameters);
+    motor.configureAsync(config, ResetMode.kNoResetSafeParameters, PersistMode.kNoPersistParameters);
   }
 
   //TODO: move this out into shooter, this itself shouldn't count as a subsystem.
@@ -171,7 +171,7 @@ public class Hood extends SubsystemBase {
 
     motor.getEncoder().setPosition(homeAngle);
 
-    motor.configureAsync(config, ResetMode.kNoResetSafeParameters, PersistMode.kPersistParameters);
+    motor.configureAsync(config, ResetMode.kNoResetSafeParameters, PersistMode.kNoPersistParameters);
 
     homed=true;
   }

@@ -4,6 +4,8 @@
 
 package frc.robot;
 
+import static edu.wpi.first.units.Units.Degrees;
+
 import com.stormbots.CRTAbsoluteEncoder;
 
 import edu.wpi.first.math.geometry.Pose3d;
@@ -63,13 +65,18 @@ public class RobotContainer {
     driver.a().whileTrue(shooter.testFlywheelVoltage(6));
     driver.b().whileTrue(spindexer.feedToShooter());
     driver.x().whileTrue(spindexer.intake());
+
+    driver.povDown().whileTrue(shooter.testHome());
+    driver.povUp().whileTrue(shooter.testSetHoodAngle(Degrees.of(30)));
+
+
     // driver.a().whileTrue(shooter.testHome());
     // driver.b().whileTrue(shooter.testSetHoodAngle(Degrees.of(30)));
-    swerve.setDefaultCommand(swerve.addDriverInputs(
-      ()->-driver.getLeftY(), 
-      ()->-driver.getLeftX(), 
-      ()->-driver.getRightX()
-    ));
+    // swerve.setDefaultCommand(swerve.addDriverInputs(
+    //   ()->-driver.getLeftY(), 
+    //   ()->-driver.getLeftX(), 
+    //   ()->-driver.getRightX()
+    // ));
 
     //THIS IS VERY JANK, FIX LATER, should be part of the auto starting sequence, should setQuestPose THEN wantToTrack, this was dumb
     // driver.a().onTrue(swerve.zeroGyro());
