@@ -4,6 +4,8 @@
 
 package frc.robot.Subsystems.Intake;
 
+import static edu.wpi.first.units.Units.Degree;
+
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -43,6 +45,28 @@ public class Intake extends SubsystemBase {
     );
   }
 
+
+  public Command bringUp(){
+    var upRollers = Commands.parallel(
+      left.up(),
+      right.up(),
+      rollers.intake()
+    )
+    .withTimeout(0.5)
+    .until(()->{
+      return left.getAngle().in(Degree) > 45
+      && right.getAngle().in(Degree) > 45;
+    })
+    ;
+
+    return Commands.sequence(
+      upRollers,
+      stop()
+    )
+    .withName("bringUp")
+    ;
+  }  
+  
   public Command stop(){
     return Commands.parallel(
       rollers.stop(),
