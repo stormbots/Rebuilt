@@ -26,14 +26,14 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 
 public class IntakeExtension extends SubsystemBase {
-  SparkFlex motor = new SparkFlex(9, MotorType.kBrushless);
-  SparkFlex followerMotor = new SparkFlex(10, MotorType.kBrushless);
-
+  SparkFlex motor;
+  
   // Breaks on real robot? It shouldn't....
   // IntakeExtensionSim sim = new IntakeExtensionSim(motor);
 
   /** Creates a new IntakeExtension. */
-  public IntakeExtension() {
+  public IntakeExtension(int motorID, Boolean inverted) {
+    this.motor = new SparkFlex(motorID, MotorType.kBrushless);
     var config = new  SparkFlexConfig();
     double factor = 1/9.0 * 1/5.0 * 12*36 / 360.0 ;
     //90 = all the way
@@ -61,7 +61,7 @@ public class IntakeExtension extends SubsystemBase {
 
     config
     .idleMode(IdleMode.kCoast)
-    .inverted(false)
+    .inverted(inverted)
     .smartCurrentLimit(5)
     .voltageCompensation(11)
     ;
@@ -69,8 +69,7 @@ public class IntakeExtension extends SubsystemBase {
     motor.configure(config, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
 
     //Apply the follower configuration, and re-use any applicable configs for the other side
-    config.follow(motor,true);
-    followerMotor.configure(config, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+    // config.follow(motor,true);
 
     new Trigger(DriverStation::isEnabled)
     .onTrue(setIdleMode(IdleMode.kCoast))

@@ -12,7 +12,8 @@ import frc.robot.Subsystems.Intake.Rollers.Rollers;
 
 /** Add your docs here. */
 public class Intake extends SubsystemBase {
-  private IntakeExtension intakeExtension = new IntakeExtension();
+  private IntakeExtension left = new IntakeExtension(9,false);
+  private IntakeExtension right = new IntakeExtension(10,true);
   private Rollers rollers = new Rollers();
   private IntakeVisualizer visual = new IntakeVisualizer();
 
@@ -21,13 +22,14 @@ public class Intake extends SubsystemBase {
 
   @Override
   public void periodic(){
-    visual.update(intakeExtension.getAngle(), rollers.getPosition(),rollers.getVelocity());
+    visual.update(left.getAngle(), rollers.getPosition(),rollers.getVelocity());
   }
 
   public Command intake(){
     return Commands.parallel(
       rollers.intake(),
-      intakeExtension.down()
+      left.down(),
+      right.down()
     )    
     .withName("Intake")
     ;    
@@ -36,14 +38,16 @@ public class Intake extends SubsystemBase {
   public Command eject(){
     return Commands.parallel(
       rollers.eject(),
-      intakeExtension.down()
+      left.down(),
+      right.down()
     );
   }
 
   public Command stop(){
     return Commands.parallel(
       rollers.stop(),
-      intakeExtension.up()
+      left.up(),
+      right.up()
     )
     .withName("Stop")
     ;
