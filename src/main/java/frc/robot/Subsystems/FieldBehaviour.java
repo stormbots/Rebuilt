@@ -1,24 +1,38 @@
 package frc.robot.Subsystems;
 
+import org.dyn4j.geometry.Rotation;
+
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Subsystems.Swerve.Swerve.SwerveInputs;
 
 public class FieldBehaviour{
     public boolean isPassing = false;
     Field2d field = new Field2d();
+    Rotation2d rotation = new Rotation2d(15);
 
     public FieldBehaviour(){
         SmartDashboard.putData("FieldBehavior/field",field);
+        field.getObject("TestPose").setPose(new Pose2d(5, 7, rotation));
+
+        if(DriverStation.isFMSAttached()) return; //Don't do debug things
+        new Trigger(DriverStation::isEnabled)
+        .whileTrue(Commands.run(()->{
+            SmartDashboard.putBoolean("FieldBehaviour/retractHood", getRetractHood(field.getObject("TestPose").getPose()));
+        }));
+
     }
 
 
     // Track our field locations, in meters
-    public double[] trenchX = new double[]{0,0,0,0};
-    public double[] trenchY = new double[]{0,0,0,0};
+    public double[] trenchX = new double[]{4.3, 5.1, 12, 13};
+    public double[] trenchY = new double[]{1, 0, 6.7, 8};
 
     public double[] bumpX = new double[]{0,0,0,0};
     public double[] bumpY = new double[]{0,0,0,0};
