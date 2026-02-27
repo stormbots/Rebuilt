@@ -38,7 +38,8 @@ public class IntakeExtension extends SubsystemBase {
     double factor = 1/9.0 * 1/5.0 * 12*36 / 360.0 ;
     //90 = all the way
     //0  = resting on top of fuel on the ground
-    factor = 90/11.309586;
+    factor = 90/4.666661;
+    // factor = 1;
     config.encoder
     .positionConversionFactor(factor)
     .velocityConversionFactor(factor / 60.0)
@@ -49,7 +50,7 @@ public class IntakeExtension extends SubsystemBase {
     // .svacr(0, 0, 0, 0, 0);
     
     config.closedLoop
-    .p(3/12.0 / 45.0)
+    .p(9 / 45.0)
     ;
 
     config.closedLoop.maxMotion
@@ -60,7 +61,7 @@ public class IntakeExtension extends SubsystemBase {
 
     config
     .idleMode(IdleMode.kCoast)
-    .inverted(true)
+    .inverted(false)
     .smartCurrentLimit(5)
     .voltageCompensation(11)
     ;
@@ -68,7 +69,7 @@ public class IntakeExtension extends SubsystemBase {
     motor.configure(config, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
 
     //Apply the follower configuration, and re-use any applicable configs for the other side
-    config.follow(motor,false);
+    config.follow(motor,true);
     followerMotor.configure(config, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
 
     new Trigger(DriverStation::isEnabled)
@@ -85,13 +86,10 @@ public class IntakeExtension extends SubsystemBase {
   public void periodic() {
     // This method will be called once per scheduler run
 
-    motor.getAppliedOutput();
-    motor.getOutputCurrent();
-    motor.getAbsoluteEncoder().getPosition();
     SmartDashboard.putNumber("Intake/Extension/OutputCurrent", motor.getOutputCurrent());
     SmartDashboard.putNumber("Intake/Extension/Dutycycle", motor.getAppliedOutput());
-    SmartDashboard.putNumber("Intake/Extension/abs enc angle", motor.getAbsoluteEncoder().getPosition());
     SmartDashboard.putNumber("Intake/Extension/rel enc angle", motor.getEncoder().getPosition());
+    SmartDashboard.putNumber("Intake/Extension/getAngle", getAngle().in(Degree));
     SmartDashboard.putString("Intake/Extension/Command", getCurrentCommand()==null ? "None" : getCurrentCommand().getName() );
   }
 
@@ -102,7 +100,7 @@ public class IntakeExtension extends SubsystemBase {
   }
 
   public Angle getAngle(){
-    return Degrees.of(motor.getAbsoluteEncoder().getPosition());
+    return Degrees.of(motor.getEncoder().getPosition());
   };
 
   private Command setIdleMode(IdleMode mode){
@@ -133,16 +131,16 @@ public class IntakeExtension extends SubsystemBase {
   public Command up(){
     return Commands.sequence(
       setAngle(90, 0).until(()->getAngle().in(Degree) > 80),
-      setAngle(90, 0.5)
+      setAngle(90, 0)
     )
     .withName("Up")
     ;
   }
 
   public Command down(){
-    double downTransitionAngle = 60;
+    double downTransitionAngle = 45;
     return Commands.repeatingSequence(
-      run(()->motor.setVoltage(-5)).until(()->getAngle().in(Degree)<=downTransitionAngle),
+      run(()->motor.setVoltage(-9)).until(()->getAngle().in(Degree)<=downTransitionAngle),
       run(()->motor.stopMotor()).until(()->getAngle().in(Degree)>downTransitionAngle)
     )
     .withName("Down")

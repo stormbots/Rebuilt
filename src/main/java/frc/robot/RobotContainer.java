@@ -32,8 +32,8 @@ public class RobotContainer {
   }
 
   private void configureBindings()  {
-    // driver.x().whileTrue(intake.intake());
-    // driver.y().whileTrue(intake.stop());
+    driver.x().whileTrue(intake.intake());
+    driver.y().whileTrue(intake.stop());
   }
 
   public Command getAutonomousCommand() {

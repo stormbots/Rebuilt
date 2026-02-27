@@ -85,11 +85,13 @@ public class Rollers extends SubsystemBase {
   }
 
   public Command intake(){
-    return setVelocity(100);
+    // return setVelocity(100);
+    return setVoltage(9);
   }
 
  public Command eject(){
-    return setVelocity(-100);
+    // return setVelocity(-100);
+    return setVoltage(-9);
   }
 
   public Command stop(){
