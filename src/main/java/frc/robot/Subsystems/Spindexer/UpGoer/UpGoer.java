@@ -31,7 +31,7 @@ public class UpGoer extends SubsystemBase{
         config
         .idleMode(IdleMode.kCoast)
         .inverted(true)
-        .smartCurrentLimit(20)
+        .smartCurrentLimit(30)
         ;
 
         // config.closedLoop
@@ -71,7 +71,7 @@ public class UpGoer extends SubsystemBase{
     }
 
     public Command feed(){
-        return setVoltage(6);
+        return setVoltage(8);
     }
 
     public Command unclog(){

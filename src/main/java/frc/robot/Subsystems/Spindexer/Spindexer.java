@@ -71,11 +71,11 @@ public class Spindexer extends SubsystemBase{
     );
   }
 
-  private Command setVoltages(double rotor, double upgoer){
-    return run(()->{
-      dyeRotor.setVoltage(rotor);
-      upGoer.setVoltage(upgoer);
-    });
+  public Command setVoltages(double rotor, double upgoer){
+    return Commands.parallel(
+      dyeRotor.setVoltage(rotor),
+      upGoer.setVoltage(upgoer)
+    );
   }
 
   public void periodic(){

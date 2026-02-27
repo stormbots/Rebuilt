@@ -47,11 +47,11 @@ public class RobotContainer {
   }
 
   private void configureBindings() {
-    // swerve.setDefaultCommand(swerve.addDriverInputs(
-    //   ()->-driver.getLeftY(), 
-    //   ()->-driver.getLeftX(), 
-    //   ()->-driver.getRightX()
-    // ));
+    swerve.setDefaultCommand(swerve.addDriverInputs(
+      ()->-driver.getLeftY(), 
+      ()->-driver.getLeftX(), 
+      ()->-driver.getRightX()
+    ));
     // if(Robot.isSimulation()){
     //   //Make it "drive right" on the sim field using default Red1
     //   swerve.setDefaultCommand(swerve.addDriverInputs(
@@ -62,16 +62,17 @@ public class RobotContainer {
     // }
 
     // driver.a().whileTrue(shooter.testSetFlywheelRPM(1000));
-    driver.a().whileTrue(shooter.testFlywheelVoltage(6));
+    driver.a().whileTrue(shooter.testFlywheelVoltage(4));
     driver.b().whileTrue(spindexer.feedToShooter());
-    driver.x().whileTrue(spindexer.intake());
+    driver.x().whileTrue(spindexer.setVoltages(8.0, 0.0));
+    driver.y().whileTrue(spindexer.setVoltages(0.0, 8.0));
 
     driver.povDown().whileTrue(shooter.testHome());
     driver.povUp().whileTrue(shooter.testSetHoodAngle(Degrees.of(30)));
 
 
-    // driver.a().whileTrue(shooter.testHome());
-    // driver.b().whileTrue(shooter.testSetHoodAngle(Degrees.of(30)));
+    //  driver.povUp().whileTrue(shooter.testHome());
+    //  driver.y().whileTrue(shooter.testSetHoodAngle(Degrees.of(30)));
     // swerve.setDefaultCommand(swerve.addDriverInputs(
     //   ()->-driver.getLeftY(), 
     //   ()->-driver.getLeftX(), 

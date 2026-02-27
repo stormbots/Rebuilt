@@ -22,8 +22,8 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 public class DyeRotor extends SubsystemBase{
     SparkFlex motor = new SparkFlex(12, MotorType.kBrushless);
     DyeRotorSim sim = new DyeRotorSim(motor);
-    int maxCurrent = 30;
-    int currentLimit = 10;
+    int maxCurrent = 40;
+    int lowCurrentLimit = 25;
     
     public DyeRotor(){
         var config = new SparkFlexConfig();
@@ -81,15 +81,15 @@ public class DyeRotor extends SubsystemBase{
 
     public Command feed(){
         //return setVelocity(2);
-        return setVoltage(6);
+        return setVoltage(7);
     }
 
     public Command intake(){
-        return setVoltage(5).beforeStarting(runOnce(()-> setCurrentLimits(currentLimit))).finallyDo(()->setCurrentLimits(maxCurrent));
+        return setVoltage(8).beforeStarting(runOnce(()-> setCurrentLimits(lowCurrentLimit))).finallyDo(()->setCurrentLimits(maxCurrent));
     }
 
     public Command unclog(){
-        return setVoltage(-5).beforeStarting(runOnce(()-> setCurrentLimits(currentLimit))).finallyDo(()->setCurrentLimits(maxCurrent));
+        return setVoltage(-8);
     }
 
     public AngularVelocity getVelocity(){
