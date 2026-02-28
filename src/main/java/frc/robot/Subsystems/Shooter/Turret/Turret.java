@@ -36,8 +36,8 @@ public class Turret extends SubsystemBase {
   public static final double kGearing = (1.0 / 3.0) * (10.0 / 132.0);
 
   //How much in ONE direction, hence max range divided by 2
-  public static final double kMinRotation = -180;
-  public static final double kMaxRotation = 180;
+  public static final double kMinRotation = -45;
+  public static final double kMaxRotation = 45;
 
   Angle targetPosition = Degrees.of(0);
   Angle tolerance = Degrees.of(3);
@@ -50,25 +50,24 @@ public class Turret extends SubsystemBase {
 
     motor.configure(getMotorConfig(), ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
 
-    CRTAbsoluteEncoder.getInstance().setParams(kTurretGearToothCount, kGear1ToothCount, kGear2ToothCount, true);
+    CRTAbsoluteEncoder.getInstance().setParams(kTurretGearToothCount, kGear1ToothCount, kGear2ToothCount, false);
     CRTAbsoluteEncoder.getInstance().setRelativeEncoder(motor.getEncoder());
     CRTAbsoluteEncoder.getInstance().setEncoder1(motor.getAbsoluteEncoder());
-    CRTAbsoluteEncoder.getInstance().setEncoder2(motor.getAbsoluteEncoder());
 
-    setDefaultCommand(run(()->motor.stopMotor()));
+    // setDefaultCommand(run(()->motor.stopMotor()));
   }
 
   @Override
   public void periodic() {
     // This method will be called once per scheduler run
-    SmartDashboard.putNumber("/turret/applied", motor.getAppliedOutput());
-    SmartDashboard.putNumber("/turret/outc", motor.getOutputCurrent());
-    SmartDashboard.putNumber("/turret/target", targetPosition.in(Degrees));
-    SmartDashboard.putNumber("/turret/tolerance", tolerance.in(Degrees));
-    SmartDashboard.putBoolean("/turret/ontarget", getOnTarget());
-    SmartDashboard.putNumber("/turret/CRTpos", CRTAbsoluteEncoder.getInstance().getPosition().in(Degrees));
-    SmartDashboard.putNumber("/turret/e1", motor.getAbsoluteEncoder().getPosition());
-    SmartDashboard.putNumber("/turret/relPos", motor.getEncoder().getPosition());
+    SmartDashboard.putNumber("shooter/turret/applied", motor.getAppliedOutput());
+    SmartDashboard.putNumber("shooter/turret/outc", motor.getOutputCurrent());
+    SmartDashboard.putNumber("shooter/turret/target", targetPosition.in(Degrees));
+    SmartDashboard.putNumber("shooter/turret/tolerance", tolerance.in(Degrees));
+    SmartDashboard.putBoolean("shooter/turret/ontarget", getOnTarget());
+    SmartDashboard.putNumber("shooter/turret/CRTpos", CRTAbsoluteEncoder.getInstance().getPosition().in(Degrees));
+    SmartDashboard.putNumber("shooter/turret/e1", motor.getAbsoluteEncoder().getPosition());
+    SmartDashboard.putNumber("shooter/turret/relPos", motor.getEncoder().getPosition());
   }
 
   /**
@@ -101,10 +100,10 @@ public class Turret extends SubsystemBase {
     SparkFlexConfig config = new SparkFlexConfig();
 
     config
-      .smartCurrentLimit(60)
+      .smartCurrentLimit(30)
       .idleMode(IdleMode.kBrake)
       //giving positive power should turn the turret CCW
-      .inverted(true)
+      .inverted(false)
     ;
 
     config.encoder
@@ -114,7 +113,7 @@ public class Turret extends SubsystemBase {
 
     config.closedLoop
       .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
-      .p(0.3 * 12 * 2 / 90.0)
+      .p(0.3 * 12 / 90.0)
     ;
 
     config.softLimit
@@ -126,7 +125,7 @@ public class Turret extends SubsystemBase {
 
     config.absoluteEncoder
       .positionConversionFactor(360.0)
-      .inverted(true)
+      .inverted(false)
     ;
 
     return config;

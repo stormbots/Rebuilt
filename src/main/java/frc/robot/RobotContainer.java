@@ -10,6 +10,7 @@ import com.stormbots.CRTAbsoluteEncoder;
 
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation3d;
+import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
@@ -69,6 +70,8 @@ public class RobotContainer {
 
     driver.povDown().whileTrue(shooter.testHome());
     driver.povUp().whileTrue(shooter.testSetHoodAngle(Degrees.of(30)));
+    driver.leftBumper().whileTrue(shooter.testSetTurretAngle(Degrees.of(30)));
+    driver.rightBumper().whileTrue(shooter.testSetTurretAngle(Degrees.of(0)));
 
 
     //  driver.povUp().whileTrue(shooter.testHome());

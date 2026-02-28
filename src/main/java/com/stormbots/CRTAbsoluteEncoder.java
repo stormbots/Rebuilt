@@ -10,6 +10,7 @@ import com.revrobotics.RelativeEncoder;
 import com.revrobotics.spark.SparkAbsoluteEncoder;
 
 import edu.wpi.first.units.measure.Angle;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 /** Add your docs here. */
 public class CRTAbsoluteEncoder {
@@ -80,6 +81,8 @@ public class CRTAbsoluteEncoder {
         else if(difference > 180){
             difference -= 360;
         }
+
+        SmartDashboard.putNumber("shooter/turret/difference", difference);
         
         //Difference increases linearly with turret angle
         //Multiply by slope to get turret angle from difference
