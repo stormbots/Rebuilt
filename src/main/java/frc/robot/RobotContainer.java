@@ -82,6 +82,11 @@ public class RobotContainer {
     //   ()->-driver.getRightX()
     // ));
 
+    //TODO Add intakes to controller
+    // driver.x().whileTrue(intake.intake());
+    // driver.y().whileTrue(intake.bringUp());
+
+
     //THIS IS VERY JANK, FIX LATER, should be part of the auto starting sequence, should setQuestPose THEN wantToTrack, this was dumb
     // driver.a().onTrue(swerve.zeroGyro());
     // driver.a().onTrue(new InstantCommand(()->questnav.setQuestPose(new Pose3d(swerve.swerveDrive.getPose().getX(), swerve.swerveDrive.getPose().getY(), 0.0, new Rotation3d(0.0, 0.0, 0.0)))));

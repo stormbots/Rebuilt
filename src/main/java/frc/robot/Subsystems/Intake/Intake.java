@@ -4,37 +4,91 @@
 
 package frc.robot.Subsystems.Intake;
 
+import static edu.wpi.first.units.Units.Degree;
+
+import com.stormbots.CRTAbsoluteEncoder;
+
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
-import frc.robot.Subsystems.HopperSensors.HopperSensors;
+import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Subsystems.Intake.IntakeExtension.IntakeExtension;
-import frc.robot.Subsystems.Intake.OuterRollers.OuterRollers;
 import frc.robot.Subsystems.Intake.Rollers.Rollers;
 
 /** Add your docs here. */
-public class Intake {
-    private IntakeExtension intakeExtension = new IntakeExtension();
-    private Rollers rollers = new Rollers();
-    private OuterRollers outerrollers = new OuterRollers();
+public class Intake extends SubsystemBase {
+  private IntakeExtension left = new IntakeExtension(9,false);
+  private IntakeExtension right = new IntakeExtension(10,true);
+  private Rollers rollers = new Rollers();
+  private IntakeVisualizer visual = new IntakeVisualizer();
 
-    /** Boolean to check if deployed. Mostly to facilitate Fuel 
-     * simulation, and should be replaced with a Trigger checking the
-     * deployment angle eventually.
-     */ 
-    public boolean isDeployed = false;
+  public Trigger isDeployed = new Trigger(()->
+    left.getAngle().in(Degree) < 45
+    && right.getAngle().in(Degree) < 45
+  );
 
+  public Intake(){
+    CRTAbsoluteEncoder.getInstance().setEncoder2(left.getAbsoluteEncoder());
+  }
 
-    /** Pause intaking when full, resume intaking when space available.*/
-    public Command smartIntake(){
-        //TODO: Quickly cobbled to test sim
-        return Commands.either(
-            Commands.run(()->isDeployed=true).until(HopperSensors.getInstance().isFull),
-            Commands.run(()->isDeployed=false).until(HopperSensors.getInstance().isNotFull),
-            HopperSensors.getInstance().isNotFull
-        )
-        .repeatedly()
-        .finallyDo(()->isDeployed=false)
-        ;
-    }
+  @Override
+  public void periodic(){
+    visual.update(left.getAngle(), rollers.getPosition(),rollers.getVelocity());
+  }
 
+  public Command intake(){
+    return Commands.parallel(
+      rollers.intake(),
+      left.down(),
+      right.down()
+    )    
+    .withName("Intake")
+    ;    
+  }
+
+  public Command eject(){
+    return Commands.parallel(
+      rollers.eject(),
+      left.down(),
+      right.down()
+    );
+  }
+
+  public Command bringUp(){
+    var upRollers = Commands.parallel(
+      left.up(),
+      right.up(),
+      rollers.intake()
+    )
+    .withTimeout(0.5)
+    .until(()->{
+      return left.getAngle().in(Degree) > 45
+      && right.getAngle().in(Degree) > 45;
+    })
+    ;
+
+    return Commands.sequence(
+      upRollers,
+      stop()
+    )
+    .withName("bringUp")
+    ;
+  }  
+  
+  public Command stop(){
+    return Commands.parallel(
+      rollers.stop(),
+      left.up(),
+      right.up()
+    )
+    .withName("Stop")
+    ;
+  }
+
+  public Command testRollers(){
+    return Commands.parallel(
+      rollers.setVoltage(2)
+    );
+  }
+  
 }

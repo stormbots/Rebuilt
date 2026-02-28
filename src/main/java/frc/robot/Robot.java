@@ -143,7 +143,7 @@ public class Robot extends TimedRobot {
       //Y Coordinates of the intake bounding box
       Intake.width.div(-2.0).in(Meter), 
       Intake.width.div(2.0).in(Meter),
-      ()->robotContainer.intake.isDeployed, // (optional) BooleanSupplier for whether the intake should be active at a given moment
+      robotContainer.intake.isDeployed, // (optional) BooleanSupplier for whether the intake should be active at a given moment
       ()->HopperSensors.getInstance().fuelInHopper++ // (optional) Runnable called whenever a fuel is intaked
     ); 
 
