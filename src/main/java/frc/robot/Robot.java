@@ -43,6 +43,9 @@ public class Robot extends TimedRobot {
       case "compbot":
       break;
 
+      case "compBot":
+        //Actually reset the name.
+        Preferences.setString("BotName", "compbot");
       default:
       //No name set: Set a default to make the key visible.
       Preferences.setString("BotName", "compbot");
