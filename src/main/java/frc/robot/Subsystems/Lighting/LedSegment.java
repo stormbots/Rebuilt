@@ -23,6 +23,8 @@ public class LedSegment extends LedBase {
       this.length = stop - start;
       WLED.registerSegment(this);
     }
+
+    /**Added because having issues with .equals, left because it works */
     public boolean compareColors(CustomColor[] col1, CustomColor[] col2){
       if (col1.length != col2.length){
         return false;
@@ -40,7 +42,7 @@ public class LedSegment extends LedBase {
       if(this.col == null || !compareColors(col, color)){
         this.col = color;
         data.setColor(color);
-        setFreeze(false);
+        setFreeze(false); //if individual control is set, it freezez the segment, this is called to authomattically acount for that
       }
     }
 
@@ -116,6 +118,14 @@ public class LedSegment extends LedBase {
       }
     }
 
+    public void setPalette(int palette){
+      if(this.pal.isEmpty() || !this.bri.get().equals(palette)){
+        this.pal = Optional.of(palette);
+        data.setPalette(palette);
+        setFreeze(false);
+      }
+    }
+
     public void setIndividualControl(LedMultiRange ind){
       if(this.i == null||!this.i.equals(ind)){
         this.i = ind;
@@ -150,8 +160,12 @@ public class LedSegment extends LedBase {
       return new InstantCommand(()->{
         setEffect(1);
         setColor(color,CustomColor.kBlack);
+        setSpeed(speed);
       }, this);
     }
+
+  
+
     // TODO: Add compensation for unset start/stop
     public class LedRange{
       private int start;
@@ -170,12 +184,12 @@ public class LedSegment extends LedBase {
       }
 
       public LedRange(CustomColor color, double fraction, double index){
-        int pixels = (int)(length/fraction);
+        int pixels = (int) Math.round(length/fraction);
         if (pixels == 0){
           pixels = 1;
         }
-        start = (int) (pixels*(index-1));
-        stop = (int)(pixels*index);
+        start = (int) Math.round(pixels*(index-1));
+        stop = (int)Math.round(pixels*index);
         this.color = color;
       }
       
@@ -246,7 +260,7 @@ public class LedSegment extends LedBase {
         }
         else{
           int instances = 1;
-          int fraction = length/list.length;
+          int fraction = Math.round(length/list.length);
           if (fraction == 0){
             fraction = 1;
           }
@@ -254,7 +268,7 @@ public class LedSegment extends LedBase {
           for(int i=0; i<list.length; i++){
             if (i>0 && list[i].getColor() == list[i-1].getColor()){
               instances++;
-              int newFraction = instances*length/list.length;
+              int newFraction = Math.round(instances*length/list.length);
               if (newFraction == 0){
                 newFraction = 1;
               }
@@ -287,6 +301,13 @@ public class LedSegment extends LedBase {
     public Command stripes(LedMultiRange colors){
       return new InstantCommand(()->{
         setIndividualControl(colors);
+      }, this);      
+    }
+
+    public Command noAprilTags(){
+      return new InstantCommand(()->{
+        setEffect(110);
+        setIntensity(1);
       }, this);      
     }
 

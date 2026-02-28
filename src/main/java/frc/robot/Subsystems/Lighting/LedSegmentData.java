@@ -69,6 +69,11 @@ private transient int index;
         updated  = true;
     }
 
+    public void setPalette(int pal){
+        this.pal = Optional.of(pal);
+        updated  = true;
+    }
+
     public void setIndividualControl(LedSegment.LedMultiRange i){
         this.i = i;
         updated  = true;
@@ -92,6 +97,7 @@ private transient int index;
         rev = Optional.empty();
         on = Optional.empty();
         bri = Optional.empty();
+        pal = Optional.empty();
         i = null;
         frz = Optional.empty();
         updated = false;

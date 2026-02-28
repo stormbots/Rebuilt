@@ -24,6 +24,7 @@ public class LedBase extends SubsystemBase{
     protected Optional<Boolean> rev = Optional.empty();
     protected Optional<Boolean> on = Optional.empty();
     protected Optional<Integer> bri = Optional.empty();
+    protected Optional<Integer> pal = Optional.empty();
     protected LedMultiRange i;
     protected Optional<Boolean> frz = Optional.empty();
 
