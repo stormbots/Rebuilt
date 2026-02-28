@@ -37,7 +37,7 @@ public class Hood extends SubsystemBase {
   public static final int kPreHomeCurrentLimit = 10;
   //CANNOT be higher than 20, ITS A NEO 550
   public static final int kPostHomeCurrentLimit = 20;
-  public static final double kHomeCurrentThreshold = 8.0;
+  public static final double kHomeCurrentThreshold = 4.0;
 
   public static final double homeAngle = 0.0;
   //minimum reachable should be slightly higher than hard limit
@@ -130,10 +130,15 @@ public class Hood extends SubsystemBase {
   }
 
 
-  private void setCurrentLimit(int limit){
+  private void setHomeableConfig(){
     SparkBaseConfig config = new SparkMaxConfig();
     
-    config.smartCurrentLimit(limit);
+    config.smartCurrentLimit(kPreHomeCurrentLimit);
+
+    config.softLimit
+      .forwardSoftLimitEnabled(false)
+      .reverseSoftLimitEnabled(false)
+    ;
 
     motor.configureAsync(config, ResetMode.kNoResetSafeParameters, PersistMode.kNoPersistParameters);
   }
@@ -143,7 +148,7 @@ public class Hood extends SubsystemBase {
     return new FunctionalCommand(
       ()->{
         homed=false;
-        setCurrentLimit(kPreHomeCurrentLimit);
+        setHomeableConfig();
       }, 
       ()->motor.set(-0.1), 
       (interrupted)->{
