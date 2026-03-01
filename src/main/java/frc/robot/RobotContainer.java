@@ -10,9 +10,12 @@ import com.stormbots.CRTAbsoluteEncoder;
 
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation3d;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
+import frc.robot.Subsystems.FieldBehaviour;
 import frc.robot.Subsystems.HopperSensors.HopperSensors;
 import frc.robot.Subsystems.Intake.Intake;
 import frc.robot.Subsystems.Lighting.Signals;
@@ -37,10 +40,13 @@ public class RobotContainer {
   Pathing pathing = new Pathing(swerve);
   Signals signlas = new Signals();
   // Bling bling = new Bling(); //TODO: Currently no bling lights on bot
+  FieldBehaviour fieldBehaviour = new FieldBehaviour();
+
 
   CommandXboxController driver = new CommandXboxController(0);
   CommandXboxController operator = new CommandXboxController(1);
   Path testingPath = new Path("goCollect");
+
   public RobotContainer() {
     HopperSensors.getInstance(); //Ensure this always exists and is updating
     questnav.setQuestPose(new Pose3d(swerve.swerveDrive.getPose().getX(), swerve.swerveDrive.getPose().getY(), 0.0, new Rotation3d(0.0, 0.0, 0.0)));
@@ -89,6 +95,13 @@ public class RobotContainer {
     // driver.y().whileTrue(intake.bringUp());
 
 
+    new Trigger(DriverStation::isEnabled)
+    .whileTrue(
+      swerve.addFieldInput( ()->fieldBehaviour.getSwerveInputs(swerve.getSwervePose()) )
+    );
+
+
+
     //THIS IS VERY JANK, FIX LATER, should be part of the auto starting sequence, should setQuestPose THEN wantToTrack, this was dumb
     // driver.a().onTrue(swerve.zeroGyro());
     // driver.a().onTrue(new InstantCommand(()->questnav.setQuestPose(new Pose3d(swerve.swerveDrive.getPose().getX(), swerve.swerveDrive.getPose().getY(), 0.0, new Rotation3d(0.0, 0.0, 0.0)))));
@@ -103,7 +116,9 @@ public class RobotContainer {
         ()->-driver.getRightX()
       ));
     }
+
   }
+
 
   public Command getAutonomousCommand() {
     //TODO: Get this from Autos.java instead
