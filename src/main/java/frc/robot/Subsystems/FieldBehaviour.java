@@ -24,7 +24,7 @@ public class FieldBehaviour{
             this.lower = new Translation2d(lowerX,lowerY);
             this.upper = new Translation2d(upperX,upperY);
         }
-
+        
         public boolean contains(Translation2d pose){
             if(pose.getX() < lower.getX()) return false;
             if(pose.getX() > upper.getX()) return false;
@@ -60,12 +60,16 @@ public class FieldBehaviour{
         new Trigger(DriverStation::isEnabled)
         .whileTrue(Commands.run(()->{
             SmartDashboard.putBoolean("FieldBehaviour/retractHood", getRetractHood(field.getObject("TestPose").getPose()));
+            SmartDashboard.putBoolean("FieldBehaviour/climber", getClimber(field.getObject("TestPose").getPose()));
         }));
 
         field.getObject("blthb").setPoses(blueLowerTrenchHoodBox.toPoses());
         field.getObject("buthb").setPoses(blueUpperTrenchHoodBox.toPoses());
         field.getObject("rlthb").setPoses(redLowerTrenchHoodBox.toPoses());
         field.getObject("ruthb").setPoses(redUpperTrenchHoodBox.toPoses());
+
+        field.getObject("cb").setPoses(climbingBlue.toPoses());
+        field.getObject("cr").setPoses(climbingRed.toPoses());
     }
 
 
@@ -97,6 +101,9 @@ public class FieldBehaviour{
     public BoundingBox redUpperTrenchHoodBox = new BoundingBox(centerX[1] - trenchHoodOffset, trenchY[0], centerX[1] + trenchHoodOffset, trenchY[1]);
     public BoundingBox redLowerTrenchHoodBox = new BoundingBox(centerX[1] - trenchHoodOffset, trenchY[2], centerX[1] + trenchHoodOffset, trenchY[3]);
 
+    public BoundingBox climbingBlue = new BoundingBox(.912, 3.054, 1.715, 4.375);
+    public BoundingBox climbingRed = new BoundingBox(14.82, 3.545, 15.615, 5.036);
+
     public ArrayList<BoundingBox> swerveTrenches = new ArrayList<>(){{
         add(blueLowerTrench);
         add(blueUpperTrench);
@@ -116,6 +123,11 @@ public class FieldBehaviour{
         add(blueUpperTrenchHoodBox);
         add(redUpperTrenchHoodBox);
         add(redLowerTrenchHoodBox);
+    }};
+
+    public ArrayList<BoundingBox> climbingList = new ArrayList<>(){{
+        add(climbingBlue);
+        add(climbingRed);
     }};
 
     private SwerveInputs avoidWallsY(Pose2d botpose, BoundingBox box){
@@ -156,6 +168,15 @@ public class FieldBehaviour{
     public boolean getRetractHood(Pose2d robotPosition){
         for(var trench : hoodTrenches){
             if(trench.contains(robotPosition)){
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public boolean getClimber(Pose2d robotPosition){
+        for(var climber : climbingList){
+            if(climber.contains(robotPosition)){
                 return true;
             }
         }
