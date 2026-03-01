@@ -4,7 +4,6 @@
 
 package frc.robot.Subsystems.Shooter;
 
-import frc.robot.Subsystems.Shooter.Feeder.Feeder;
 import frc.robot.Subsystems.Shooter.Flywheel.Flywheel;
 import frc.robot.Subsystems.Shooter.Hood.Hood;
 import frc.robot.Subsystems.Shooter.Turret.Turret;
@@ -12,7 +11,7 @@ import frc.robot.Subsystems.Shooter.Turret.Turret;
 /** Add your docs here. */
 public class ShooterVisual {
 
-    ShooterVisual(Feeder feeder, Flywheel flywheel, Hood hood, Turret turret){
+    ShooterVisual(Flywheel flywheel, Hood hood, Turret turret){
         //TODO: Build the Mechanism2D reference package
     }
 }

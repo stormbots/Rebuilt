@@ -7,7 +7,9 @@ package frc.robot.Subsystems.Swerve;
 import java.io.File;
 import java.util.Optional;
 import java.util.function.DoubleSupplier;
+import java.util.function.Supplier;
 
+import dev.doglog.DogLog;
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -24,12 +26,11 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Subsystems.FieldBehaviour;
 import swervelib.SwerveDrive;
 import swervelib.parser.SwerveParser;
 import swervelib.telemetry.SwerveDriveTelemetry;
 import swervelib.telemetry.SwerveDriveTelemetry.TelemetryVerbosity;
-import frc.robot.lib.BLine.*;
-import edu.wpi.first.math.controller.PIDController;
 
 
 public class Swerve extends SubsystemBase {
@@ -48,6 +49,7 @@ public class Swerve extends SubsystemBase {
       .createSwerveDrive(maximumSpeed, new Pose2d(1,1,new Rotation2d()));
     } catch (Exception e)
     {
+      System.err.println("Could not find robot config for " + botname);
       throw new RuntimeException(e);
     }  
 
@@ -58,13 +60,14 @@ public class Swerve extends SubsystemBase {
     SmartDashboard.putData("odometryField", odometryField);
   }
 
-  static class SwerveInputs{
+  /** Represent Inputs as a proportion to the drive trains maximum capability */
+  public static class SwerveInputs{
     /** Positive meaning away from driver station */
-    double tx=0;
+    public double tx=0;
     /** Positive meaning up from driver station */
-    double ty=0;
+    public double ty=0;
     /** rotation, positive ccw*/
-    double r=0;
+    public double r=0;
     /** Zero out all inputs for this input set  */
     public void clear(){this.tx=0;this.ty=0;this.r=0;}
     /** Add another input to this one */
@@ -84,6 +87,9 @@ public class Swerve extends SubsystemBase {
   public void periodic() {
     // This method will be called once per scheduler run
     swerveDrive.updateOdometry();
+    //Log the pose to allow AdvantageScope to work properly
+    DogLog.log("Swerve/pose", swerveDrive.getPose());
+
     odometryField.setRobotPose(swerveDrive.getPose());
     var inputs = new SwerveInputs()
     .add(driverInputs)
@@ -153,6 +159,16 @@ public class Swerve extends SubsystemBase {
   public Pose2d getSwervePose(){
     return swerveDrive.getPose();
   }
+
+  public ChassisSpeeds getChassisSpeeds(){
+    return swerveDrive.getRobotVelocity();
+  }
+
+  public Command addFieldInput(Supplier<SwerveInputs> inputs){
+    return run(()->{
+      fieldInputs = inputs.get();
+    });
+  };
 
   public void addVisionMeasurement(Pose2d pose2d, double timestamp, Matrix<N3, N1> STD_DEVS){
     swerveDrive.addVisionMeasurement(pose2d, timestamp, STD_DEVS);

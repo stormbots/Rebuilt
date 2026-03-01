@@ -1,0 +1,10 @@
+[
+  {
+    "name": "/Preferences/BotName",
+    "type": "string",
+    "value": "tabisim",
+    "properties": {
+      "persistent": true
+    }
+  }
+]
