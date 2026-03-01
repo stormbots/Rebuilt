@@ -16,6 +16,7 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Subsystems.FieldBehaviour;
+import frc.robot.Subsystems.Climber.Climber;
 import frc.robot.Subsystems.HopperSensors.HopperSensors;
 import frc.robot.Subsystems.Intake.Intake;
 import frc.robot.Subsystems.Lighting.Signals;
@@ -36,6 +37,8 @@ public class RobotContainer {
   Shooter shooter = new Shooter(targeting);
   Intake intake = new Intake();
   Spindexer spindexer = new Spindexer(shooter.isReadyToAcceptFuel);
+  Climber climber = new Climber();
+
   QuestNavSubsystem questnav = new QuestNavSubsystem(swerve);
   Pathing pathing = new Pathing(swerve);
   Signals signlas = new Signals();
@@ -61,14 +64,6 @@ public class RobotContainer {
       ()->-driver.getLeftX(), 
       ()->-driver.getRightX()
     ));
-    // if(Robot.isSimulation()){
-    //   //Make it "drive right" on the sim field using default Red1
-    //   swerve.setDefaultCommand(swerve.addDriverInputs(
-    //     ()->-driver.getLeftX()/2.0, 
-    //     ()->driver.getLeftY()/2.0, 
-    //     ()->-driver.getRightX()/2.0
-    //   ));
-    // }
 
     // driver.a().whileTrue(shooter.testSetFlywheelRPM(1000));
     driver.a().whileTrue(shooter.testFlywheelVoltage(4));
@@ -89,6 +84,22 @@ public class RobotContainer {
     //   ()->-driver.getLeftX(), 
     //   ()->-driver.getRightX()
     // ));
+
+    // Climber Initial Controls
+    //TODO: Not yet  fully ready!
+    // driver.povLeft().whileTrue(climber.setStage1Voltage(-12)); //stage1 down
+    // driver.povUp().whileTrue(climber.setStage1Voltage(12)); //stage1 up
+    // driver.povDown().whileTrue(climber.setStage2Voltage(-12)); //stage2 down
+    // driver.povRight().whileTrue(climber.setStage2Voltage(12)); //stage2 up
+
+    // driver.rightBumper()
+    // .whileTrue(climber.prepareForClimbL1())
+    // .onFalse(climber.climbL1().withTimeout(10))
+    // ;
+    // driver.start().whileTrue(climber.goHome());
+
+
+    //Test code but it works
 
     //TODO Add intakes to controller
     // driver.x().whileTrue(intake.intake());
@@ -123,5 +134,6 @@ public class RobotContainer {
   public Command getAutonomousCommand() {
     //TODO: Get this from Autos.java instead
     return Commands.print("No autonomous command configured");
+    // return climber.goHome();
   }
 }
