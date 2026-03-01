@@ -10,12 +10,12 @@ import com.stormbots.CRTAbsoluteEncoder;
 
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation3d;
-import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.Subsystems.HopperSensors.HopperSensors;
 import frc.robot.Subsystems.Intake.Intake;
+import frc.robot.Subsystems.Lighting.Signals;
 import frc.robot.Subsystems.Photonvision.Photonvision;
 import frc.robot.Subsystems.Questnav.QuestNavSubsystem;
 import frc.robot.Subsystems.Shooter.Shooter;
@@ -35,6 +35,8 @@ public class RobotContainer {
   Spindexer spindexer = new Spindexer(shooter.isReadyToAcceptFuel);
   QuestNavSubsystem questnav = new QuestNavSubsystem(swerve);
   Pathing pathing = new Pathing(swerve);
+  Signals signlas = new Signals();
+  // Bling bling = new Bling(); //TODO: Currently no bling lights on bot
 
   CommandXboxController driver = new CommandXboxController(0);
   CommandXboxController operator = new CommandXboxController(1);

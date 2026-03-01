@@ -10,8 +10,4 @@ public class Bling extends SubsystemBase {
   /** Glorious Gratuitous Glow */
   public Bling() {}
 
-  @Override
-  public void periodic() {
-    // This method will be called once per scheduler run
-  }
 }

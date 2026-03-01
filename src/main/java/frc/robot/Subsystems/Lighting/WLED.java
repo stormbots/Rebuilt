@@ -1,0 +1,125 @@
+// Copyright (c) FIRST and other WPILib contributors.
+// Open Source Software; you can modify and/or share it under the terms of
+// the WPILib BSD license file in the root directory of this project.
+
+package frc.robot.Subsystems.Lighting;
+
+
+import java.lang.reflect.Type;
+import java.util.ArrayList;
+import java.util.Optional;
+
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonSerializationContext;
+import com.google.gson.JsonSerializer;
+
+import edu.wpi.first.wpilibj.SerialPort;
+import edu.wpi.first.wpilibj.SerialPort.Port;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Subsystems.Lighting.LedSegment.LedMultiRange;
+
+public class WLED extends SubsystemBase{
+  private static SerialPort serialport;
+  private static ArrayList<LedSegment> segments = new ArrayList<LedSegment>();
+  private static ArrayList<Boolean> updated = new ArrayList<Boolean>();
+  private static int calls;
+  public WLED(SerialPort serialPort) {
+    try{
+      serialport.toString();
+    }
+    catch (NullPointerException n){
+      this.serialport = serialPort;
+    }
+    calls = 0; 
+  }
+
+  public LedSegment getLedSegment(int id, int start, int stop, boolean reverse){
+    return new LedSegment(id, start, stop, reverse);
+  }
+
+  @Override
+  public void periodic() {
+    serializeSegments();
+    SmartDashboard.putString("updated",updated.toString());
+  }
+
+  private static String gsonSerialize(LedSegment segment){
+    GsonBuilder builder = new GsonBuilder();
+    builder.registerTypeAdapter(LedMultiRange.class, new LedMultiRangeSerializer());
+    builder.registerTypeAdapter(Optional.class, new OptionalSerializer());
+    builder.registerTypeAdapter(CustomColor.class, new ColorSerializer());
+    Gson gson = builder.create();
+    String json = gson.toJson(segment.getData());
+    return "{\"seg\":"+json +"}";
+    
+  }
+  
+  private static void serializeSegments(){
+    if (updated.contains(true)){
+      
+      String json = "";
+      boolean needsComma = false;
+      for (int i = 0; i<segments.size(); i++){
+        if(segments.get(i).getData().isUpdated()){
+          if(needsComma){
+            json += ",";
+          }
+          else{
+            needsComma = true;
+          }
+          json += gsonSerialize(segments.get(i));
+          segments.get(i).reset();
+        }
+      }
+      calls++;
+      serialport.writeString(json);
+      SmartDashboard.putNumber("calls", calls);
+      SmartDashboard.putString("json", json);
+    } 
+  }
+
+  public static void registerSegment(LedSegment seg){
+    segments.add(seg);
+  }
+
+  public static int registerState(boolean data){
+    updated.add(data);
+    return updated.size()-1;
+  }
+
+  public static void updateState(boolean data, int index){
+    updated.set(index, data);
+  }
+
+
+
+  private static class LedMultiRangeSerializer implements JsonSerializer<LedMultiRange>{
+    public JsonElement serialize(LedMultiRange ledRange, Type type, JsonSerializationContext jsonSerializationContext){
+      JsonArray array = new JsonArray();
+      for (int i = 0; i<ledRange.getLedRanges().size();i++){
+        array.add(ledRange.getLedRanges().get(i).getStart());
+        array.add(ledRange.getLedRanges().get(i).getStop());
+        array.add(ledRange.getLedRanges().get(i).getColor().getHex());
+      }
+      return array;
+    }
+  }
+
+  private static class OptionalSerializer implements JsonSerializer<Optional<?>> {
+    public JsonElement serialize(Optional<?> optional, Type type, JsonSerializationContext jsonSerializationContext){
+      return jsonSerializationContext.serialize(optional.orElse(null));
+    }
+  }
+
+  private static class ColorSerializer implements JsonSerializer<CustomColor> {
+    public JsonElement serialize(CustomColor color, Type type, JsonSerializationContext jsonSerializationContext){
+      return jsonSerializationContext.serialize(color.getHex());
+    }
+  }
+}
+
+
