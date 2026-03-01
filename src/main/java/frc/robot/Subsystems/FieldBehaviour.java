@@ -1,10 +1,14 @@
 package frc.robot.Subsystems;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.dyn4j.geometry.Rotation;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.wpilibj.BuiltInAccelerometer;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -13,33 +17,8 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Subsystems.Swerve.Swerve.SwerveInputs;
 
 public class FieldBehaviour{
-    public boolean isPassing = false;
-    Field2d field = new Field2d();
-    Rotation2d rotation = new Rotation2d(15);
 
-    public FieldBehaviour(){
-        SmartDashboard.putData("FieldBehavior/field",field);
-        field.getObject("TestPose").setPose(new Pose2d(5, 7, rotation));
-
-        if(DriverStation.isFMSAttached()) return; //Don't do debug things
-        new Trigger(DriverStation::isEnabled)
-        .whileTrue(Commands.run(()->{
-            SmartDashboard.putBoolean("FieldBehaviour/retractHood", getRetractHood(field.getObject("TestPose").getPose()));
-        }));
-
-    }
-
-
-    // Track our field locations, in meters
-    public double[] trenchX = new double[]{4.3, 5.1, 12, 13};
-    public double[] trenchY = new double[]{1, 0, 6.7, 8};
-
-    public double[] bumpX = new double[]{0,0,0,0};
-    public double[] bumpY = new double[]{0,0,0,0};
-
-    public Rotation2d trenchRotation;
-    public Rotation2d bumpRotation; 
-
+    /** Supplemental class to wrap poses up nicely */
     public static class BoundingBox{
         public Translation2d lower;
         public Translation2d upper ;
@@ -60,8 +39,89 @@ public class FieldBehaviour{
         public boolean contains(Pose2d pose){
             return contains(pose.getTranslation());
         }
+
+        public List<Pose2d> toPoses(){
+            return List.of(
+                new Pose2d(lower.getX(),lower.getY(),new Rotation2d()),
+                new Pose2d(upper.getX(),lower.getY(),new Rotation2d()),
+                new Pose2d(upper.getX(),upper.getY(),new Rotation2d()),
+                new Pose2d(lower.getX(),upper.getY(),new Rotation2d()),
+                new Pose2d(lower.getX(),lower.getY(),new Rotation2d())
+            );
+        }
     }
+
+
+    public boolean isPassing = false;
+    Field2d field = new Field2d();
+
+    public FieldBehaviour(){
+        SmartDashboard.putData("FieldBehavior/field",field);
+        field.getObject("TestPose").setPose(new Pose2d(5, 7, new Rotation2d(15)));
+
+        if(DriverStation.isFMSAttached()) return; //Don't do debug things
+        new Trigger(DriverStation::isEnabled)
+        .whileTrue(Commands.run(()->{
+            SmartDashboard.putBoolean("FieldBehaviour/retractHood", getRetractHood(field.getObject("TestPose").getPose()));
+        }));
+
+
+        field.getObject("blthb").setPoses(blueLowerTrenchHoodBox.toPoses());
+        field.getObject("buthb").setPoses(blueUpperTrenchHoodBox.toPoses());
+        field.getObject("rlthb").setPoses(redLowerTrenchHoodBox.toPoses());
+        field.getObject("ruthb").setPoses(redUpperTrenchHoodBox.toPoses());
+    }
+
+
+    // Track our field locations, in meters
+    private double blueCenter = 4.65;
+    private double redCenter = 11.887;
+
+    //generate X coordinate offsets from centerline of obstacles
+    private double trenchHoodOffset = .65;
+
+    public double[] centerX = new double[]{blueCenter, redCenter};
+    public double[] trenchY = new double[]{0, 1.2, 6.7, 8};
+
+    public double[] bumpY = new double[]{1.7, 3.3, 4.6, 6.3};
+
+    //TODO: Change bump and trench boxes to be important for stuff
+    public BoundingBox blueLowerTrench = new BoundingBox(centerX[0], trenchY[0], centerX[0], trenchY[1]);
+    public BoundingBox blueUpperTrench = new BoundingBox(centerX[0], trenchY[2], centerX[0], trenchY[3]);
+    public BoundingBox redLowerTrench = new BoundingBox(centerX[1], trenchY[0], centerX[1], trenchY[1]);
+    public BoundingBox redUpperTrench = new BoundingBox(centerX[1], trenchY[2], centerX[1], trenchY[3]);
         
+    public BoundingBox blueLowerBump = new BoundingBox(centerX[0],trenchY[0], centerX[0],trenchY[1]);
+    public BoundingBox blueUpperBump = new BoundingBox(centerX[0],trenchY[2], centerX[0],trenchY[3]);
+    public BoundingBox redLowerBump = new BoundingBox(centerX[1],trenchY[0], centerX[1],trenchY[1]);
+    public BoundingBox redUpperBump = new BoundingBox(centerX[1],trenchY[2], centerX[1],trenchY[3]);   
+    
+    public BoundingBox blueLowerTrenchHoodBox = new BoundingBox(centerX[0] - trenchHoodOffset, trenchY[0], centerX[0] + trenchHoodOffset, trenchY[1]);
+    public BoundingBox blueUpperTrenchHoodBox = new BoundingBox(centerX[0] - trenchHoodOffset, trenchY[2], centerX[0] + trenchHoodOffset, trenchY[3]);
+    public BoundingBox redUpperTrenchHoodBox = new BoundingBox(centerX[1] - trenchHoodOffset, trenchY[0], centerX[1] + trenchHoodOffset, trenchY[1]);
+    public BoundingBox redLowerTrenchHoodBox = new BoundingBox(centerX[1] - trenchHoodOffset, trenchY[2], centerX[1] + trenchHoodOffset, trenchY[3]);
+
+    public ArrayList<BoundingBox> swerveTrenches = new ArrayList<>(){{
+        add(blueLowerTrench);
+        add(blueUpperTrench);
+        add(redLowerTrench);
+        add(redUpperTrench);
+    }};
+
+   public ArrayList<BoundingBox> bumpList = new ArrayList<>(){{
+        add(blueLowerBump);
+        add(blueUpperBump);
+        add(redLowerBump);
+        add(redUpperBump);
+    }};
+    
+    public ArrayList<BoundingBox> hoodTrenches = new ArrayList<>(){{
+        add(blueLowerTrenchHoodBox);
+        add(blueUpperTrenchHoodBox);
+        add(redUpperTrenchHoodBox);
+        add(redLowerTrenchHoodBox);
+    }};
+
     private SwerveInputs avoidWallsY(Pose2d botpose, BoundingBox box){
         var inputs = new SwerveInputs();
         //TODO: Add the appropriate logic
@@ -70,7 +130,7 @@ public class FieldBehaviour{
         return inputs;
     }
 
-    private SwerveInputs turnForBump(Pose2d botpose, BoundingBox box){
+    private SwerveInputs computeForBump(Pose2d botpose, BoundingBox box){
         var inputs = new SwerveInputs();
         //TODO: Add the appropriate logic
         // if(botpose.getY()>box.upper.getY()/2) inputs.ty = 0.1;
@@ -80,96 +140,35 @@ public class FieldBehaviour{
 
 
 
-    public BoundingBox blueLowerTrench = new BoundingBox(trenchX[0],trenchY[0], trenchX[1],trenchY[1]);
-    public BoundingBox blueUpperTrench = new BoundingBox(trenchX[0],trenchY[2], trenchX[1],trenchY[3]);
-    public BoundingBox redLowerTrench = new BoundingBox(trenchX[2],trenchY[0], trenchX[3],trenchY[1]);
-    public BoundingBox redUpperTrench = new BoundingBox(trenchX[2],trenchY[2], trenchX[3],trenchY[3]);
-        
-    public BoundingBox blueLowerBump = new BoundingBox(trenchX[0],trenchY[0], trenchX[1],trenchY[1]);
-    public BoundingBox blueUpperBump = new BoundingBox(trenchX[0],trenchY[2], trenchX[1],trenchY[3]);
-    public BoundingBox redLowerBump = new BoundingBox(trenchX[2],trenchY[0], trenchX[3],trenchY[1]);
-    public BoundingBox redUpperBump = new BoundingBox(trenchX[2],trenchY[2], trenchX[3],trenchY[3]);        
-
     private SwerveInputs changeDriveTrainBehaviour(Pose2d robotPosition){
-        if(blueUpperTrench.contains(robotPosition)){
-           return avoidWallsY(robotPosition, blueUpperTrench);
-
-        } else if(redUpperTrench.contains(robotPosition)){
-           return avoidWallsY(robotPosition, redUpperTrench);
-
-        } else if(blueUpperBump.contains(robotPosition)){
-           return getSwerveBumpInputs();
-
-        } else if(redUpperBump.contains(robotPosition)){
-           return getSwerveBumpInputs();
-
-        } else if(blueLowerTrench.contains(robotPosition)){
-           return avoidWallsY(robotPosition, blueLowerTrench);
-
-        } else if(redLowerTrench.contains(robotPosition)){
-           return avoidWallsY(robotPosition, redLowerTrench);
-
-        } else if(blueLowerBump.contains(robotPosition)){
-           return getSwerveBumpInputs();
-
-        } else if(redLowerBump.contains(robotPosition)){
-           return getSwerveBumpInputs();
-           
-        } else {
-            return new SwerveInputs();
+        var swerveInputs = new SwerveInputs();
+        for(var trench : swerveTrenches){
+            if(trench.contains(robotPosition)){
+                swerveInputs.add(avoidWallsY(robotPosition, trench));
+            }
         }
+
+        for(var bump : bumpList){
+            if(bump.contains(robotPosition)){
+                swerveInputs.add(computeForBump(robotPosition, bump));
+            }
+        }
+
+        return swerveInputs;
     }
 
     public boolean getRetractHood(Pose2d robotPosition){
-        if(blueUpperBump.contains(robotPosition)){
-           return true;
-
-        } else if(redUpperBump.contains(robotPosition)){
-           return true;
-
-        } else if(blueLowerBump.contains(robotPosition)){
-           return true;
-
-        } else if(redLowerBump.contains(robotPosition)){
-           return true;
-           
-        } else {
-            return false;
+        for(var trench : hoodTrenches){
+            if(trench.contains(robotPosition)){
+                return true;
+            }
         }
+        return false;
     }
-
-
-    //TODO Get Position and Define Field Pos
-    //TODO Make changeDriveTrainBehaviour do stuffs
 
     public SwerveInputs getSwerveInputs(Pose2d robotPos){
         var response = changeDriveTrainBehaviour(robotPos);
-        
-                // field.getObject("testpose").setPose(new Pose2d());
-
         field.setRobotPose(robotPos);
         return response;
-    }
-
-    private SwerveInputs getSwerveBumpInputs(){
-        var bumpSwerveInputs = new SwerveInputs();
-        bumpSwerveInputs.r += 45.0;
-        return bumpSwerveInputs;
-
-    }
-
-    private SwerveInputs getTrenchActions(Pose2d robotPose){
-        return new SwerveInputs();
-
-    }
-
-    private int boxserialnumber=0;
-    public void plotBoundingBox(BoundingBox box){
-        field.getObject(String.format("box%n", boxserialnumber)).setPoses(
-            new Pose2d(box.lower.getX(),box.lower.getY(),new Rotation2d()),
-            //other ones
-            new Pose2d(box.lower.getX(),box.lower.getY(),new Rotation2d())
-        );
-        boxserialnumber++;
     }
 }
