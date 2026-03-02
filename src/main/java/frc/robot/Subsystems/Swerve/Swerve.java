@@ -10,7 +10,6 @@ import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
 
 import dev.doglog.DogLog;
-import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -27,17 +26,18 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.Subsystems.FieldBehaviour;
 import swervelib.SwerveDrive;
 import swervelib.parser.SwerveParser;
 import swervelib.telemetry.SwerveDriveTelemetry;
 import swervelib.telemetry.SwerveDriveTelemetry.TelemetryVerbosity;
 
+import com.studica.frc.Navx;
 
 public class Swerve extends SubsystemBase {
 
   final double maximumSpeed = 2.0;
   public SwerveDrive swerveDrive; 
+  Navx navx; 
   Field2d odometryField = new Field2d();
 
   /** Creates a new SwerveSubsystem. */
@@ -59,6 +59,24 @@ public class Swerve extends SubsystemBase {
     swerveDrive.setCosineCompensator(false);
     SwerveDriveTelemetry.verbosity = TelemetryVerbosity.HIGH;
     SmartDashboard.putData("odometryField", odometryField);
+
+    //Grab the constructed navx in case we need it
+    this.navx = (Navx) swerveDrive.getGyro().getIMU();
+    //AT MINIMUM the quat6d and algoStates is required for navx swerve to work.
+    //Other signals are unknown, but leaving in place
+    navx.enableOptionalMessages(
+      true, 
+      true, 
+      true, 
+      true,
+      true, 
+      true, 
+      true, 
+      true, 
+      true, 
+      true
+    );
+
   }
 
   /** Represent Inputs as a proportion to the drive trains maximum capability */
