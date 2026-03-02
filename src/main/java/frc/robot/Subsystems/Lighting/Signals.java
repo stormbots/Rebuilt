@@ -21,7 +21,7 @@ import edu.wpi.first.wpilibj2.command.WaitCommand;
 public class Signals extends SubsystemBase {
 
   double[] ownedSegments=new double[]{0,1,2,3};
-  public WLED wled = new WLED(new SerialPort(115200, Port.kUSB1));
+  public WLED wled = new WLED(Port.kUSB1);
   LedSegment seg = new LedSegment(0, 0, 60, false);
   LedSegment seg2 = new LedSegment(1, 60, 120, false);
   List<LedSegment> signalSegments = List.of(seg,seg2);
