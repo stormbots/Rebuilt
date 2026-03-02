@@ -10,6 +10,7 @@ import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
 
 import dev.doglog.DogLog;
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -27,7 +28,6 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import swervelib.SwerveDrive;
-import swervelib.imu.NavXSwerve;
 import swervelib.parser.SwerveParser;
 import swervelib.telemetry.SwerveDriveTelemetry;
 import swervelib.telemetry.SwerveDriveTelemetry.TelemetryVerbosity;
@@ -246,8 +246,11 @@ public class Swerve extends SubsystemBase {
     return Commands.run(()->{
       secondaryInputs.r = 0.3;
       var error = swerveDrive.getPose().getRotation().minus(bearing);
-      secondaryInputs.r += error.getDegrees()*1/90;
 
+      double kp = 1.0 / 120.0; //90 degrees is 1 output
+      double output = error.getDegrees()*kp;
+      output = MathUtil.clamp(output, -1.0, 1.0);
+      secondaryInputs.r = output;
     })
     ;
   }
