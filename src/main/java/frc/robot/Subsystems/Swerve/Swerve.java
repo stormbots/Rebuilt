@@ -10,6 +10,7 @@ import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
 
 import dev.doglog.DogLog;
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -96,6 +97,7 @@ public class Swerve extends SubsystemBase {
     .add(fieldInputs)
     .add(autoInputs)
     ;
+
     if(DriverStation.isDisabled())inputs.clear();
     swerveDrive.drive(
         new Translation2d(
@@ -106,6 +108,9 @@ public class Swerve extends SubsystemBase {
         true,
         false 
       );
+
+    SmartDashboard.putNumber("swerve/driverInputsr", driverInputs.r);
+    SmartDashboard.putNumber("swerve/anglegyro", swerveDrive.getGyro().getRotation3d().getAngle());
   }
 
   public Command addDriverInputs(DoubleSupplier translationX, DoubleSupplier translationY, DoubleSupplier angularRotationX){
@@ -180,5 +185,31 @@ public class Swerve extends SubsystemBase {
 
   public ChassisSpeeds getChassisSpeedsFieldRelative(){
     return swerveDrive.getFieldVelocity();
+  }
+
+  private void pidToRotation(Rotation2d targetRot){
+    
+
+    double clamp = 2.0;
+    // swerveDrive.setChassisSpeeds(new ChassisSpeeds(
+    //   MathUtil.clamp(delta.getX()*transltionP,-clamp, clamp),
+    //   MathUtil.clamp(delta.getY()*transltionP,-clamp,clamp),
+    //   delta.getRotation().getRadians()*thetaP
+    // ));
+
+    autoInputs.r = targetRot.getDegrees()*1/90.0;
+
+  }
+
+
+  public Command turnToHeading(Rotation2d bearing){
+    return run(()->{
+      autoInputs.r = 0.3;
+      var error = swerveDrive.getPose().getRotation().minus(bearing);
+      autoInputs.r = error.getDegrees()*1/90;
+      
+    })
+    .finallyDo(autoInputs::clear)
+    ;
   }
 }

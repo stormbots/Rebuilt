@@ -115,6 +115,10 @@ public class TargetingSystem extends SubsystemBase {
     return pass.get(0);
   }
 
+  public Pose2d getTarLockTemp(){
+    return new Pose2d(Constants.Field.blueHub,new Rotation2d());
+  }
+
   public Pose2d getBestTarget(){
     return getBestTarget(swerve.getSwervePose());
   }

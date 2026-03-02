@@ -9,6 +9,7 @@ import static edu.wpi.first.units.Units.Degrees;
 import com.stormbots.CRTAbsoluteEncoder;
 
 import edu.wpi.first.math.geometry.Pose3d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -77,19 +78,20 @@ public class RobotContainer {
     // }
 
     // driver.a().whileTrue(shooter.testSetFlywheelRPM(1000));
-    driver.a().whileTrue(shooter.shoot(()->new TargetingSystem.ShooterState(
-      Degrees.of(0), 
-      Degrees.of(SmartDashboard.getNumber("robotContainer/hoodAngle", hoodAngle)), 
-      SmartDashboard.getNumber("robotContainer/flywheelrpm", rpm)))
-    );
-    driver.b().whileTrue(spindexer.feedToShooter());
+    // driver.a().whileTrue(shooter.shoot(()->new TargetingSystem.ShooterState(
+    //   Degrees.of(0), 
+    //   Degrees.of(SmartDashboard.getNumber("robotContainer/hoodAngle", hoodAngle)), 
+    //   SmartDashboard.getNumber("robotContainer/flywheelrpm", rpm)))
+    // );
+    // driver.b().whileTrue(spindexer.feedToShooter());
     // driver.x().whileTrue(spindexer.setVoltages(8.0, 0.0));
     // driver.y().whileTrue(spindexer.setVoltages(0.0, 8.0));
 
-    driver.x().whileTrue(shooter.testSetTurretAngle(Degrees.of(20)));
+    // driver.x().whileTrue(shooter.testSetTurretAngle(Degrees.of(20)));
 
     driver.povDown().whileTrue(shooter.testHome());
-    driver.a().whileTrue(swerve.targetLock(targeting.getBestTarget()));
+    driver.x().whileTrue(swerve.turnToHeading(targeting.getHeadingToTarget(swerve.getSwervePose().getTranslation(), targeting.getTarLockTemp().getTranslation())));
+    driver.a().whileTrue(swerve.turnToHeading(new Rotation2d(0.0)));
     // driver.povUp().whileTrue(shooter.testSetHoodAngle(Degrees.of(30)));
     // driver.leftBumper().whileTrue(shooter.testSetTurretAngle(Degrees.of(30)));
     // driver.rightBumper().whileTrue(shooter.testSetTurretAngle(Degrees.of(0)));
