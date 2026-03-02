@@ -54,8 +54,8 @@ Flywheel flywheel = new Flywheel();
     public Command shoot(Supplier<TargetingSystem.ShooterState> targets){
         return Commands.parallel(
             flywheel.setRPM(targets),
-            hood.setAngle(targets),
-            turret.setAngle(targets)
+            hood.setAngle(targets)
+            // turret.setAngle(targets)
         );
     }
 
@@ -71,9 +71,9 @@ Flywheel flywheel = new Flywheel();
         return flywheel.setRPM(()->rpm, ()->300);
     }
     
-    public Command testFlywheelVoltage(double volts){
-        return flywheel.setVoltageCommand(volts);
-    }
+    // public Command testFlywheelVoltage(double volts){
+    //     return flywheel.setVoltageCommand(volts);
+    // }
 
     public Command testHome(){
         return hood.homingCommand();

@@ -86,7 +86,7 @@ public class Hood extends SubsystemBase {
 
     config.closedLoop
       .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
-      .p(2*0.3/30)
+      .p(2 * 0.3 / 30 * 5 * 1.2)
     ;
 
     //do not enable soft limits until homed

@@ -65,8 +65,21 @@ public class TargetingSystem extends SubsystemBase {
 
   //distance, hoodangle, flywheel rpm
   LUT hubLUT = new LUT(new double[][]{
-    {0, 0, 0},
-    {0, 0, 0}
+    {22, 5, 2050},
+    {32, 10, 2050},
+    {48, 10, 2100},
+    {60, 13, 2100},
+    {72, 23, 2100},
+    {84, 26, 2100},
+    {96, 30, 2150},
+    {108, 30, 2200},
+    {120, 30, 2300},
+    {132, 30, 2350},
+    {144, 30, 2400},
+    {156, 30, 2450},
+    {168, 30, 2500},
+    {180, 30, 2550},
+    {192, 30, 2625}
   });
 
   //distance, hoodangle, flywheel rpm

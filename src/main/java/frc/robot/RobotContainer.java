@@ -11,12 +11,12 @@ import com.stormbots.CRTAbsoluteEncoder;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Subsystems.FieldBehaviour;
-import frc.robot.Subsystems.Climber.Climber;
 import frc.robot.Subsystems.HopperSensors.HopperSensors;
 import frc.robot.Subsystems.Intake.Intake;
 import frc.robot.Subsystems.Lighting.Signals;
@@ -37,8 +37,6 @@ public class RobotContainer {
   Shooter shooter = new Shooter(targeting);
   Intake intake = new Intake();
   Spindexer spindexer = new Spindexer(shooter.isReadyToAcceptFuel);
-  Climber climber = new Climber();
-
   QuestNavSubsystem questnav = new QuestNavSubsystem(swerve);
   Pathing pathing = new Pathing(swerve);
   Signals signlas = new Signals();
@@ -49,8 +47,13 @@ public class RobotContainer {
   CommandXboxController driver = new CommandXboxController(0);
   CommandXboxController operator = new CommandXboxController(1);
   Path testingPath = new Path("goCollect");
+  Double rpm = 2600.0;
+  Double hoodAngle = 25.0;
 
   public RobotContainer() {
+    SmartDashboard.putNumber("robotContainer/flywheelrpm", rpm);
+    SmartDashboard.putNumber("robotContainer/hoodAngle", hoodAngle);
+
     HopperSensors.getInstance(); //Ensure this always exists and is updating
     questnav.setQuestPose(new Pose3d(swerve.swerveDrive.getPose().getX(), swerve.swerveDrive.getPose().getY(), 0.0, new Rotation3d(0.0, 0.0, 0.0)));
     configureBindings();
@@ -64,17 +67,32 @@ public class RobotContainer {
       ()->-driver.getLeftX(), 
       ()->-driver.getRightX()
     ));
+    // if(Robot.isSimulation()){
+    //   //Make it "drive right" on the sim field using default Red1
+    //   swerve.setDefaultCommand(swerve.addDriverInputs(
+    //     ()->-driver.getLeftX()/2.0, 
+    //     ()->driver.getLeftY()/2.0, 
+    //     ()->-driver.getRightX()/2.0
+    //   ));
+    // }
 
     // driver.a().whileTrue(shooter.testSetFlywheelRPM(1000));
-    driver.a().whileTrue(shooter.testFlywheelVoltage(4));
+    driver.a().whileTrue(shooter.shoot(()->new TargetingSystem.ShooterState(
+      Degrees.of(0), 
+      Degrees.of(SmartDashboard.getNumber("robotContainer/hoodAngle", hoodAngle)), 
+      SmartDashboard.getNumber("robotContainer/flywheelrpm", rpm)))
+    );
     driver.b().whileTrue(spindexer.feedToShooter());
-    driver.x().whileTrue(spindexer.setVoltages(8.0, 0.0));
-    driver.y().whileTrue(spindexer.setVoltages(0.0, 8.0));
+    // driver.x().whileTrue(spindexer.setVoltages(8.0, 0.0));
+    // driver.y().whileTrue(spindexer.setVoltages(0.0, 8.0));
+
+    driver.x().whileTrue(shooter.testSetTurretAngle(Degrees.of(20)));
 
     driver.povDown().whileTrue(shooter.testHome());
-    driver.povUp().whileTrue(shooter.testSetHoodAngle(Degrees.of(30)));
-    driver.leftBumper().whileTrue(shooter.testSetTurretAngle(Degrees.of(30)));
-    driver.rightBumper().whileTrue(shooter.testSetTurretAngle(Degrees.of(0)));
+    driver.a().whileTrue(swerve.targetLock(targeting.getBestTarget()));
+    // driver.povUp().whileTrue(shooter.testSetHoodAngle(Degrees.of(30)));
+    // driver.leftBumper().whileTrue(shooter.testSetTurretAngle(Degrees.of(30)));
+    // driver.rightBumper().whileTrue(shooter.testSetTurretAngle(Degrees.of(0)));
 
 
     //  driver.povUp().whileTrue(shooter.testHome());
@@ -85,31 +103,15 @@ public class RobotContainer {
     //   ()->-driver.getRightX()
     // ));
 
-    // Climber Initial Controls
-    //TODO: Not yet  fully ready!
-    // driver.povLeft().whileTrue(climber.setStage1Voltage(-12)); //stage1 down
-    // driver.povUp().whileTrue(climber.setStage1Voltage(12)); //stage1 up
-    // driver.povDown().whileTrue(climber.setStage2Voltage(-12)); //stage2 down
-    // driver.povRight().whileTrue(climber.setStage2Voltage(12)); //stage2 up
-
-    // driver.rightBumper()
-    // .whileTrue(climber.prepareForClimbL1())
-    // .onFalse(climber.climbL1().withTimeout(10))
-    // ;
-    // driver.start().whileTrue(climber.goHome());
-
-
-    //Test code but it works
-
     //TODO Add intakes to controller
-    // driver.x().whileTrue(intake.intake());
-    // driver.y().whileTrue(intake.bringUp());
+    //  driver.x().whileTrue(intake.intake());
+    //  driver.y().whileTrue(intake.stop());
 
 
-    new Trigger(DriverStation::isEnabled)
-    .whileTrue(
-      swerve.addFieldInput( ()->fieldBehaviour.getSwerveInputs(swerve.getSwervePose()) )
-    );
+    // new Trigger(DriverStation::isEnabled)
+    // .whileTrue(
+    //   swerve.addFieldInput( ()->fieldBehaviour.getSwerveInputs(swerve.getSwervePose()) )
+    // );
 
 
 
@@ -134,6 +136,5 @@ public class RobotContainer {
   public Command getAutonomousCommand() {
     //TODO: Get this from Autos.java instead
     return Commands.print("No autonomous command configured");
-    // return climber.goHome();
   }
 }
