@@ -10,7 +10,6 @@ import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
 
 import dev.doglog.DogLog;
-import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -27,12 +26,10 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.Subsystems.FieldBehaviour;
 import swervelib.SwerveDrive;
 import swervelib.parser.SwerveParser;
 import swervelib.telemetry.SwerveDriveTelemetry;
 import swervelib.telemetry.SwerveDriveTelemetry.TelemetryVerbosity;
-
 
 public class Swerve extends SubsystemBase {
 
@@ -78,11 +75,27 @@ public class Swerve extends SubsystemBase {
       this.r+=other.r;
       return this;
     }
+
+    /** Create an input using relative chassis outputs [+/-1] */
+    public static SwerveInputs fromRelativePower(double tx, double ty, double rotation){
+      var inputs = new SwerveInputs();
+      inputs.tx = tx;
+      inputs.ty = ty;
+      inputs.r = rotation;
+      return inputs;
+    }
+
+    /** Update the input, returning itself */
+    public SwerveInputs addtx(Double tx){ this.tx +=tx; return this; }
+    /** Update the input, returning itself */
+    public SwerveInputs addty(Double tx){ this.ty +=ty; return this; }
+    /** Update the input, returning itself */
+    public SwerveInputs addr(Double tx){ this.r +=r; return this; }
   }
 
-  SwerveInputs driverInputs = new SwerveInputs();
+  SwerveInputs primaryInputs = new SwerveInputs();
   SwerveInputs fieldInputs = new SwerveInputs();
-  SwerveInputs autoInputs = new SwerveInputs();
+  SwerveInputs secondaryInputs = new SwerveInputs();
 
   @Override
   public void periodic() {
@@ -93,68 +106,102 @@ public class Swerve extends SubsystemBase {
 
     odometryField.setRobotPose(swerveDrive.getPose());
     var inputs = new SwerveInputs()
-    .add(driverInputs)
+    .add(primaryInputs)
     .add(fieldInputs)
-    .add(autoInputs)
+    .add(secondaryInputs)
     ;
 
+    //Don't generate output when off
     if(DriverStation.isDisabled())inputs.clear();
-    swerveDrive.drive(
-        new Translation2d(
-          inputs.tx * swerveDrive.getMaximumChassisVelocity(),
-          inputs.ty * swerveDrive.getMaximumChassisVelocity()
-        ),
-        inputs.r * swerveDrive.getMaximumChassisAngularVelocity(),
-        true,
-        false 
-      );
 
-    SmartDashboard.putNumber("swerve/driverInputsr", driverInputs.r);
+    swerveDrive.drive(
+      new Translation2d(
+        inputs.tx * swerveDrive.getMaximumChassisVelocity(),
+        inputs.ty * swerveDrive.getMaximumChassisVelocity()
+      ),
+      inputs.r * swerveDrive.getMaximumChassisAngularVelocity(),
+      true,
+      false 
+    );
+
+    //Now that we've read the inputs, clear them to prevent potential stale data
+    primaryInputs.clear();
+    fieldInputs.clear();
+    secondaryInputs.clear();
+
+    SmartDashboard.putNumber("swerve/primaryInput/tx", primaryInputs.tx);
+    SmartDashboard.putNumber("swerve/primaryInput/ty", primaryInputs.ty);
+    SmartDashboard.putNumber("swerve/primaryInput/r", primaryInputs.r);
+
+    SmartDashboard.putNumber("swerve/secondaryInput/tx", primaryInputs.tx);
+    SmartDashboard.putNumber("swerve/secondaryInput/ty", primaryInputs.ty);
+    SmartDashboard.putNumber("swerve/secondaryInput/r", primaryInputs.r);
+
     SmartDashboard.putNumber("swerve/anglegyro", swerveDrive.getGyro().getRotation3d().getAngle());
   }
 
-  public Command addDriverInputs(DoubleSupplier translationX, DoubleSupplier translationY, DoubleSupplier angularRotationX){
+  /** Own the subsystem and add dominant field-centric control */
+  public Command setPrimaryInputs(DoubleSupplier translationX, DoubleSupplier translationY, DoubleSupplier angularRotationX){
     return Commands.either(
       run(()->{
-        driverInputs.tx = 1 * translationX.getAsDouble();
-        driverInputs.ty = 1 * translationY.getAsDouble();
-        driverInputs.r = angularRotationX.getAsDouble();
+        primaryInputs.tx = 1 * translationX.getAsDouble();
+        primaryInputs.ty = 1 * translationY.getAsDouble();
+        primaryInputs.r = angularRotationX.getAsDouble();
       }), 
       run(()->{
-        driverInputs.tx = -1 * translationX.getAsDouble();
-        driverInputs.ty = -1 * translationY.getAsDouble();
-        driverInputs.r = angularRotationX.getAsDouble();
+        primaryInputs.tx = -1 * translationX.getAsDouble();
+        primaryInputs.ty = -1 * translationY.getAsDouble();
+        primaryInputs.r = angularRotationX.getAsDouble();
       }),
       ()->DriverStation.getAlliance().equals(Optional.of(Alliance.Blue))
     )
-    .finallyDo(driverInputs::clear)
+    .finallyDo(primaryInputs::clear)
     ;
   }
 
-  public Command addAutoInputs(DoubleSupplier translationX, DoubleSupplier translationY, DoubleSupplier angularRotationX){
+  /** Special interface for path-planning, which needs a method interface
+   * to build it's command.
+   * @param translationX in percent of chassis power
+   * @param translationY in percent of chassis power
+   * @param angularRotationX in percent of chassis power
+   */
+  public void setPrimaryInputsVoid(DoubleSupplier translationX, DoubleSupplier translationY, DoubleSupplier angularRotationX){
+    primaryInputs.tx = 1 * translationX.getAsDouble();
+    primaryInputs.ty = 1 * translationY.getAsDouble();
+    primaryInputs.r = angularRotationX.getAsDouble();
+  }
+
+  /** Add additional inputs for automatic actions like turning/aiming without disrupting primary input.
+   * Does not claim subsystem.
+   * @param translationX in percentage of chassis power
+   * @param translationY in percent chassis power
+   * @param angularRotationX in percent chassis power
+   * @return
+   */
+  public Command addSecondaryInputs(DoubleSupplier translationX, DoubleSupplier translationY, DoubleSupplier angularRotationX){
     return Commands.either(
-      run(()->{
-        autoInputs.tx = 1 * translationX.getAsDouble();
-        autoInputs.ty = 1 * translationY.getAsDouble();
-        autoInputs.r = angularRotationX.getAsDouble();
+      Commands.run(()->{
+        secondaryInputs.tx += 1 * translationX.getAsDouble();
+        secondaryInputs.ty += 1 * translationY.getAsDouble();
+        secondaryInputs.r += angularRotationX.getAsDouble();
       }), 
-      run(()->{
-        autoInputs.tx = -1 * translationX.getAsDouble();
-        autoInputs.ty = -1 * translationY.getAsDouble();
-        autoInputs.r = angularRotationX.getAsDouble();
+      Commands.run(()->{
+        secondaryInputs.tx += -1 * translationX.getAsDouble();
+        secondaryInputs.ty += -1 * translationY.getAsDouble();
+        secondaryInputs.r += angularRotationX.getAsDouble();
       }),
       ()->DriverStation.getAlliance().equals(Optional.of(Alliance.Blue))
     )
-    .finallyDo(autoInputs::clear)
+    .finallyDo(secondaryInputs::clear)
     ;
   }
 
-  public void addAutoInputsVoid(DoubleSupplier translationX, DoubleSupplier translationY, DoubleSupplier angularRotationX)
-  {
-    autoInputs.tx = 1 * translationX.getAsDouble();
-    autoInputs.ty = 1 * translationY.getAsDouble();
-    autoInputs.r = angularRotationX.getAsDouble();
-  }
+  /** Provide inputs generated by field position; Does not claim subsystem! */
+  public Command addFieldInput(Supplier<SwerveInputs> inputs){
+    return Commands.run(()->{
+      fieldInputs = inputs.get();
+    });
+  };
 
   public Command zeroGyro(){
     return Commands.runOnce(swerveDrive::zeroGyro);
@@ -168,12 +215,6 @@ public class Swerve extends SubsystemBase {
   public ChassisSpeeds getChassisSpeeds(){
     return swerveDrive.getRobotVelocity();
   }
-
-  public Command addFieldInput(Supplier<SwerveInputs> inputs){
-    return run(()->{
-      fieldInputs = inputs.get();
-    });
-  };
 
   public void addVisionMeasurement(Pose2d pose2d, double timestamp, Matrix<N3, N1> STD_DEVS){
     swerveDrive.addVisionMeasurement(pose2d, timestamp, STD_DEVS);
@@ -197,19 +238,18 @@ public class Swerve extends SubsystemBase {
     //   delta.getRotation().getRadians()*thetaP
     // ));
 
-    autoInputs.r = targetRot.getDegrees()*1/90.0;
+    secondaryInputs.r = targetRot.getDegrees()*1/90.0;
 
   }
 
 
   public Command turnToHeading(Rotation2d bearing){
-    return run(()->{
-      autoInputs.r = 0.3;
+    return Commands.run(()->{
+      secondaryInputs.r = 0.3;
       var error = swerveDrive.getPose().getRotation().minus(bearing);
-      autoInputs.r = error.getDegrees()*1/90;
-      
+      secondaryInputs.r += error.getDegrees()*1/90;
+
     })
-    .finallyDo(autoInputs::clear)
     ;
   }
 }

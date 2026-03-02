@@ -48,7 +48,7 @@ public class Pathing extends SubsystemBase {
     autoinputx = fieldRelative.vxMetersPerSecond;
     autoinputy = fieldRelative.vyMetersPerSecond;
     autoinputr = fieldRelative.omegaRadiansPerSecond;
-    swerveSubsystem.addAutoInputsVoid(()->fieldRelative.vxMetersPerSecond, ()->fieldRelative.vyMetersPerSecond, ()->fieldRelative.omegaRadiansPerSecond);
+    swerveSubsystem.setPrimaryInputsVoid(()->fieldRelative.vxMetersPerSecond, ()->fieldRelative.vyMetersPerSecond, ()->fieldRelative.omegaRadiansPerSecond);
 }
   
   @Override
