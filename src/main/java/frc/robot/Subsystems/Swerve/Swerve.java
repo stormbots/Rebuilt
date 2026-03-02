@@ -29,6 +29,7 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Subsystems.FieldBehaviour;
 import swervelib.SwerveDrive;
+import swervelib.imu.NavXSwerve;
 import swervelib.parser.SwerveParser;
 import swervelib.telemetry.SwerveDriveTelemetry;
 import swervelib.telemetry.SwerveDriveTelemetry.TelemetryVerbosity;
@@ -109,8 +110,6 @@ public class Swerve extends SubsystemBase {
         false 
       );
 
-    SmartDashboard.putNumber("swerve/driverInputsr", driverInputs.r);
-    SmartDashboard.putNumber("swerve/anglegyro", swerveDrive.getGyro().getRotation3d().getAngle());
   }
 
   public Command addDriverInputs(DoubleSupplier translationX, DoubleSupplier translationY, DoubleSupplier angularRotationX){
@@ -188,17 +187,13 @@ public class Swerve extends SubsystemBase {
   }
 
   private void pidToRotation(Rotation2d targetRot){
-    
-
     double clamp = 2.0;
     // swerveDrive.setChassisSpeeds(new ChassisSpeeds(
     //   MathUtil.clamp(delta.getX()*transltionP,-clamp, clamp),
     //   MathUtil.clamp(delta.getY()*transltionP,-clamp,clamp),
     //   delta.getRotation().getRadians()*thetaP
     // ));
-
     autoInputs.r = targetRot.getDegrees()*1/90.0;
-
   }
 
 
