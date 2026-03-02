@@ -60,7 +60,7 @@ public class RobotContainer {
     //     )>=1.0
     //   )
       ));
-  WLED wled = new WLED(new SerialPort(115200, Port.kUSB1),photonvision);
+  WLED wled = new WLED(Port.kUSB1,photonvision);
   Autos autos = new Autos(swerve, shooter, intake, questnav, spindexer, pathing, targeting, climber);
   ShiftTracking shiftTracking = new ShiftTracking();
   // Bling bling = new Bling(); //TODO: Currently no bling lights on bot

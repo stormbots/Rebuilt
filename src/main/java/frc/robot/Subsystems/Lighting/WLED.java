@@ -16,13 +16,14 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonSerializationContext;
 import com.google.gson.JsonSerializer;
 
+import edu.wpi.first.hal.util.UncleanStatusException;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.SerialPort;
+import edu.wpi.first.wpilibj.SerialPort.Port;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.RobotContainer;
 import frc.robot.Subsystems.Lighting.LedSegment.LedMultiRange;
 import frc.robot.Subsystems.Photonvision.Photonvision;
 
@@ -38,15 +39,28 @@ public class WLED extends SubsystemBase{
   public static final int numPatterns = 28;
   private static int chanceIndividual = 8;
   private static boolean auraMode = false;
-  public WLED(SerialPort serialPort, Photonvision vision) {
+  
+  public WLED(Port port, Photonvision vision) {
     if (chanceIndividual==0){
       chanceIndividual = 2;
     }
     try{
-      serialport.toString();
+      this.serialport = new SerialPort(115200, port);
+      //TODO: This is intended to be a singleton-esque class
+
+      //Attempt to write to the port to verify it functions
+      serialport.writeString("{v:true}");
     }
-    catch (NullPointerException n){
-      WLED.serialport = serialPort;
+    catch (UncleanStatusException e){
+      //Raised if WLED is unplugged at robot boot
+      /*
+      Error at frc.robot.Subsystems.Lighting.Signals.<init>(Signals.java:24): 
+      Unhandled exception instantiating robot edu.wpi.first.hal.SerialPortJNI 
+      edu.wpi.first.hal.util.UncleanStatusException: Code: -1123. 
+      HAL: The specified serial port device was not found
+      */
+      System.err.println("Could not capture serial port! WLED not running");
+      this.serialport = null; //Mark invalid and avoid further writes
     }
 
     if (defaultPattern == -1){
@@ -56,6 +70,7 @@ public class WLED extends SubsystemBase{
     if (indivualRoll == -1){
       indivualRoll = (int)(Math.random()*(chanceIndividual*2)+1);
     }
+
     calls = 0; 
     
     try{
@@ -64,8 +79,16 @@ public class WLED extends SubsystemBase{
     catch (NullPointerException n){
       WLED.vision = vision;
     }
-     
-}
+  }
+
+  // TODO: Impliment as a proper singleton using a port fetch to support multiple modules
+  // Note: This requires notable edits to getLedSegment and streamlining data flow
+  // public static WLED getInstance(Port port){
+  //   if(ports.containsKey(port)) return ports.get(port);
+  //   var wled = new WLED(port);
+  //   ports.put(port, wled);
+  //   return wled;
+  // }
 
   public LedSegment getLedSegment(int id, int start, int stop, boolean reverse){
     return new LedSegment(id, start, stop, reverse);
@@ -144,9 +167,10 @@ public class WLED extends SubsystemBase{
         }
       }
       calls++;
+      if(serialport==null)return; // Invalid serial port! WLED not connected on boot
       serialport.writeString(json);
-      SmartDashboard.putNumber("calls", calls);
-      SmartDashboard.putString("json", json);
+      SmartDashboard.putNumber("WLED/calls", calls);
+      SmartDashboard.putString("WLED/json", json);
     } 
   }
 

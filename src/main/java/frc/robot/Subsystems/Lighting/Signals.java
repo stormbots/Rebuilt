@@ -10,14 +10,10 @@ import java.util.Optional;
 
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
-import edu.wpi.first.wpilibj.SerialPort;
-import edu.wpi.first.wpilibj.SerialPort.Port;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
-import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import edu.wpi.first.wpilibj2.command.button.Trigger;
+
 /** Add your docs here. */
 public class Signals extends SubsystemBase {
   double[] ownedSegments=new double[]{0,1,2,3};
@@ -26,7 +22,6 @@ public class Signals extends SubsystemBase {
   LedSegment left = new LedSegment(2, 40, 59, false);
 
   List<LedSegment> signalSegments = List.of(right,center);
-
   
   public Signals(){
     right.setDefaultCommand(right.showAllianceColorInteresting().ignoringDisable(true));
