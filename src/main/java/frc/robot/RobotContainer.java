@@ -63,7 +63,7 @@ public class RobotContainer {
   }
 
   private void configureBindings() {
-    swerve.setDefaultCommand(swerve.addDriverInputs(
+    swerve.setDefaultCommand(swerve.setPrimaryInputs(
       ()->-driver.getLeftY(), 
       ()->-driver.getLeftX(), 
       ()->-driver.getRightX()
@@ -125,7 +125,7 @@ public class RobotContainer {
     // driver.y().onTrue(swerve.addAutoInputs(()->0.0, ()->0.0, ()->0.0));
     if(Robot.isSimulation()){
       //Make it "drive right" on the sim field using default Red1
-      swerve.setDefaultCommand(swerve.addDriverInputs(
+      swerve.setDefaultCommand(swerve.setPrimaryInputs(
         ()->-driver.getLeftX(), 
         ()->driver.getLeftY(), 
         ()->-driver.getRightX()
