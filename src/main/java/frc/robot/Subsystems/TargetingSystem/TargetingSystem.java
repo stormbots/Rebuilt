@@ -39,7 +39,7 @@ public class TargetingSystem extends SubsystemBase {
 
     public Angle turretTolerance = Degrees.of(3);
     public Angle hoodTolerance = Degrees.of(0.5);
-    public double flywheelTolerance = 50;
+    public double flywheelTolerance = 100;
 
     public ShooterState(Angle turretAngle, Angle hoodAngle, double flywheelRPM){
       this.turretAngle = turretAngle;

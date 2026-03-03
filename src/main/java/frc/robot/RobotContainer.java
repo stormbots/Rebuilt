@@ -40,7 +40,7 @@ public class RobotContainer {
   Shooter shooter = new Shooter(targeting);
   Intake intake = new Intake();
   Climber climber = new Climber();
-  Spindexer spindexer = new Spindexer(shooter.isReadyToAcceptFuel);
+  Spindexer spindexer = new Spindexer(shooter.isReadyToAcceptFuel.and(swerve::isOnTargetAngle));
   QuestNavSubsystem questnav = new QuestNavSubsystem(swerve);
   Pathing pathing = new Pathing(swerve);
   Signals signlas = new Signals();

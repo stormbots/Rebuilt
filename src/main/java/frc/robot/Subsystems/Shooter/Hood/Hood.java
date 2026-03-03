@@ -127,7 +127,7 @@ public class Hood extends SubsystemBase {
   }
 
   public boolean getOnTarget(){
-    return homed && MathUtil.isNear(targetAngle.in(Degrees), motor.getEncoder().getPosition(), tolerance.in(Degrees));
+    return MathUtil.isNear(targetAngle.in(Degrees), motor.getEncoder().getPosition(), tolerance.in(Degrees));
   }
 
 

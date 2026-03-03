@@ -116,7 +116,6 @@ public class Photonvision extends SubsystemBase {
       double avgDistance = 0.0;
 
       for(var tag : targets){
-        //Account for left + right? do not have time to confirm right now
         var tagPose = rightEstimator.getFieldTags().getTagPose( tag.getFiducialId() );
         if( tagPose.isEmpty() ) continue;
         numTags++;

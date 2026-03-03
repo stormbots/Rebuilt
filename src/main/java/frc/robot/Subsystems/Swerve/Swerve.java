@@ -37,7 +37,7 @@ public class Swerve extends SubsystemBase {
   final double maximumSpeed = 2.0;
   public SwerveDrive swerveDrive; 
   Field2d odometryField = new Field2d();
-
+  private boolean isOnTargetAngle = true;
   /** Creates a new SwerveSubsystem. */
   public Swerve() {
     var botname = Preferences.getString("BotName", "compbot");
@@ -221,6 +221,10 @@ public class Swerve extends SubsystemBase {
     return swerveDrive.getRobotVelocity();
   }
 
+  public boolean isOnTargetAngle(){
+    return isOnTargetAngle;
+  }
+
   public void addVisionMeasurement(Pose2d pose2d, double timestamp, Matrix<N3, N1> STD_DEVS){
     swerveDrive.addVisionMeasurement(pose2d, timestamp, STD_DEVS);
   }
@@ -248,16 +252,18 @@ public class Swerve extends SubsystemBase {
 
   public Command turnToHeading(Supplier<Rotation2d> bearing){
     return Commands.run(()->{
-      Boolean atTarget = false;
+      isOnTargetAngle = false;
       secondaryInputs.r = 0.3;
       var error = bearing.get().minus(swerveDrive.getPose().getRotation());
       // var error = swerveDrive.getPose().getRotation().minus(bearing);  
-
       double kp = 2.0 / 120.0; //90 degrees is 1 output
       double output = error.getDegrees()*kp;
       output = MathUtil.clamp(output, -1.0, 1.0);
       secondaryInputs.r = output;
-    })
+      if(error.getDegrees() < 5.0){
+        isOnTargetAngle = true;
+      }
+    }).finallyDo(()->isOnTargetAngle = false)
     ;
   }
 }
