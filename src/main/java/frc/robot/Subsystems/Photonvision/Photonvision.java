@@ -37,10 +37,10 @@ public class Photonvision extends SubsystemBase {
   private Matrix<N3, N1> singleTagStdDevs = VecBuilder.fill(4, 4, 8);
   private Matrix<N3, N1> multiTagStdDevs = VecBuilder.fill(0.5, 0.5, 1);
   private Transform3d cameraToCenter = new Transform3d(new Translation3d(
-    Inch.of(6).in(Meters), 
-    Inch.of(6).in(Meters), 
-    Inch.of(0).in(Meters)), 
-    new Rotation3d(0.0, 0.0, 45.0)
+    Inch.of(12).in(Meters), 
+    Inch.of(-9).in(Meters), 
+    Inch.of(18.65).in(Meters)), 
+    new Rotation3d(0.0, 0.0, Math.toRadians(-56.5))
   );
 
   private Field2d visionField2d = new Field2d();

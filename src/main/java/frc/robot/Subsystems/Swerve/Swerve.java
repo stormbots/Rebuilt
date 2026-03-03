@@ -208,6 +208,10 @@ public class Swerve extends SubsystemBase {
     return Commands.runOnce(swerveDrive::zeroGyro);
   }
 
+  public Command testZeroPose(){
+    return Commands.runOnce(()->swerveDrive.resetOdometry(new Pose2d()));
+  }
+
   //For other subsystems/files
   public Pose2d getSwervePose(){
     return swerveDrive.getPose();
@@ -242,12 +246,13 @@ public class Swerve extends SubsystemBase {
   }
 
 
-  public Command turnToHeading(Rotation2d bearing){
+  public Command turnToHeading(Supplier<Rotation2d> bearing){
     return Commands.run(()->{
       secondaryInputs.r = 0.3;
-      var error = swerveDrive.getPose().getRotation().minus(bearing);
+      var error = bearing.get().minus(swerveDrive.getPose().getRotation());
+      // var error = swerveDrive.getPose().getRotation().minus(bearing);  
 
-      double kp = 1.0 / 120.0; //90 degrees is 1 output
+      double kp = 2.0 / 120.0; //90 degrees is 1 output
       double output = error.getDegrees()*kp;
       output = MathUtil.clamp(output, -1.0, 1.0);
       secondaryInputs.r = output;

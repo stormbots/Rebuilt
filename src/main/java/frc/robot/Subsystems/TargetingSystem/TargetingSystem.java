@@ -65,21 +65,21 @@ public class TargetingSystem extends SubsystemBase {
 
   //distance, hoodangle, flywheel rpm
   LUT hubLUT = new LUT(new double[][]{
-    {22, 5, 2050},
-    {32, 10, 2050},
-    {48, 10, 2100},
-    {60, 13, 2100},
-    {72, 23, 2100},
-    {84, 26, 2100},
-    {96, 30, 2150},
-    {108, 30, 2200},
-    {120, 30, 2300},
-    {132, 30, 2350},
-    {144, 30, 2400},
-    {156, 30, 2450},
-    {168, 30, 2500},
-    {180, 30, 2550},
-    {192, 30, 2625}
+    {22+14, 5, 2050},
+    {32+22, 10, 2050},
+    {48+22, 10, 2100},
+    {60+22, 13, 2100},
+    {72+22, 23, 2100},
+    {84+22, 26, 2100},
+    {96+22, 30, 2150},
+    {108+22, 30, 2200},
+    {120+22, 30, 2300},
+    {132+22, 30, 2350},
+    {144+22, 30, 2400},
+    {156+22, 30, 2450},
+    {168+22, 30, 2500},
+    {180+22, 30, 2550},
+    {192+22, 30, 2625}
   });
 
   //distance, hoodangle, flywheel rpm
@@ -144,15 +144,24 @@ public class TargetingSystem extends SubsystemBase {
   private ShooterState getLUTShooterState(Pose2d botPose, Translation2d target, LUT lut){
     
     Distance magnitude = getDistanceToTarget(botPose.getTranslation(), target);
+
     
+    SmartDashboard.putNumber("shooter/lut/botx", botPose.getX());
+    SmartDashboard.putNumber("shooter/lut/boty", botPose.getY());
+    SmartDashboard.putNumber("shooter/lut/targetx", target.getX());
+    SmartDashboard.putNumber("shooter/lut/targety", target.getY());
+    SmartDashboard.putNumber("shooter/lut/distance", magnitude.in(Inches));
     var entry = lut.get(magnitude.in(Inches));   
     var angle = entry[1];
     var rpm = entry[2];
+    SmartDashboard.putNumber("shooter/lut/rpm", rpm);
+    SmartDashboard.putNumber("shooter/lut/hoodangle", angle);
     
     Translation2d turretTranslation = getTurretCenterpoint().toTranslation2d();
     Rotation2d heading = getHeadingToTarget(turretTranslation, target);
 
-    return new ShooterState(heading.minus(botPose.getRotation()).getMeasure(), Degrees.of(angle), rpm);
+    // return new ShooterState(heading.minus(botPose.getRotation()).getMeasure(), Degrees.of(angle), rpm);
+    return new ShooterState(Degrees.of(0), Degrees.of(angle), rpm);
   }
 
 
@@ -201,7 +210,8 @@ public class TargetingSystem extends SubsystemBase {
 
   public ShooterState getHub(){
     Translation2d target = new Translation2d(); //get best target
-    return getLUTShooterState(swerve.getSwervePose(), target, hubLUT);
+    //TODO: NEED TO CHANGE TO FLIP BASED OFF FIELD
+    return getLUTShooterState(swerve.getSwervePose(), Constants.Field.blueHub, hubLUT);
   }
 
   //IDT this is needed for now. We'll see. if it is, i'd like getPass() to use this method

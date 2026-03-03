@@ -30,17 +30,19 @@ public class Robot extends TimedRobot {
     robotContainer = new RobotContainer();
     //Set up the GrappleHook bridge application
     CanBridge.runTCP();
-     
+    PortForwarder.add(5800, "photonvision.local", 5800);
+
     switch(Preferences.getString("BotName", "compbot")){
       case "tabi":
       //Set up a network bridge to access the Orange Pi
-      PortForwarder.add(5800, "photonvision.local", 5800);
+      // PortForwarder.add(5800, "photonvision.local", 5800);
       break;
 
       case "practicebot":
       break;
 
       case "compbot":
+
       break;
 
       case "compBot":
