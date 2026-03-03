@@ -248,6 +248,7 @@ public class Swerve extends SubsystemBase {
 
   public Command turnToHeading(Supplier<Rotation2d> bearing){
     return Commands.run(()->{
+      Boolean atTarget = false;
       secondaryInputs.r = 0.3;
       var error = bearing.get().minus(swerveDrive.getPose().getRotation());
       // var error = swerveDrive.getPose().getRotation().minus(bearing);  

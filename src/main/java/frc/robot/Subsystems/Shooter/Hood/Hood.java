@@ -22,6 +22,7 @@ import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.FunctionalCommand;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
@@ -57,7 +58,7 @@ public class Hood extends SubsystemBase {
   public Hood() {
     motor.configure(getMotorConfig(), ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
 
-    setDefaultCommand(run(this::stop));
+    setDefaultCommand(setAngle(()->Degrees.of(0.0), ()->Degrees.of(0.5)));
   }
 
   @Override
@@ -106,14 +107,14 @@ public class Hood extends SubsystemBase {
 
   public Command setAngle(Supplier<Angle> angle, Supplier<Angle> tolerance){
     return run(()->{
-      if(homed){
+      // if(homed){
         this.targetAngle = angle.get();
         this.tolerance = tolerance.get();
         motor.getClosedLoopController().setSetpoint(
           targetAngle.in(Degrees),
           ControlType.kPosition
         );
-      }
+      // }
     });
   }
 

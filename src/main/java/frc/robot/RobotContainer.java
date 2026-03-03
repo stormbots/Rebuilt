@@ -8,6 +8,7 @@ import com.stormbots.CRTAbsoluteEncoder;
 
 import static edu.wpi.first.units.Units.Degrees;
 
+import java.io.SequenceInputStream;
 
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -18,6 +19,7 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.Subsystems.FieldBehaviour;
+import frc.robot.Subsystems.Climber.Climber;
 import frc.robot.Subsystems.HopperSensors.HopperSensors;
 import frc.robot.Subsystems.Intake.Intake;
 import frc.robot.Subsystems.Lighting.Signals;
@@ -37,6 +39,7 @@ public class RobotContainer {
   TargetingSystem targeting = new TargetingSystem(swerve);
   Shooter shooter = new Shooter(targeting);
   Intake intake = new Intake();
+  Climber climber = new Climber();
   Spindexer spindexer = new Spindexer(shooter.isReadyToAcceptFuel);
   QuestNavSubsystem questnav = new QuestNavSubsystem(swerve);
   Pathing pathing = new Pathing(swerve);
@@ -89,45 +92,53 @@ public class RobotContainer {
     ));
 
 
-    //PROGRAMMING DEBUG BUTTONS CODE REMOVE ME
+    //TODO: PROGRAMMING DEBUG BUTTONS CODE REMOVE ME
 
-    driver.start().onTrue(swerve.testZeroPose());
+    driver.start().onTrue(
+      Commands.sequence(
+        swerve.testZeroPose().withTimeout(0.1),
+        new InstantCommand(()->questnav.setQuestPose(new Pose3d(swerve.getSwervePose().getX(), swerve.getSwervePose().getY(), 0.0, new Rotation3d(0.0, 0.0, 0.0)))).withTimeout(0.1),
+        new InstantCommand(()->questnav.wantToTrack()))
+      );
 
-    driver.rightTrigger().whileTrue(shooter.shootHub());
-    driver.leftTrigger().whileTrue(spindexer.feedToShooter());
+    // driver.rightTrigger().whileTrue(shooter.shootHub());
+    // driver.leftTrigger().whileTrue(spindexer.feedToShooter());
     
 
-    driver.povLeft().whileTrue(shooter.testHome());
-    driver.a().whileTrue(swerve.turnToHeading(()->{
-      return targeting.getHeadingToTarget(swerve.getSwervePose().getTranslation(), targeting.getTarLockTemp().getTranslation()).plus(Rotation2d.k180deg);
-    }));
+    // driver.povLeft().whileTrue(shooter.testHome());
+    // driver.a().whileTrue(swerve.turnToHeading(()->{
+    //   return targeting.getHeadingToTarget(swerve.getSwervePose().getTranslation(), targeting.getTarLockTemp().getTranslation()).plus(Rotation2d.k180deg);
+    // }));
 
-    driver.x().whileTrue(intake.intake());
-    driver.y().whileTrue(intake.stop());
 
-    driver.povDown().whileTrue(shooter.testHome());
-    driver.a().whileTrue(swerve.turnToHeading(()->{
-      return targeting.getHeadingToTarget(swerve.getSwervePose().getTranslation(), targeting.getTarLockTemp().getTranslation()).plus(Rotation2d.k180deg);
-    }));
+    // driver.povDown().whileTrue(shooter.testHome());
+    // driver.a().whileTrue(swerve.turnToHeading(()->{
+    //   return targeting.getHeadingToTarget(swerve.getSwervePose().getTranslation(), targeting.getTarLockTemp().getTranslation()).plus(Rotation2d.k180deg);
+    // }));
     // END PROGRAMMING DEBUG BUTTONS
 
 
-    // driver.leftBumper().whileTrue(command); Swerve Slow Mode
+    driver.leftBumper().whileTrue(
+      swerve.setPrimaryInputs(
+      ()->-driver.getLeftY()/3.0, 
+      ()->-driver.getLeftX()/3.0, 
+      ()->-driver.getRightX()/3.0
+    )
+    );
 
-    // driver.start(); //zero heading
+    // driver.start().onTrue(swerve.zeroGyro()); //zero heading, occulus implementation added later
 
-    // driver.a() // face swerve away from driver
-    // driver.b() // face any 45 to prepare for bump crossing
+    driver.a().whileTrue(swerve.turnToHeading(()->new Rotation2d())); // face swerve away from driver
+    // driver.b() //TODO: face any 45 to prepare for bump crossing
 
-    // driver.x() // extend intake // This button is useless and will never be used
-    //.whileHeld(intake.intake());
+    driver.x() // extend intake // This button is useless and will never be used
+    .whileTrue(intake.intake()).whileFalse(intake.stop());
 
-    // driver.y() //intake eject //also will never be used
+    driver.y().whileTrue(intake.eject()); //intake eject //also will never be used
 
     // driver.(back left paddle) //global stow/defense mode
 
-
-    //  driver.povUp().whileTrue(shooter.testHome());
+    driver.povUp().whileTrue(shooter.testHome());
     //  driver.y().whileTrue(shooter.testSetHoodAngle(Degrees.of(30)));
 
 
@@ -137,32 +148,49 @@ public class RobotContainer {
   private void configureOperatorBindings() {
 
 
-    // operator.leftBumper() // Stage2 hook up, lock out if not end of match
     // operator.leftTrigger() // Stage2 hook down, lock out if not end of match
+    // operator.leftBumper().whileTrue(climber.setStage1Voltage(12));
+    // operator.leftTrigger().whileTrue(climber.setStage1Voltage(-12));
 
-    // operator.rightBumper() stage2 hook up, lock out if not end of match
-    // operator.rightTrigger() stage2 hook down, lock out if not end of match
+    operator.leftBumper()
+      .whileTrue(climber.prepareForClimbL1())
+      .onFalse(climber.climbL1())
+    ;
 
-    // operator.povUp() // shake dye rotor / unclog
+    // operator.rightBumper() stage2 hook up, lock out if not end of match  
+    // operator.rightBumper().whileTrue(climber.setStage2Voltage(12));
+    // // operator.rightTrigger() stage2 hook down, lock out if not end of match
+    // operator.rightTrigger().whileTrue(climber.setStage2Voltage(-12));
+    operator.povUp().whileTrue(spindexer.unclog()); // shake dye rotor / unclog
 
-    // operator.povDown() // intake.eject()
+    operator.povDown().whileTrue(intake.eject()); // intake.eject()
 
-    // operator.x() // shoot + hopper feed
-    // .whileTrue(shooter.shoot(hub?))
-    // .whileTrue(spindexer.feedToShooter());
+    operator.x() // shoot + hopper feed
+    .whileTrue(shooter.shootHub())
+    .whileTrue(spindexer.feedToShooter())
+    .whileTrue(swerve.turnToHeading(()->{
+      return targeting.getHeadingToTarget(swerve.getSwervePose().getTranslation(), targeting.getTarLockTemp().getTranslation()).plus(Rotation2d.k180deg);
+    }));
 
 
-    // operator.a() // global stow (unnecessary, this is default)
+    operator.a().whileTrue(climber.stow()); // global stow (unnecessary, this is default)
 
-    // operator.b() // passing: Face driver station wall and launch at fixed rpm/angle/distance
+    operator.b()// passing: Face driver station wall and launch at fixed rpm/angle/distance
+    .whileTrue(shooter.pass())
+    .whileTrue(spindexer.feedToShooter())
+    .whileTrue(swerve.turnToHeading(()->new Rotation2d()));
 
-    // operator.back() // re-home intake, hood, turret? hood?
+    // operator.back() // re-home intake, hood, turret? hood? not doing this rn
 
   }
 
 
   public Command getAutonomousCommand() {
     //TODO: Get this from Autos.java instead
+    Commands.sequence(
+      //home everything
+      //do the rest of the sequence
+    );
     return Commands.print("No autonomous command configured");
   }
 }

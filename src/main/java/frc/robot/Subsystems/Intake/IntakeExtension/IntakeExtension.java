@@ -85,7 +85,7 @@ public class IntakeExtension extends SubsystemBase {
     //Assume the proper startup position
     motor.getEncoder().setPosition(90);
     
-    // setDefaultCommand(up());
+    setDefaultCommand(up());
   }
 
   @Override

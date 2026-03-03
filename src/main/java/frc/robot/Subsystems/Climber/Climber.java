@@ -15,7 +15,7 @@ import frc.robot.Subsystems.Climber.Grabber.Grabber;
 
 /** Add your docs here. */
 public class Climber extends SubsystemBase {
-    public static Distance kStage1Range = Inches.of(6);
+    public static Distance kStage1Range = Inches.of(8.05);
     public static Distance kStage2Range = Inches.of(20);
 
     ClimberExtension stage1 = new ClimberExtension(

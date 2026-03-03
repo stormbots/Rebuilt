@@ -18,6 +18,7 @@ import com.revrobotics.spark.config.SparkFlexConfig;
 
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.Distance;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Command.InterruptionBehavior;
 import edu.wpi.first.wpilibj2.command.Commands;
@@ -26,12 +27,15 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 
 public class Grabber extends SubsystemBase {
-  SparkFlex motor = new SparkFlex(30, MotorType.kBrushless);;
+  SparkFlex motor = new SparkFlex(21, MotorType.kBrushless);;
   private boolean isHomed = false;
   private String name;
   private final int kHomeCurrentThreshold = 5;
   private final int kHomeCurrentMaxOutput = 8;
   private final int kGrabberCurrentMax = 10;
+
+  public static final double kMinPosition = -28.0;
+  public static final double kMaxPosition = 98.0;
 
   Trigger isHomingCurrentReached = new Trigger(()->{
     return Math.abs(motor.getOutputCurrent()) <= kHomeCurrentThreshold;
@@ -50,21 +54,21 @@ public class Grabber extends SubsystemBase {
     config.inverted(false);
     config.smartCurrentLimit(kGrabberCurrentMax);
     config.openLoopRampRate(0.05);
-    //TODO Configure the encoder conversion
-    var conversionfactor=1/(6/57.71); //1 divided by whatever number you determined
-    conversionfactor = 1; 
+
+    double conversionfactor = 360/25.0; 
+
 		config.encoder
-    .positionConversionFactor(1/conversionfactor)
-    .velocityConversionFactor(1/conversionfactor/60.0)
+    .positionConversionFactor(conversionfactor)
+    .velocityConversionFactor(conversionfactor/60.0)
     ;
 
     config.closedLoop
-    .p(12/2.0)
+    .p(12.0/90.0)
     ;
 
     config.softLimit
-    .forwardSoftLimit(90)
-    .reverseSoftLimit(0.0)
+    .forwardSoftLimit(kMaxPosition)
+    .reverseSoftLimit(kMinPosition)
     .forwardSoftLimitEnabled(true)
     .reverseSoftLimitEnabled(true)
     ;
@@ -78,11 +82,14 @@ public class Grabber extends SubsystemBase {
     // new Trigger(DriverStation::isEnabled)
 		// .and(()->isHomed==false)
 		// .whileTrue(goHome());
+
+    motor.getEncoder().setPosition(kMinPosition);
   }
 
   @Override
   public void periodic() {
     // This method will be called once per scheduler run
+    SmartDashboard.putNumber("climber/grabber/position", motor.getEncoder().getPosition());
   }
 
   // private Command setPosition(...)
@@ -100,11 +107,11 @@ public class Grabber extends SubsystemBase {
   }
 
   public Command grab(){
-    return setPosition(Degrees.of(90));
+    return setPosition(Degrees.of(kMaxPosition));
   }
 
   public Command retract(){
-    return setPosition(Degrees.of(0));
+    return setPosition(Degrees.of(kMinPosition));
   }
 
   public Command goHome(){
@@ -157,12 +164,13 @@ public class Grabber extends SubsystemBase {
   }
 
   public Trigger isPossiblyConnected = new Trigger(() -> {
-    return getPosition().isNear(Degrees.of(90), Degrees.of(10));    
+    return getPosition().isNear(Degrees.of(kMaxPosition), Degrees.of(10));    
   });
 
   public Trigger isRetracted = new Trigger(() -> {
-    return getPosition().isNear(Degrees.of(0), Degrees.of(10));    
+    return getPosition().isNear(Degrees.of(kMinPosition), Degrees.of(10));    
   });
   
+
 
 }

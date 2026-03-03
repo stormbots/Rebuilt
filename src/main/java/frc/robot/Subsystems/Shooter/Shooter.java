@@ -27,7 +27,7 @@ Flywheel flywheel = new Flywheel();
     TargetingSystem targeting;
 
     //TODO: Sync this method/concept with shooter code
-    public Trigger isReadyToAcceptFuel = new Trigger(()->true);
+    public Trigger isReadyToAcceptFuel = new Trigger(()->flywheel.getOnTarget() && hood.getOnTarget()).debounce(0.05);
 
 
     /** Just set up the mechanism2d so we can visualize the system all at once */

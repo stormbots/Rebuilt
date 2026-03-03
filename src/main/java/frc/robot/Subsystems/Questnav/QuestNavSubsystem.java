@@ -32,7 +32,16 @@ public class QuestNavSubsystem extends SubsystemBase {
   }
 
   //Values to change when we get bot
-  Transform3d robotToQuest = new Transform3d(Inches.of(-(23-(27.5/2.0))).in(Meters), Inches.of(-27.5/2 + 2.5).in(Meters), Inches.of(17.75).in(Meters), new Rotation3d(Degrees.of(90).in(Radians), 0.0, Degrees.of(180).in(Radians)));
+  Transform3d robotToQuest = new Transform3d(
+    Inches.of((-27.5/2.0 + 4.5)).in(Meters), 
+    Inches.of(-27.5/2 + 2.5).in(Meters), 
+    Inches.of(17.75).in(Meters), 
+    new Rotation3d(
+      Degrees.of(-90).in(Radians), 
+      0.0, 
+      Degrees.of(180).in(Radians)
+    )
+  );
 
   QuestNav questNav = new QuestNav();
   Matrix<N3, N1> QUESTNAV_STD_DEVS =
@@ -61,7 +70,7 @@ public class QuestNavSubsystem extends SubsystemBase {
             // Transform by the mount pose to get your robot pose
             Pose3d robotPose = questPose.transformBy(robotToQuest.inverse());
             //add to swervedrive pose
-            // swerveSubsystem.addVisionMeasurement(robotPose.toPose2d(), timestamp, QUESTNAV_STD_DEVS);
+            swerveSubsystem.addVisionMeasurement(robotPose.toPose2d(), timestamp, QUESTNAV_STD_DEVS);
         }
     }
   }
