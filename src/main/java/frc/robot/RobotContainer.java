@@ -57,80 +57,94 @@ public class RobotContainer {
 
     HopperSensors.getInstance(); //Ensure this always exists and is updating
     questnav.setQuestPose(new Pose3d(swerve.swerveDrive.getPose().getX(), swerve.swerveDrive.getPose().getY(), 0.0, new Rotation3d(0.0, 0.0, 0.0)));
-    configureBindings();
+    
+    configureDriverBindings();
+    configureOperatorBindings();
 
+    
     CRTAbsoluteEncoder.getInstance().sync();
-  }
 
-  private void configureBindings() {
-    swerve.setDefaultCommand(swerve.setPrimaryInputs(
-      ()->-driver.getLeftY(), 
-      ()->-driver.getLeftX(), 
-      ()->-driver.getRightX()
-    ));
-    // if(Robot.isSimulation()){
-    //   //Make it "drive right" on the sim field using default Red1
-    //   swerve.setDefaultCommand(swerve.addDriverInputs(
-    //     ()->-driver.getLeftX()/2.0, 
-    //     ()->driver.getLeftY()/2.0, 
-    //     ()->-driver.getRightX()/2.0
-    //   ));
+    // new Trigger(DriverStation::isEnabled){
+      //wait for PV to have seen a tag
+      //set questnav position
     // }
 
-    // driver.a().whileTrue(shooter.testSetFlywheelRPM(1000));
-    // driver.a().whileTrue(shooter.shoot(()->new TargetingSystem.ShooterState(
-    //   Degrees.of(0), 
-    //   Degrees.of(SmartDashboard.getNumber("robotContainer/hoodAngle", hoodAngle)), 
-    //   SmartDashboard.getNumber("robotContainer/flywheelrpm", rpm)))
-    // );
-    // driver.b().whileTrue(spindexer.feedToShooter());
-    // driver.x().whileTrue(spindexer.setVoltages(8.0, 0.0));
-    // driver.y().whileTrue(spindexer.setVoltages(0.0, 8.0));
-
-    // driver.x().whileTrue(shooter.testSetTurretAngle(Degrees.of(20)));
-
-    driver.povDown().whileTrue(shooter.testHome());
-    driver.x().whileTrue(swerve.turnToHeading(targeting.getHeadingToTarget(swerve.getSwervePose().getTranslation(), targeting.getTarLockTemp().getTranslation())));
-    driver.a().whileTrue(swerve.turnToHeading(new Rotation2d(0.0)));
-    // driver.povUp().whileTrue(shooter.testSetHoodAngle(Degrees.of(30)));
-    // driver.leftBumper().whileTrue(shooter.testSetTurretAngle(Degrees.of(30)));
-    // driver.rightBumper().whileTrue(shooter.testSetTurretAngle(Degrees.of(0)));
-
-
-    //  driver.povUp().whileTrue(shooter.testHome());
-    //  driver.y().whileTrue(shooter.testSetHoodAngle(Degrees.of(30)));
-    // swerve.setDefaultCommand(swerve.addDriverInputs(
-    //   ()->-driver.getLeftY(), 
-    //   ()->-driver.getLeftX(), 
-    //   ()->-driver.getRightX()
-    // ));
-
-    //TODO Add intakes to controller
-    //  driver.x().whileTrue(intake.intake());
-    //  driver.y().whileTrue(intake.stop());
-
+    //QuestNav initialization?
 
     // new Trigger(DriverStation::isEnabled)
     // .whileTrue(
     //   swerve.addFieldInput( ()->fieldBehaviour.getSwerveInputs(swerve.getSwervePose()) )
     // );
 
+    // new Trigger(FieldBehavior::isInTrench)
+    // .whileTrue(
+    //   shooter.hideForTrench()
+    // );
+
+  }
+
+  private void configureDriverBindings() {
+    swerve.setDefaultCommand(swerve.setPrimaryInputs(
+      ()->-driver.getLeftY(), 
+      ()->-driver.getLeftX(), 
+      ()->-driver.getRightX()
+    ));
 
 
-    //THIS IS VERY JANK, FIX LATER, should be part of the auto starting sequence, should setQuestPose THEN wantToTrack, this was dumb
-    // driver.a().onTrue(swerve.zeroGyro());
-    // driver.a().onTrue(new InstantCommand(()->questnav.setQuestPose(new Pose3d(swerve.swerveDrive.getPose().getX(), swerve.swerveDrive.getPose().getY(), 0.0, new Rotation3d(0.0, 0.0, 0.0)))));
-    // driver.b().onTrue(new InstantCommand(()->questnav.wantToTrack()));
-    // driver.x().whileTrue(pathing.followPath(testingPath));
-    // driver.y().onTrue(swerve.addAutoInputs(()->0.0, ()->0.0, ()->0.0));
-    if(Robot.isSimulation()){
-      //Make it "drive right" on the sim field using default Red1
-      swerve.setDefaultCommand(swerve.setPrimaryInputs(
-        ()->-driver.getLeftX(), 
-        ()->driver.getLeftY(), 
-        ()->-driver.getRightX()
-      ));
-    }
+    //PROGRAMMING DEBUG BUTTONS CODE REMOVE ME
+
+    driver.povDown().whileTrue(shooter.testHome());
+    driver.x().whileTrue(swerve.turnToHeading(targeting.getHeadingToTarget(swerve.getSwervePose().getTranslation(), targeting.getTarLockTemp().getTranslation())));
+    driver.a().whileTrue(swerve.turnToHeading(new Rotation2d(0.0)));
+
+    // END PROGRAMMING DEBUG BUTTONS
+
+
+    // driver.leftBumper().whileTrue(command); Swerve Slow Mode
+
+    // driver.start(); //zero heading
+
+    // driver.a() // face swerve away from driver
+    // driver.b() // face any 45 to prepare for bump crossing
+
+    // driver.x() // extend intake // This button is useless and will never be used
+    //.whileHeld(intake.intake());
+
+    // driver.y() //intake eject //also will never be used
+
+    // driver.(back left paddle) //global stow/defense mode
+
+
+    //  driver.povUp().whileTrue(shooter.testHome());
+    //  driver.y().whileTrue(shooter.testSetHoodAngle(Degrees.of(30)));
+
+
+
+  }
+
+  private void configureOperatorBindings() {
+
+
+    // operator.leftBumper() // Stage2 hook up, lock out if not end of match
+    // operator.leftTrigger() // Stage2 hook down, lock out if not end of match
+
+    // operator.rightBumper() stage2 hook up, lock out if not end of match
+    // operator.rightTrigger() stage2 hook down, lock out if not end of match
+
+    // operator.povUp() // shake dye rotor / unclog
+
+    // operator.povDown() // intake.eject()
+
+    // operator.x() // shoot + hopper feed
+    // .whileTrue(shooter.shoot(hub?))
+    // .whileTrue(spindexer.feedToShooter());
+
+
+    // operator.a() // global stow (unnecessary, this is default)
+
+    // operator.b() // passing: Face driver station wall and launch at fixed rpm/angle/distance
+
+    // operator.back() // re-home intake, hood, turret? hood?
 
   }
 

@@ -110,6 +110,16 @@ Flywheel flywheel = new Flywheel();
         return shoot(targeting::getPass);
     }
 
+    // For tuning LUTs, read 
+    public Command shootWithDashboardValues(){
+        return Commands.none();
+    // return shooter.shoot(()->new TargetingSystem.ShooterState(
+    //   Degrees.of(0), 
+    //   Degrees.of(SmartDashboard.getNumber("robotContainer/hoodAngle", hoodAngle)), 
+    //   SmartDashboard.getNumber("robotContainer/flywheelrpm", rpm)))
+    // );
+    }
+
     public Command doTheObviousThingDriversWant(){
         Supplier<TargetingSystem.ShooterState> bestState = ()->{
 
