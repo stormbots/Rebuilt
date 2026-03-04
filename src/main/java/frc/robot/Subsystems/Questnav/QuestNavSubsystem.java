@@ -16,6 +16,7 @@ import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Subsystems.Swerve.Swerve;
@@ -26,7 +27,7 @@ import gg.questnav.questnav.QuestNav;
 public class QuestNavSubsystem extends SubsystemBase {
   /** Creates a new QuestNav. */
   Swerve swerveSubsystem;
-  private Boolean wantToTrack = false;
+  private boolean wantToTrack = true;
   public QuestNavSubsystem(Swerve swerveSubsystem) {
     this.swerveSubsystem = swerveSubsystem;
   }
@@ -55,6 +56,7 @@ public class QuestNavSubsystem extends SubsystemBase {
   public void periodic() {
     questNav.commandPeriodic();
     SmartDashboard.putBoolean("Questnav/isconnected", questNav.isConnected());
+    SmartDashboard.putBoolean("Questnav/wantToTrack", wantToTrack);
     // Get the latest pose data frames from the Quest
     PoseFrame[] questFrames = questNav.getAllUnreadPoseFrames();
     SmartDashboard.putNumber("Questnav/frames", questFrames.length);
@@ -62,7 +64,8 @@ public class QuestNavSubsystem extends SubsystemBase {
     for (PoseFrame questFrame : questFrames) {
         // Make sure the Quest was tracking the pose for this frame
         // if (questFrame.isTracking()) {
-        if(questNav.isConnected()&&wantToTrack){
+        //if not isEnabled check, then there is no way for the cameras to start feeding into the quest
+        if(questNav.isConnected()&&wantToTrack&&DriverStation.isEnabled()){
             // Get the pose of the Quest
             Pose3d questPose = questFrame.questPose3d();
             // Get timestamp for when the data was sent
@@ -81,7 +84,7 @@ public class QuestNavSubsystem extends SubsystemBase {
   }
 
   //This is a very goofy way to fix how occulus stores its pose, might do this differently later but it works for now
-  public void wantToTrack(){
-    wantToTrack = true;
+  public void wantToTrack(boolean wantTo){
+    wantToTrack = wantTo;
   }
 }

@@ -49,7 +49,7 @@ public class IntakeExtension extends SubsystemBase {
     //Not used in Intake system, but the port on one side is borrowed for turret
     config.absoluteEncoder
       .positionConversionFactor(360.0)
-      .inverted(false)
+      .inverted(true)
     ;
 
     //TODO Set feed-forwards for intake arm?

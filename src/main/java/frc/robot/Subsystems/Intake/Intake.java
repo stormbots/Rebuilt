@@ -8,6 +8,7 @@ import static edu.wpi.first.units.Units.Degree;
 
 import com.stormbots.CRTAbsoluteEncoder;
 
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -34,6 +35,7 @@ public class Intake extends SubsystemBase {
   @Override
   public void periodic(){
     visual.update(left.getAngle(), rollers.getPosition(),rollers.getVelocity());
+    SmartDashboard.putNumber("shooter/turret/e2", left.getAbsoluteEncoder().getPosition());
   }
 
   public Command intake(){

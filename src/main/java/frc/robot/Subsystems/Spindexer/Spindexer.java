@@ -48,6 +48,15 @@ public class Spindexer extends SubsystemBase{
     );
   }
 
+  public Command feedToShooterForce(){
+    var feed = Commands.parallel(
+      dyeRotor.feed(),
+      upGoer.feed()
+    );
+
+    return feed;
+  }
+
   public Command unclog(){
     var reverse = Commands.parallel(
       dyeRotor.unclog(),

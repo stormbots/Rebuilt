@@ -4,12 +4,20 @@
 
 package frc.robot.Subsystems.TargetingSystem;
 
+import static edu.wpi.first.units.Units.Degree;
 import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.Inches;
 import static edu.wpi.first.units.Units.InchesPerSecond;
 import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.Radians;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.Set;
+import java.util.function.Supplier;
 
 import com.stormbots.LUT;
 
@@ -23,6 +31,7 @@ import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -39,7 +48,7 @@ public class TargetingSystem extends SubsystemBase {
 
     public Angle turretTolerance = Degrees.of(3);
     public Angle hoodTolerance = Degrees.of(0.5);
-    public double flywheelTolerance = 100;
+    public double flywheelTolerance = 75;
 
     public ShooterState(Angle turretAngle, Angle hoodAngle, double flywheelRPM){
       this.turretAngle = turretAngle;
@@ -90,6 +99,13 @@ public class TargetingSystem extends SubsystemBase {
 
   Swerve swerve;
 
+  //remove, we want to use field objects
+  // ArrayList<Translation2d> bluePassTargets;
+  Translation2d blueLow = new Translation2d(1,1.5);
+  Translation2d blueHigh = new Translation2d(1,6.5);
+  Translation2d redLow = new Translation2d(15.6,1.5);
+  Translation2d redHigh = new Translation2d(15.6,6.5);
+
   Field2d field = new Field2d();
 
   /** Creates a new TargetingSubsystem. */
@@ -125,6 +141,7 @@ public class TargetingSystem extends SubsystemBase {
 
   /** Generate a fieldcentric heading from bot location to target */
   public Rotation2d getHeadingToTarget(Translation2d botTranslation,Translation2d target){
+    // SmartDashboard.putNumber("bruh/bruh", value)
     var angle = target.minus(botTranslation).getAngle();
     return angle;
   }
@@ -141,15 +158,11 @@ public class TargetingSystem extends SubsystemBase {
   }
 
   
-  private ShooterState getLUTShooterState(Pose2d botPose, Translation2d target, LUT lut){
+  private ShooterState getLUTShooterState(Supplier<Pose2d> botPose, Supplier<Translation2d> target, LUT lut){
     
-    Distance magnitude = getDistanceToTarget(botPose.getTranslation(), target);
+    Distance magnitude = getDistanceToTarget(botPose.get().getTranslation(), target.get());
 
     
-    SmartDashboard.putNumber("shooter/lut/botx", botPose.getX());
-    SmartDashboard.putNumber("shooter/lut/boty", botPose.getY());
-    SmartDashboard.putNumber("shooter/lut/targetx", target.getX());
-    SmartDashboard.putNumber("shooter/lut/targety", target.getY());
     SmartDashboard.putNumber("shooter/lut/distance", magnitude.in(Inches));
     var entry = lut.get(magnitude.in(Inches));   
     var angle = entry[1];
@@ -158,10 +171,13 @@ public class TargetingSystem extends SubsystemBase {
     SmartDashboard.putNumber("shooter/lut/hoodangle", angle);
     
     Translation2d turretTranslation = getTurretCenterpoint().toTranslation2d();
-    Rotation2d heading = getHeadingToTarget(turretTranslation, target);
+    Rotation2d heading = getHeadingToTarget(turretTranslation, target.get());
+    SmartDashboard.putNumber("shooter/turret/netHeading", heading.getDegrees());
 
-    // return new ShooterState(heading.minus(botPose.getRotation()).getMeasure(), Degrees.of(angle), rpm);
-    return new ShooterState(Degrees.of(0), Degrees.of(angle), rpm);
+    SmartDashboard.putNumber("shooter/turret/turretInput", heading.minus(botPose.get().getRotation()).getMeasure().in(Degrees));
+
+    return new ShooterState(heading.minus(botPose.get().getRotation()).getMeasure(), Degrees.of(angle), rpm);
+    // return new ShooterState(Degrees.of(0), Degrees.of(angle), rpm);
   }
 
 
@@ -208,10 +224,15 @@ public class TargetingSystem extends SubsystemBase {
     );
   }
 
+  public Translation2d getHubTarget(){
+    return DriverStation.getAlliance().orElse(Alliance.Blue)==Alliance.Blue ?
+      Constants.Field.blueHub :
+      Constants.Field.redHub
+    ;
+  }
+
   public ShooterState getHub(){
-    Translation2d target = new Translation2d(); //get best target
-    //TODO: NEED TO CHANGE TO FLIP BASED OFF FIELD
-    return getLUTShooterState(swerve.getSwervePose(), Constants.Field.blueHub, hubLUT);
+    return getLUTShooterState(swerve::getSwervePose, this::getHubTarget, hubLUT);
   }
 
   //IDT this is needed for now. We'll see. if it is, i'd like getPass() to use this method
@@ -219,9 +240,34 @@ public class TargetingSystem extends SubsystemBase {
   //   return getGroundShooterState(swerve.getSwervePose(),target.getTranslation(), passLUT);
   // }
 
+
+  // private Translation2d getClosest(Translation2d bot, Collection<Translation2d> targets){
+  //   // ArrayList<Translation2d>.of(new Translation2d(),new Translation2d());
+  //   new Arraylist {new Translation2d(),new Translation2d()};
+  //   return bot.nearest(aaaaa);
+  // }
+
+  public Angle getNearestAllianceWallAngle(Pose2d botPose){
+    if( swerve.getSwervePose().getRotation().getMeasure().isNear(Degrees.of(90), Degrees.of(90)) ) return Degree.of(90);
+    
+    return Degrees.of(-90);
+  }
+
+  public Translation2d getPassTarget(){
+    if(DriverStation.getAlliance().orElse(Alliance.Blue)==Alliance.Blue){
+      return swerve.getSwervePose().getY() > 4.2 ? blueHigh : blueLow;
+    }
+    return swerve.getSwervePose().getY() > 4.2 ? redHigh : redLow;
+  }
+
   public ShooterState getPass(){
-    Translation2d target = new Translation2d(); //get best target
-    return getLUTShooterState(swerve.getSwervePose(),target, passLUT);
+    // Translation2d target = new Translation2d(2, 2); //get best target
+    // return getLUTShooterState(swerve::getSwervePose,()->target, passLUT);
+
+    Translation2d turretTranslation = getTurretCenterpoint().toTranslation2d();
+    Rotation2d heading = getHeadingToTarget(turretTranslation, getPassTarget());
+
+    return new ShooterState(heading.minus(swerve.getSwervePose().getRotation()).getMeasure(), Degrees.of(28), 3500);
   }
 
 

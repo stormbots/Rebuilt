@@ -63,14 +63,16 @@ public class Robot extends TimedRobot {
   public void disabledInit() {}
 
   @Override
-  public void disabledPeriodic() {}
+  public void disabledPeriodic() {
+    robotContainer.syncQuestPose();
+  }
 
   @Override
   public void disabledExit() {}
 
   @Override
   public void autonomousInit() {
-    m_autonomousCommand = robotContainer.getAutonomousCommand();
+   m_autonomousCommand = robotContainer.autos.getAutonomousCommand();
 
     if (m_autonomousCommand != null) {
       CommandScheduler.getInstance().schedule(m_autonomousCommand);

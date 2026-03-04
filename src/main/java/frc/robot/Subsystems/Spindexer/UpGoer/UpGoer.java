@@ -53,6 +53,7 @@ public class UpGoer extends SubsystemBase{
         SmartDashboard.putNumber("UpGoer/Output", motor.getAppliedOutput());
         SmartDashboard.putNumber("UpGoer/Position",motor.getEncoder().getPosition());
         SmartDashboard.putNumber("UpGoer/Velocity",motor.getEncoder().getVelocity());
+        SmartDashboard.putNumber("UpGoer/Current",motor.getOutputCurrent());
     }
 
     

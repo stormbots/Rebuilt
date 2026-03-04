@@ -27,7 +27,7 @@ Flywheel flywheel = new Flywheel();
     TargetingSystem targeting;
 
     //TODO: Sync this method/concept with shooter code
-    public Trigger isReadyToAcceptFuel = new Trigger(()->flywheel.getOnTarget() && hood.getOnTarget()).debounce(0.05);
+    public Trigger isReadyToAcceptFuel = new Trigger(()->flywheel.getOnTarget() && hood.getOnTarget() && turret.getOnTarget()).debounce(0.05);
 
 
     /** Just set up the mechanism2d so we can visualize the system all at once */
@@ -52,6 +52,13 @@ Flywheel flywheel = new Flywheel();
     // }
 
     public Command shoot(Supplier<TargetingSystem.ShooterState> targets){
+        return Commands.parallel(
+            flywheel.setRPM(targets),
+            hood.setAngle(targets),
+            turret.setAngle(targets)
+        );
+    }
+    public Command shootNoTurret(Supplier<TargetingSystem.ShooterState> targets){
         return Commands.parallel(
             flywheel.setRPM(targets),
             hood.setAngle(targets)
@@ -104,6 +111,9 @@ Flywheel flywheel = new Flywheel();
 
     public Command shootHub(){
         return shoot(targeting::getHub);
+    }
+    public Command shootHubAuto(){
+        return shootNoTurret(targeting::getHub);
     }
 
     public Command pass(){

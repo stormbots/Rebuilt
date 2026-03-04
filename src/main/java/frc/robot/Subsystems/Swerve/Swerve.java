@@ -134,9 +134,9 @@ public class Swerve extends SubsystemBase {
     SmartDashboard.putNumber("swerve/primaryInput/ty", primaryInputs.ty);
     SmartDashboard.putNumber("swerve/primaryInput/r", primaryInputs.r);
 
-    SmartDashboard.putNumber("swerve/secondaryInput/tx", primaryInputs.tx);
-    SmartDashboard.putNumber("swerve/secondaryInput/ty", primaryInputs.ty);
-    SmartDashboard.putNumber("swerve/secondaryInput/r", primaryInputs.r);
+    SmartDashboard.putNumber("swerve/secondaryInput/tx", secondaryInputs.tx);
+    SmartDashboard.putNumber("swerve/secondaryInput/ty", secondaryInputs.ty);
+    SmartDashboard.putNumber("swerve/secondaryInput/r", secondaryInputs.r);
 
     SmartDashboard.putNumber("swerve/anglegyro", swerveDrive.getGyro().getRotation3d().getAngle());
   }
@@ -253,17 +253,42 @@ public class Swerve extends SubsystemBase {
   public Command turnToHeading(Supplier<Rotation2d> bearing){
     return Commands.run(()->{
       isOnTargetAngle = false;
-      secondaryInputs.r = 0.3;
       var error = bearing.get().minus(swerveDrive.getPose().getRotation());
       // var error = swerveDrive.getPose().getRotation().minus(bearing);  
       double kp = 2.0 / 120.0; //90 degrees is 1 output
       double output = error.getDegrees()*kp;
       output = MathUtil.clamp(output, -1.0, 1.0);
       secondaryInputs.r = output;
-      if(error.getDegrees() < 5.0){
+      if(Math.abs(error.getDegrees()) < 5.0){
         isOnTargetAngle = true;
       }
-    }).finallyDo(()->isOnTargetAngle = false)
+    }).finallyDo(()->{
+      isOnTargetAngle = false;
+      secondaryInputs.r=0;
+    })
     ;
   }
+  public Command turnToHeadingNiche(Supplier<Rotation2d> bearing){
+    return Commands.run(()->{
+      isOnTargetAngle = false;
+      var error = bearing.get().minus(swerveDrive.getPose().getRotation());
+      // var error = swerveDrive.getPose().getRotation().minus(bearing);  
+      double kp = 2.0 / 120.0; //90 degrees is 1 output
+      double output = error.getDegrees()*kp;
+      output = MathUtil.clamp(output, -1.0, 1.0);
+      if(Math.abs(error.getDegrees()) > 80.0){
+        secondaryInputs.r = output;
+      }
+      else{
+        isOnTargetAngle = true;
+        secondaryInputs.r = 0.0;
+      }
+    }).finallyDo(()->{
+      isOnTargetAngle = false;
+      secondaryInputs.r=0;
+    })
+    ;
+  }
+
+
 }
