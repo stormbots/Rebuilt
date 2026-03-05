@@ -13,6 +13,7 @@ import com.studica.frc.AHRS;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -63,7 +64,7 @@ public class Autos {
         SmartDashboard.putData("AutoSelector/chooser",autoChooser);
         autoChooser.setDefaultOption("Select Auto",()->new InstantCommand());
 
-        
+
         autoChooser.addOption("VV UNTESTED VV",()->new InstantCommand());
 
         //ACTUAL OPTIONS BELOW HERE
@@ -94,34 +95,72 @@ public class Autos {
             }).until(()->swerve.isOnTargetAngle()).withTimeout(1.0),
             new ParallelCommandGroup(
                 shooter.shootHubAuto(),
-                new WaitCommand(2.0)
+                new WaitCommand(0.3)
                 .andThen(spindexer.feedToShooterForce())
             ).withTimeout(1.5)
         );
     }
     public Command centerShootRightBlue(){
+        Path.PathConstraints constraints = new Path.PathConstraints()
+            .setMaxVelocityMetersPerSec(4.0)
+            .setMaxAccelerationMetersPerSec2(4.0)
+            .setMaxVelocityDegPerSec(360.0)
+            .setMaxAccelerationDegPerSec2(580.0)
+            .setEndTranslationToleranceMeters(0.4)
+            .setEndRotationToleranceDeg(5.0);
+          Path pointStart = new Path(
+            constraints,
+            new Path.Waypoint(new Translation2d(4.0, 0.8), new Rotation2d(1.5707963267948966))
+        );
+        Path pathInt = new Path(
+            constraints,
+            new Path.Waypoint(new Translation2d(7.7, 0.8), new Rotation2d(1.5707963267948966)),
+            new Path.Waypoint(new Translation2d(7.7, 2.5), new Rotation2d(1.5707963267948966)),
+            new Path.Waypoint(new Translation2d(7.7, 0.8), new Rotation2d(1.5707963267948966))
+        );
+        Path pointPostInt = new Path(
+            constraints,
+            new Path.Waypoint(new Translation2d(7.7, 0.8), new Rotation2d(1.5707963267948966)),
+            new Path.Waypoint(new Translation2d(4.0, 0.8), new Rotation2d(1.5707963267948966))
+        );
         return Commands.sequence(
             Commands.print("1"),
             basicShootInitial8(),
             Commands.print("3"),
             shooter.testSetHoodAngle(Degrees.of(0)).withTimeout(0.5),
-            new ParallelCommandGroup(
-                pathing.followPath(new Path("orbitAHHH")),
-                intake.intake().withTimeout(5.0)
-            ),
+            Commands.print("4"),
+            pathing.followPath(pointStart).withTimeout(0.3),
+            Commands.print("5"),
+            pathing.followPath(pathInt).withTimeout(10.0),
+            Commands.print("8"),
+            intake.stop().withTimeout(0.2),
+            Commands.print("9"),
+            pathing.followPath(pointPostInt).withTimeout(2.5),
+            Commands.print("10"),
             basicShootInitial8()
         );
     }
     public Command centerShootLeftBlue(){
+        Path pointStart = new Path(
+            new Path.Waypoint(new Translation2d(4.0, 0.8), new Rotation2d(0))
+        );
+        Path pointPreInt = new Path(
+            new Path.Waypoint(new Translation2d(7.7, 0.8), new Rotation2d(0))
+        );
+        Path pointPostInt = new Path(
+            new Path.Waypoint(new Translation2d(7.7, 2.5), new Rotation2d(0))
+        );
         return Commands.sequence(
             Commands.print("1"),
             basicShootInitial8(),
             Commands.print("3"),
             shooter.testSetHoodAngle(Degrees.of(0)).withTimeout(0.5),
-            new ParallelCommandGroup(
-                pathing.followPath((new Path("orbitAHHH"))),
-                intake.intake().withTimeout(5.0)
-            ),
+            pathing.followPath(pointStart),
+            pathing.followPath(pointPreInt),
+            pathing.followPath(pointPostInt).alongWith(intake.intake()),
+            pathing.followPath(pointPreInt),
+            intake.stop(),
+            pathing.followPath(pointStart),
             basicShootInitial8()
         );
     }
@@ -132,7 +171,7 @@ public class Autos {
             Commands.print("3"),
             shooter.testSetHoodAngle(Degrees.of(0)).withTimeout(0.5),
             new ParallelCommandGroup(
-                pathing.followPathFlipped((new Path("orbitAHHH"))),
+                pathing.followPathTeamFlipped((new Path("orbitAHHH"))),
                 intake.intake().withTimeout(5.0)
             ),
             basicShootInitial8()

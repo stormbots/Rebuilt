@@ -221,7 +221,7 @@ public class Swerve extends SubsystemBase {
   }
 
   public Command testZeroPose(){
-    return Commands.runOnce(()->swerveDrive.resetOdometry(new Pose2d()));
+    return Commands.runOnce(()->swerveDrive.resetOdometry(new Pose2d(4.0, 0.8, new Rotation2d())));
   }
 
   //For other subsystems/files

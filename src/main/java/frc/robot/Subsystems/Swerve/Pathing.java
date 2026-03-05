@@ -31,8 +31,8 @@ public class Pathing extends SubsystemBase {
     swerveSubsystem::getSwervePose, 
     swerveSubsystem::getChassisSpeedsRobotRelative, 
     this::setAutoInputs, 
-    new PIDController(0.25, 0.0, 0.0025),    // Translation PID
-    new PIDController(0.5, 0.0, 0.005),    // Rotation PID
+    new PIDController(0.125, 0.0, 0.0),    // Translation PID
+    new PIDController(0.5, 0.0, 0.0),    // Rotation PID
     new PIDController(2.0, 0.0, 0.002)     // Cross-track PID
     );
   }
@@ -41,7 +41,8 @@ public class Pathing extends SubsystemBase {
     return pathBuilder.build(path);
   }
 
-  public Command followPathFlipped(Path path){
+
+  public Command followPathTeamFlipped(Path path){
     path.flip();
     return pathBuilder.build(path);
   }
