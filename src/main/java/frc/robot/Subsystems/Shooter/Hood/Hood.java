@@ -45,7 +45,7 @@ public class Hood extends SubsystemBase {
   public static final double minAngle = homeAngle+0.5;
   public static final double maxAngle = 43.0;
 
-  private boolean homed = false;
+  private boolean homed = true;//TODO:make actual homed thingy
 
   private Angle targetAngle = Degrees.of(minAngle);
   private Angle tolerance = Degrees.of(3); 

@@ -9,6 +9,9 @@ import static edu.wpi.first.units.Units.Degrees;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Supplier;
 
+import com.studica.frc.AHRS;
+
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -38,7 +41,7 @@ public class Autos {
     TargetingSystem targeting;
 
     SendableChooser<Supplier<Command>> autoChooser = new SendableChooser<>();
-    private CompletableFuture<Command> selectedAutoFuture = CompletableFuture.supplyAsync(()->new InstantCommand());
+    // private CompletableFuture<Command> selectedAutoFuture = CompletableFuture.supplyAsync(()->new InstantCommand());
 
     public Autos(
         Swerve swerve,
@@ -60,8 +63,11 @@ public class Autos {
         SmartDashboard.putData("AutoSelector/chooser",autoChooser);
         autoChooser.setDefaultOption("Select Auto",()->new InstantCommand());
 
+        
+        autoChooser.addOption("VV UNTESTED VV",()->new InstantCommand());
+
         //ACTUAL OPTIONS BELOW HERE
-        autoChooser.addOption("THE ORIGINAL PATHING AUTO", this::ogAutoHeHeHe);
+        autoChooser.addOption("THE ORIGINAL PATHING AUTO", this::centerShootRightBlue);
     }
 
 
@@ -74,42 +80,86 @@ public class Autos {
         //     System.err.println("Failed to build auto command ");
         //     System.err.println(e);
         // }
-        // return new InstantCommand();
-        return ogAutoHeHeHe();
+        return autoChooser.getSelected().get();
     }
 
 
     /////////////////////////
-    //ALL AUTOS BELLOW HERE//
+    //ALL AUTOS BELLOW HERE sk was here!!!!!!!!!//
     /////////////////////////
-    public Command ogAutoHeHeHe(){
-        //This is kind of basic format, we will want to run sequences/parallel groups and stuff once shooter and allat are up
+    public Command basicShootInitial8(){
         return Commands.sequence(
-            Commands.print("1"),
             swerve.turnToHeading(()->{
                 return targeting.getHeadingToTarget(swerve.getSwervePose().getTranslation(), targeting.getHubTarget()).plus(Rotation2d.k180deg);
-            }).withTimeout(2.0),
-            Commands.print("2"),
+            }).until(()->swerve.isOnTargetAngle()).withTimeout(1.0),
             new ParallelCommandGroup(
                 shooter.shootHubAuto(),
                 new WaitCommand(2.0)
                 .andThen(spindexer.feedToShooterForce())
-            ).withTimeout(8.0),
+            ).withTimeout(1.5)
+        );
+    }
+    public Command centerShootRightBlue(){
+        return Commands.sequence(
+            Commands.print("1"),
+            basicShootInitial8(),
             Commands.print("3"),
             shooter.testSetHoodAngle(Degrees.of(0)).withTimeout(0.5),
             new ParallelCommandGroup(
                 pathing.followPath(new Path("orbitAHHH")),
                 intake.intake().withTimeout(5.0)
             ),
-            swerve.turnToHeading(()->{
-                return targeting.getHeadingToTarget(swerve.getSwervePose().getTranslation(), targeting.getHubTarget()).plus(Rotation2d.k180deg);
-            }).withTimeout(2.0),
-            Commands.print("2"),
+            basicShootInitial8()
+        );
+    }
+    public Command centerShootLeftBlue(){
+        return Commands.sequence(
+            Commands.print("1"),
+            basicShootInitial8(),
+            Commands.print("3"),
+            shooter.testSetHoodAngle(Degrees.of(0)).withTimeout(0.5),
             new ParallelCommandGroup(
-                shooter.shootHubAuto(),
-                new WaitCommand(2.0)
-                .andThen(spindexer.feedToShooterForce())
-            ).withTimeout(8.0)
+                pathing.followPath((new Path("orbitAHHH"))),
+                intake.intake().withTimeout(5.0)
+            ),
+            basicShootInitial8()
+        );
+    }
+    public Command centerShootRightRed(){
+        return Commands.sequence(
+            Commands.print("1"),
+            basicShootInitial8(),
+            Commands.print("3"),
+            shooter.testSetHoodAngle(Degrees.of(0)).withTimeout(0.5),
+            new ParallelCommandGroup(
+                pathing.followPathFlipped((new Path("orbitAHHH"))),
+                intake.intake().withTimeout(5.0)
+            ),
+            basicShootInitial8()
+        );
+    }
+    public Command centerShootLeftRed(){
+        return Commands.sequence(
+            Commands.print("1"),
+            basicShootInitial8(),
+            Commands.print("3"),
+            shooter.testSetHoodAngle(Degrees.of(0)).withTimeout(0.5),
+            new ParallelCommandGroup(
+                pathing.followPath(new Path("orbitAHHH")),
+                intake.intake().withTimeout(5.0)
+            ),
+            basicShootInitial8()
+        );
+    }
+
+    public Command pidNotBlineCenterShoot(){
+        return Commands.sequence(
+            basicShootInitial8(),
+            shooter.testSetHoodAngle(Degrees.of(0)).withTimeout(0.5),
+            swerve.pidToPose(new Pose2d(7.7, 0.8, new Rotation2d(1.5707963267948966))).until(()->(swerve.isOnTargetTranslate() && swerve.isOnTargetAngle())),
+            swerve.pidToPose(new Pose2d(7.7, 2.5, new Rotation2d(1.5707963267948966))).until(()->(swerve.isOnTargetTranslate() && swerve.isOnTargetAngle())),
+            swerve.pidToPose(new Pose2d(7.7, 0.8, new Rotation2d(1.5707963267948966))).until(()->(swerve.isOnTargetTranslate() && swerve.isOnTargetAngle())),
+            swerve.pidToPose(new Pose2d(4.0, 0.8, new Rotation2d(1.5707963267948966))).until(()->(swerve.isOnTargetTranslate() && swerve.isOnTargetAngle()))
         );
     }
     

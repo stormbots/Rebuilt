@@ -9,6 +9,8 @@ import java.util.Optional;
 import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
 
+import com.studica.frc.AHRS;
+
 import dev.doglog.DogLog;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.Matrix;
@@ -38,6 +40,10 @@ public class Swerve extends SubsystemBase {
   public SwerveDrive swerveDrive; 
   Field2d odometryField = new Field2d();
   private boolean isOnTargetAngle = true;
+  private boolean isOnTargetTranslate = true;
+
+  private AHRS navx;
+
   /** Creates a new SwerveSubsystem. */
   public Swerve() {
     var botname = Preferences.getString("BotName", "compbot");
@@ -52,6 +58,7 @@ public class Swerve extends SubsystemBase {
       throw new RuntimeException(e);
     }  
 
+    navx = (AHRS) swerveDrive.getGyro().getIMU();
     swerveDrive.setMotorIdleMode(true);
     swerveDrive.setModuleStateOptimization(true);
     swerveDrive.setCosineCompensator(false);
@@ -193,7 +200,6 @@ public class Swerve extends SubsystemBase {
       }),
       ()->DriverStation.getAlliance().equals(Optional.of(Alliance.Blue))
     )
-    .finallyDo(secondaryInputs::clear)
     ;
   }
 
@@ -203,6 +209,12 @@ public class Swerve extends SubsystemBase {
       fieldInputs = inputs.get();
     });
   };
+
+
+  
+  public Command isCalibrating(){
+    return Commands.idle().until(()->(navx.isCalibrating()== false));
+  }  
 
   public Command zeroGyro(){
     return Commands.runOnce(swerveDrive::zeroGyro);
@@ -223,6 +235,10 @@ public class Swerve extends SubsystemBase {
 
   public boolean isOnTargetAngle(){
     return isOnTargetAngle;
+  }
+
+  public boolean isOnTargetTranslate(){
+    return isOnTargetTranslate;
   }
 
   public void addVisionMeasurement(Pose2d pose2d, double timestamp, Matrix<N3, N1> STD_DEVS){
@@ -275,7 +291,7 @@ public class Swerve extends SubsystemBase {
       // var error = swerveDrive.getPose().getRotation().minus(bearing);  
       double kp = 2.0 / 120.0; //90 degrees is 1 output
       double output = error.getDegrees()*kp;
-      output = MathUtil.clamp(output, -1.0, 1.0);
+      output = MathUtil.clamp(output, -2.0, 2.0);
       if(Math.abs(error.getDegrees()) > 80.0){
         secondaryInputs.r = output;
       }
@@ -289,6 +305,34 @@ public class Swerve extends SubsystemBase {
     })
     ;
   }
+
+  public Command pidToPose(Pose2d pose){
+    return Commands.run(()->{
+      isOnTargetTranslate = false;
+      isOnTargetAngle = false;
+      double transltionP = 3.0*1.2;
+      double thetaP = 2.0*4*1.2 ;
+
+      double clamp = 2.0;
+
+      Pose2d delta = pose.relativeTo(swerveDrive.getPose());
+      secondaryInputs.tx = MathUtil.clamp(delta.getX()*transltionP,-clamp, clamp);
+      secondaryInputs.ty = MathUtil.clamp(delta.getY()*transltionP,-clamp,clamp);
+      secondaryInputs.r = delta.getRotation().getDegrees()*thetaP;
+      if((Math.abs(delta.getX()) < 0.05) && (Math.abs(delta.getY()) < 0.05)){
+        isOnTargetTranslate = true;
+      }
+      if(delta.getRotation().getDegrees() < 5.0){
+        isOnTargetAngle = true;
+      }
+  }).finallyDo(
+    ()->{
+      isOnTargetAngle = false;
+      isOnTargetTranslate = false;
+      addSecondaryInputs(
+      ()->0.0, ()->0.0, ()->0.0);}
+  );
+}
 
 
 }

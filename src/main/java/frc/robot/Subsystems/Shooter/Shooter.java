@@ -61,8 +61,8 @@ Flywheel flywheel = new Flywheel();
     public Command shootNoTurret(Supplier<TargetingSystem.ShooterState> targets){
         return Commands.parallel(
             flywheel.setRPM(targets),
-            hood.setAngle(targets)
-            // turret.setAngle(targets)
+            hood.setAngle(targets),
+            turret.setAngle(()->Degrees.of(180.0), ()->Degrees.of(5.0))
         );
     }
 
