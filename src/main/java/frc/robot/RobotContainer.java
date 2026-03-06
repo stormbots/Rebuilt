@@ -6,6 +6,7 @@ package frc.robot;
 
 import com.stormbots.CRTAbsoluteEncoder;
 
+import static edu.wpi.first.units.Units.Degree;
 import static edu.wpi.first.units.Units.Degrees;
 
 import java.io.SequenceInputStream;
@@ -182,26 +183,27 @@ public class RobotContainer {
 
     // operator.back() // re-home intake, hood, turret? hood? not doing this rn
 
-<<<<<<< HEAD
-=======
     // Align to the climb process/button
     // align up/down swerve.setAngle()
     // addRangeFinderOutputs
     //once in place
     //climb
 
-    Commands.parallel(
+    operator.rightBumper().whileTrue(Commands.parallel(
       climber.prepareForClimbL1(),
       swerve.turnToHeading(()->new Rotation2d(Degree.of(90))),
       swerve.addSecondaryInputsTrueFielcentric(()->climber.generateInputs(swerve.getSwervePose())),
       Commands.none()
     ).until(climber::isLinedUpWithL1)
     .andThen(climber.climbL1())
-    ;
+    );
 
->>>>>>> parent of 59b70e5 (Stuff I forgot to commit)
+
   }
 
+
+  
+  
 
   public Command getAutonomousCommand() {
     //TODO: Get this from Autos.java instead
