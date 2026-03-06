@@ -153,7 +153,7 @@ public class RobotContainer {
 
     driver.x() // extend intake // This button is useless and will never be used
     .whileTrue(intake.intake())
-    .whileTrue(spindexer.spinDyeRotor())
+    // .whileTrue(spindexer.spinDyeRotor())
     .whileFalse(intake.stop());
 
     driver.y().whileTrue(intake.eject()); //intake eject //also will never be used
@@ -185,6 +185,11 @@ public class RobotContainer {
     // operator.rightTrigger().whileTrue(climber.setStage2Voltage(-12));
     operator.povUp().whileTrue(spindexer.unclog()); // shake dye rotor / unclog
 
+    // operator.povRight()
+    // .whileTrue(intake.intake())
+    // .whileTrue(spindexer.spinDyeRotor())
+    // .whileFalse(intake.stop());
+
     operator.povDown().whileTrue(intake.eject()); // intake.eject()
 
     operator.x() // shoot + hopper feed
@@ -199,17 +204,11 @@ public class RobotContainer {
       .isNear(Degrees.of(90), Degrees.of(90)) ? 90 : -90;
 
     operator.a().whileTrue(climber.stow()); // global stow (unnecessary, this is default)
-    operator.povLeft().whileTrue(climber.goHomePartial());
+    operator.povLeft().whileTrue(climber.goHome());
 
     operator.b()// passing: Face driver station wall and launch at fixed rpm/angle/distance
     .whileTrue(shooter.pass())
     .whileTrue(spindexer.feedToShooter())
-    // .whileTrue(
-    //   swerve.turnToHeadingNiche(()->
-    //   swerve.getSwervePose().getRotation().getMeasure()
-    //   .isNear(Degrees.of(90), Degrees.of(90)) ? Rotation2d.kCCW_Pi_2 : Rotation2d.kCW_90deg
-    //   )
-    // )
     .whileTrue(swerve.turnToHeadingNiche(()->{
       return targeting.getHeadingToTarget(swerve.getSwervePose().getTranslation(), targeting.getPassTarget()).plus(Rotation2d.k180deg);
     }))

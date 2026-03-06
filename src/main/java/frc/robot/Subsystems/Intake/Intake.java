@@ -40,9 +40,9 @@ public class Intake extends SubsystemBase {
 
   public Command intake(){
     return Commands.parallel(
-      // rollers.intake(),
-      // left.down(),
-      // right.down()
+      rollers.intake(),
+      left.down(),
+      right.down()
     )    
     .withName("Intake")
     ;    

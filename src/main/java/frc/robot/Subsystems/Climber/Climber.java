@@ -55,14 +55,6 @@ public class Climber extends SubsystemBase {
             Commands.none()
         );
     }
-    public Command goHomePartial(){
-        return Commands.parallel(
-            stage1.goHome(),
-            // stage2.goHomes(),
-            grabber.retractPartial(),
-            Commands.none()
-        );
-    }
 
     public Command setStage1Voltage(double voltage){
         return stage1.setVoltage(voltage);
@@ -85,7 +77,7 @@ public class Climber extends SubsystemBase {
     public Command climbL1(){
         return Commands.sequence(
             grabber.grab().withTimeout(3),//.until(grabber.isPossiblyConnected),
-            stage1.setHeight(Inches.of(2))
+            stage1.setHeight(Inches.of(0))
         )
         .finallyDo(stage1::stopMotor)
         .withName("Climb");

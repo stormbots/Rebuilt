@@ -68,7 +68,11 @@ public class Autos {
         autoChooser.addOption("VV UNTESTED VV",()->new InstantCommand());
 
         //ACTUAL OPTIONS BELOW HERE
-        autoChooser.addOption("THE ORIGINAL PATHING AUTO", this::centerShootRightBlue);
+        autoChooser.addOption("Basic Shoot 8 anywhere", this::basicShootInitial8);
+        autoChooser.addOption("Right Blue go center", this::centerShootRightBlue);
+        autoChooser.addOption("Right Red go center", this::centerShootRightBlue);
+
+
     }
 
 
@@ -165,15 +169,42 @@ public class Autos {
         );
     }
     public Command centerShootRightRed(){
+         Path.PathConstraints constraints = new Path.PathConstraints()
+            .setMaxVelocityMetersPerSec(4.0)
+            .setMaxAccelerationMetersPerSec2(4.0)
+            .setMaxVelocityDegPerSec(360.0)
+            .setMaxAccelerationDegPerSec2(580.0)
+            .setEndTranslationToleranceMeters(0.4)
+            .setEndRotationToleranceDeg(5.0);
+          Path pointStart = new Path(
+            constraints,
+            new Path.Waypoint(new Translation2d(4.0, 0.8), new Rotation2d(1.5707963267948966))
+        );
+        Path pathInt = new Path(
+            constraints,
+            new Path.Waypoint(new Translation2d(7.7, 0.8), new Rotation2d(1.5707963267948966)),
+            new Path.Waypoint(new Translation2d(7.7, 2.5), new Rotation2d(1.5707963267948966)),
+            new Path.Waypoint(new Translation2d(7.7, 0.8), new Rotation2d(1.5707963267948966))
+        );
+        Path pointPostInt = new Path(
+            constraints,
+            new Path.Waypoint(new Translation2d(7.7, 0.8), new Rotation2d(1.5707963267948966)),
+            new Path.Waypoint(new Translation2d(4.0, 0.8), new Rotation2d(1.5707963267948966))
+        );
         return Commands.sequence(
             Commands.print("1"),
             basicShootInitial8(),
             Commands.print("3"),
             shooter.testSetHoodAngle(Degrees.of(0)).withTimeout(0.5),
-            new ParallelCommandGroup(
-                pathing.followPathTeamFlipped((new Path("orbitAHHH"))),
-                intake.intake().withTimeout(5.0)
-            ),
+            Commands.print("4"),
+            pathing.followPathTeamFlipped(pointStart).withTimeout(0.3),
+            Commands.print("5"),
+            pathing.followPathTeamFlipped(pathInt).withTimeout(10.0),
+            Commands.print("8"),
+            intake.stop().withTimeout(0.2),
+            Commands.print("9"),
+            pathing.followPathTeamFlipped(pointPostInt).withTimeout(2.5),
+            Commands.print("10"),
             basicShootInitial8()
         );
     }
