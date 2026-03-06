@@ -182,6 +182,24 @@ public class RobotContainer {
 
     // operator.back() // re-home intake, hood, turret? hood? not doing this rn
 
+<<<<<<< HEAD
+=======
+    // Align to the climb process/button
+    // align up/down swerve.setAngle()
+    // addRangeFinderOutputs
+    //once in place
+    //climb
+
+    Commands.parallel(
+      climber.prepareForClimbL1(),
+      swerve.turnToHeading(()->new Rotation2d(Degree.of(90))),
+      swerve.addSecondaryInputsTrueFielcentric(()->climber.generateInputs(swerve.getSwervePose())),
+      Commands.none()
+    ).until(climber::isLinedUpWithL1)
+    .andThen(climber.climbL1())
+    ;
+
+>>>>>>> parent of 59b70e5 (Stuff I forgot to commit)
   }
 
 
