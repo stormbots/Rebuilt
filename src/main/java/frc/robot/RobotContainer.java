@@ -199,6 +199,7 @@ public class RobotContainer {
       .isNear(Degrees.of(90), Degrees.of(90)) ? 90 : -90;
 
     operator.a().whileTrue(climber.stow()); // global stow (unnecessary, this is default)
+    operator.povLeft().whileTrue(climber.goHomePartial());
 
     operator.b()// passing: Face driver station wall and launch at fixed rpm/angle/distance
     .whileTrue(shooter.pass())

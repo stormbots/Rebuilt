@@ -35,7 +35,7 @@ public class Grabber extends SubsystemBase {
   private final int kGrabberCurrentMax = 10;
 
   public static final double kMinPosition = -28.0;
-  public static final double kMaxPosition = 98.0;
+  public static final double kMaxPosition = 128.0;
 
   Trigger isHomingCurrentReached = new Trigger(()->{
     return Math.abs(motor.getOutputCurrent()) <= kHomeCurrentThreshold;
@@ -63,7 +63,7 @@ public class Grabber extends SubsystemBase {
     ;
 
     config.closedLoop
-    .p(12.0/90.0)
+    .p(12.0 / 90.0 *2.0)
     ;
 
     config.softLimit
@@ -90,6 +90,8 @@ public class Grabber extends SubsystemBase {
   public void periodic() {
     // This method will be called once per scheduler run
     SmartDashboard.putNumber("climber/grabber/position", motor.getEncoder().getPosition());
+    SmartDashboard.putBoolean("climber/grabber/isRetracted", isRetracted.getAsBoolean());
+    SmartDashboard.putBoolean("climber/grabber/isPossiblyConnected", isPossiblyConnected.getAsBoolean());
   }
 
   // private Command setPosition(...)
@@ -112,6 +114,10 @@ public class Grabber extends SubsystemBase {
 
   public Command retract(){
     return setPosition(Degrees.of(kMinPosition));
+  }
+
+  public Command retractPartial(){
+    return setPosition(Degrees.of(kMinPosition+30));
   }
 
   public Command goHome(){

@@ -166,7 +166,7 @@ public class TargetingSystem extends SubsystemBase {
     SmartDashboard.putNumber("shooter/lut/distance", magnitude.in(Inches));
     var entry = lut.get(magnitude.in(Inches));   
     var angle = entry[1];
-    var rpm = entry[2];
+    var rpm = entry[2]+150;
     SmartDashboard.putNumber("shooter/lut/rpm", rpm);
     SmartDashboard.putNumber("shooter/lut/hoodangle", angle);
     

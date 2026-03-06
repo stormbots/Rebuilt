@@ -29,14 +29,14 @@ public class ClimberExtension extends SubsystemBase {
   public ClimberExtensionSim sim; //handled in constructor
 
   private boolean isHomed = false;
-  private final int kHomeCurrentThreshold = 12;
+  private final int kHomeCurrentThreshold = 24;
   private final int kHomeCurrentMaxOutput = 60;
   private final int kClimbingCurrentMax = 60;
 
   private  String name="";
 
   Trigger isHomingCurrentReached = new Trigger(()->{
-    return Math.abs(motor.getOutputCurrent()) <= kHomeCurrentThreshold;
+    return Math.abs(motor.getOutputCurrent()) >= kHomeCurrentThreshold;
   }).debounce(0.5)
   ;
 
@@ -119,6 +119,7 @@ public class ClimberExtension extends SubsystemBase {
     SmartDashboard.putNumber("Climber/"+name+"/output", motor.getAppliedOutput());
     SmartDashboard.putBoolean("Climber/"+name+"/homed", isHomed);
     SmartDashboard.putString("Climber/"+name+"/command", getCurrentCommand()==null ? "None" : getCurrentCommand().getName() );
+    SmartDashboard.putBoolean("climber/ishomed", isHomingCurrentReached.getAsBoolean());
   }
 
   @Override
