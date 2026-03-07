@@ -5,6 +5,7 @@ import static edu.wpi.first.units.Units.Degrees;
 import java.lang.annotation.Target;
 import java.util.function.Supplier;
 
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -119,6 +120,7 @@ Flywheel flywheel = new Flywheel();
     public Command pass(){
         return shoot(targeting::getPass);
     }
+
 
     // For tuning LUTs, read 
     public Command shootWithDashboardValues(){

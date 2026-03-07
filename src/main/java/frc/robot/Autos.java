@@ -15,7 +15,9 @@ import com.studica.frc.AHRS;
 
 
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -23,6 +25,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
+import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import frc.robot.Subsystems.Intake.Intake;
 import frc.robot.Subsystems.Questnav.QuestNavSubsystem;
@@ -71,13 +74,13 @@ public class Autos {
         Pose2d shotPoseBL = new Pose2d(3.6, 7.4, new Rotation2d());
         Pose2d shotPoseBR = new Pose2d(3.6, 0.6, new Rotation2d());
         Pose2d shotPoseRL = new Pose2d(13.5, 0.6, new Rotation2d());
-        Pose2d shotPoseRR = new Pose2d(13.5, 7.4, new Rotation2d());
+        Pose2d shotPoseRR = new Pose2d(13.5, 7.4, new Rotation2d()); 
 
         //Depot poses
         Pose2d preIntDepotBlue = new Pose2d(1.0, 6.0, new Rotation2d(Math.PI));
         Pose2d preIntDepotRed = new Pose2d(15.5, 2.0, new Rotation2d());
-        Pose2d intDepotBlue = new Pose2d(0.6, 6.0, new Rotation2d(Math.PI));
-        Pose2d intDepotRed = new Pose2d(15.9, 2.0, new Rotation2d());
+        Pose2d intDepotBlue = new Pose2d(0.4, 6.0, new Rotation2d(Math.PI));
+        Pose2d intDepotRed = new Pose2d(16.1, 2.0, new Rotation2d());
         
 
     public Autos(
@@ -111,6 +114,8 @@ public class Autos {
         autoChooser.addOption("Right Blue go center not BLINE", this::notBlineCenterBlueRightShoot);
         autoChooser.addOption("Left Red go center not BLINE", this::notBlineCenterRedLeftShoot);
         autoChooser.addOption("Right Red go center not BLINE", this::notBlineCenterRedRightShoot);
+        autoChooser.addOption("Blue Depot", this::depotAutoBlue);
+        autoChooser.addOption("Red Depot", this::depotAutoRed);
     }
 
     //Get Auto Command
@@ -375,26 +380,34 @@ public class Autos {
     }
     public Command depotAutoBlue(){
         return Commands.sequence(
+            // questNav.wantToTrackCommand(false),
+            // questNav.setQuestPoseCommand(new Pose3d(new Pose2d(4.0, 5.88, new Rotation2d()))),
+            // questNav.wantToTrackCommand(true),
             basicShootInitial8(),
             swerve.pidToPose(()->preIntDepotBlue).alongWith(intake.intake()).until(()->swerve.isOnTargetTranslate()),
             new ParallelCommandGroup(
                 swerve.pidToPose(()->intDepotBlue),
-                intake.intake(),
+                intake.intake().withTimeout(2.0).andThen(intake.stop()),
                 shooter.shootHub(),
                 spindexer.feedToShooterForce()
-            )
+            ),
+            intake.stop()
         );
     }
     public Command depotAutoRed(){
         return Commands.sequence(
+            // questNav.wantToTrackCommand(false),
+            // questNav.setQuestPoseCommand(new Pose3d(new Pose2d(4.0, 5.88, new Rotation2d()))),
+            // questNav.wantToTrackCommand(true),
             basicShootInitial8(),
             swerve.pidToPose(()->preIntDepotRed).alongWith(intake.intake()).until(()->swerve.isOnTargetTranslate()),
             new ParallelCommandGroup(
                 swerve.pidToPose(()->intDepotRed),
-                intake.intake(),
+                intake.intake().withTimeout(2.0).andThen(intake.stop()),
                 shooter.shootHub(),
                 spindexer.feedToShooterForce()
-            )
+            ),
+            intake.stop()
         );
     }
    

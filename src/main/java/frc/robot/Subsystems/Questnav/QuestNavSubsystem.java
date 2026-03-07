@@ -11,13 +11,16 @@ import static edu.wpi.first.units.Units.Radians;
 
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.VecBuilder;
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Subsystems.Swerve.Swerve;
 import gg.questnav.questnav.PoseFrame;
@@ -82,6 +85,22 @@ public class QuestNavSubsystem extends SubsystemBase {
   {
     questNav.setPose(robotPose.transformBy(robotToQuest));
   }
+
+  public Command setQuestPoseCommand()
+  {
+    return run(()->setQuestPose(new Pose3d(new Pose2d(4.0, 5.88, new Rotation2d()))));
+  }
+
+  public Command setQuestPoseCommand(Pose3d robotPose)
+  {
+    return run(()->setQuestPose(robotPose));
+  }
+
+  public Command wantToTrackCommand(boolean bool)
+  {
+    return run(()->wantToTrack(bool));
+  }
+
 
   //This is a very goofy way to fix how occulus stores its pose, might do this differently later but it works for now
   public void wantToTrack(boolean wantTo){

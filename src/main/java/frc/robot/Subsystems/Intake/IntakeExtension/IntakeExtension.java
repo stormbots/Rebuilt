@@ -136,12 +136,36 @@ public class IntakeExtension extends SubsystemBase {
     });
   }
 
+  private Command setAngleMaxMotion(double degrees, double arbitraryFFVolts){
+    return run(()->{
+      motor
+      .getClosedLoopController()
+      .setSetpoint(
+        degrees, 
+        ControlType.kMAXMotionPositionControl, 
+        ClosedLoopSlot.kSlot0, 
+        arbitraryFFVolts, 
+        ArbFFUnits.kVoltage
+      );
+      //FIXME: Get kSmartMaxMotion working. Weird issues in sim.
+    });
+  }
+
   public Command up(){
     return Commands.sequence(
       setAngle(90, 0).until(()->getAngle().in(Degree) > 80),
       setAngle(90, 0)
     )
     .withName("Up")
+    ;
+  }
+
+  public Command upTrapeziodal(){
+    return Commands.sequence(
+      // setAngleMaxMotion(90, 0).until(()->getAngle().in(Degree) > 80),
+      setAngleMaxMotion(90, 0)
+    )
+    .withName("Up Trapezoidal")
     ;
   }
 

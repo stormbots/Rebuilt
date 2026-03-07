@@ -7,7 +7,7 @@ package frc.robot;
 
 
 import static edu.wpi.first.units.Units.Degrees;
-
+import static edu.wpi.first.units.Units.Radians;
 
 import com.stormbots.CRTAbsoluteEncoder;
 
@@ -92,7 +92,7 @@ public class RobotContainer {
 
     //QuestNav initialization?
     //THIS IS VERY JANK, FIX LATER, should be part of the auto starting sequence, should setQuestPose THEN wantToTrack, this was dumb
-    // driver.povDown().onTrue(new InstantCommand(()->questnav.setQuestPose(new Pose3d(0.0, 7.5, 0.0, new Rotation3d(0.0, 0.0, 0.0)))));
+    // driver.povDown().onTrue(new InstantCommand(()->questna v.setQuestPose(new Pose3d(0.0, 7.5, 0.0, new Rotation3d(0.0, 0.0, 0.0)))));
     // driver.povUp().onTrue(new InstantCommand(()->questnav.wantToTrack(true)));
 
 
@@ -159,8 +159,12 @@ public class RobotContainer {
      
 
 
-    // driver.rightTrigger().whileTrue(shooter.shootHub());
-    // driver.leftTrigger().whileTrue(spindexer.feedToShooter());
+    driver.rightTrigger()
+      .whileTrue(swerve.turnToHeading(()->new Rotation2d(Degrees.of(-90)))
+    );
+    driver.leftTrigger()
+      .whileTrue(swerve.turnToHeading(()->new Rotation2d(Degrees.of(90)))
+    );
    
 
 
@@ -212,6 +216,8 @@ public class RobotContainer {
     driver.povUp().whileTrue(shooter.testHome());
     //  driver.y().whileTrue(shooter.testSetHoodAngle(Degrees.of(30)));
 
+    
+
 
 
 
@@ -235,6 +241,12 @@ public class RobotContainer {
       .onFalse(climber.climbL1())
     ;
 
+    operator.rightBumper()
+    .whileTrue(shooter.shoot(()->targeting.fixedPassOppAlliance()));
+    operator.y()
+    .whileTrue(shooter.shoot(()->targeting.fixedPassNeutral()))
+    .whileTrue(spindexer.feedToShooter());
+
 
     // operator.rightBumper() stage2 hook up, lock out if not end of match  
     // operator.rightBumper().whileTrue(climber.setStage2Voltage(12));
@@ -243,9 +255,7 @@ public class RobotContainer {
     operator.povUp().whileTrue(spindexer.unclog()); // shake dye rotor / unclog
 
 
-    operator.y()
-    .whileTrue(shooter.shoot(()->targeting.fixedPass()))
-    .whileTrue(spindexer.feedToShooter());
+    
 
 
     // operator.povRight()
@@ -267,7 +277,7 @@ public class RobotContainer {
 
 
     operator.povRight()
-    .whileTrue(shooter.shoot(()->targeting.fixedPass()))
+    .whileTrue(shooter.shoot(()->targeting.fixedShot()))
     .whileTrue(spindexer.feedToShooter());
 
 
@@ -284,7 +294,7 @@ public class RobotContainer {
     operator.b()// passing: Face driver station wall and launch at fixed rpm/angle/distance
     .whileTrue(shooter.pass())
     .whileTrue(spindexer.feedToShooter())
-    .whileTrue(swerve.turnToHeadingNiche(()->{
+    .whileTrue(swerve.verifyAngleTargetPass(()->{
       return targeting.getHeadingToTarget(swerve.getSwervePose().getTranslation(), targeting.getPassTarget()).plus(Rotation2d.k180deg);
     }))
     ;

@@ -93,9 +93,13 @@ public class TargetingSystem extends SubsystemBase {
   
 
   //distance, hoodangle, flywheel rpm
-  LUT passLUT = new LUT(new double[][]{
-    {0, 0, 0},
-    {0, 0, 0}
+  public LUT passLUT = new LUT(new double[][]{
+    {192+22, 45, 3200},
+    {192+22+(7.5*12), 25, 4000},
+
+    //min from center
+    //max from midfield
+    //from opponent alliance zone
   });
 
   Swerve swerve;
@@ -159,7 +163,7 @@ public class TargetingSystem extends SubsystemBase {
   }
 
   
-  private ShooterState getLUTShooterState(Supplier<Pose2d> botPose, Supplier<Translation2d> target, LUT lut){
+  public ShooterState getLUTShooterState(Supplier<Pose2d> botPose, Supplier<Translation2d> target, LUT lut){
     
     Distance magnitude = getDistanceToTarget(botPose.get().getTranslation(), target.get());
 
@@ -264,20 +268,25 @@ public class TargetingSystem extends SubsystemBase {
 
 
   public ShooterState getPass(){
+    return getLUTShooterState(swerve::getSwervePose, this::getPassTarget, passLUT);
+
     // Translation2d target = new Translation2d(2, 2); //get best target
     // return getLUTShooterState(swerve::getSwervePose,()->target, passLUT);
 
-    Translation2d turretTranslation = getTurretCenterpoint().toTranslation2d();
-    Rotation2d heading = getHeadingToTarget(turretTranslation, getPassTarget());
+    // Translation2d turretTranslation = getTurretCenterpoint().toTranslation2d();
+    // Rotation2d heading = getHeadingToTarget(turretTranslation, getPassTarget());
 
-    return new ShooterState(heading.minus(swerve.getSwervePose().getRotation()).getMeasure(), Degrees.of(30), 2760);
+    // return new ShooterState(heading.minus(swerve.getSwervePose().getRotation()).getMeasure(), Degrees.of(30), 2760);
   }
 
   public ShooterState fixedShot(){
-    return new ShooterState(Degrees.of(180), Degrees.of(30),2260 );
+    return new ShooterState(Degrees.of(180), Degrees.of(10),2210 );
   }
-  public ShooterState fixedPass(){
-    return new ShooterState(Degrees.of(180), Degrees.of(25),2800 );
+  public ShooterState fixedPassNeutral(){
+    return new ShooterState(Degrees.of(180), Degrees.of(45),3200 );
+  }
+  public ShooterState fixedPassOppAlliance(){
+    return new ShooterState(Degrees.of(180), Degrees.of(25),4000 );
   }
 
 

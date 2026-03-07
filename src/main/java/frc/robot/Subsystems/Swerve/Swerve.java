@@ -323,6 +323,19 @@ public class Swerve extends SubsystemBase {
     })
     ;
   }
+
+  public Command verifyAngleTargetPass(Supplier<Rotation2d> bearing){
+    return Commands.run(()->{
+      isOnTargetAngle = false;
+      var error = bearing.get().minus(swerveDrive.getPose().getRotation());
+
+      if(Math.abs(error.getDegrees()) < 85.0){
+        isOnTargetAngle = true;
+      }
+    }).finallyDo(()->{
+      isOnTargetAngle = false;
+    });
+  }
   public Command turnToHeadingNiche(Supplier<Rotation2d> bearing){
     return Commands.run(()->{
       isOnTargetAngle = false;

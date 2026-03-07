@@ -55,7 +55,7 @@ public class Grabber extends SubsystemBase {
     config.smartCurrentLimit(kGrabberCurrentMax);
     config.openLoopRampRate(0.05);
 
-    double conversionfactor = 360/25.0; 
+    double conversionfactor = 360/9.0; 
 
 		config.encoder
     .positionConversionFactor(conversionfactor)
@@ -170,7 +170,7 @@ public class Grabber extends SubsystemBase {
   }
 
   public Trigger isPossiblyConnected = new Trigger(() -> {
-    return getPosition().isNear(Degrees.of(kMaxPosition), Degrees.of(10));    
+    return getPosition().isNear(Degrees.of(kMaxPosition), Degrees.of(20));    
   });
 
   public Trigger isRetracted = new Trigger(() -> {
