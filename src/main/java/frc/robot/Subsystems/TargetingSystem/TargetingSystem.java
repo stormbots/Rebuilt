@@ -273,6 +273,13 @@ public class TargetingSystem extends SubsystemBase {
     return new ShooterState(heading.minus(swerve.getSwervePose().getRotation()).getMeasure(), Degrees.of(30), 2760);
   }
 
+  public ShooterState fixedShot(){
+    return new ShooterState(Degrees.of(180), Degrees.of(30),2260 );
+  }
+  public ShooterState fixedPass(){
+    return new ShooterState(Degrees.of(180), Degrees.of(25),2800 );
+  }
+
 
 
 }

@@ -193,10 +193,8 @@ public class RobotContainer {
     operator.povUp().whileTrue(spindexer.unclog()); // shake dye rotor / unclog
 
     operator.y()
-    .whileTrue(shooter.testSetFlywheelRPM(2800))
-    .whileTrue(shooter.testSetHoodAngle(Degrees.of(35)))
-    .whileTrue(shooter.testSetTurretAngle(Degrees.of(180)))
-    .whileTrue(spindexer.feedToShooterForce());
+    .whileTrue(shooter.shoot(()->targeting.fixedPass()))
+    .whileTrue(spindexer.feedToShooter());
 
     // operator.povRight()
     // .whileTrue(intake.intake())
@@ -214,10 +212,8 @@ public class RobotContainer {
     ;
 
     operator.povRight()
-    .whileTrue(shooter.testSetFlywheelRPM(2260))
-    .whileTrue(shooter.testSetHoodAngle(Degrees.of(30)))
-    .whileTrue(shooter.testSetTurretAngle(Degrees.of(180)))
-    .whileTrue(spindexer.feedToShooterForce());
+    .whileTrue(shooter.shoot(()->targeting.fixedPass()))
+    .whileTrue(spindexer.feedToShooter());
 
 
     double bool =  swerve.getSwervePose().getRotation().getMeasure()
