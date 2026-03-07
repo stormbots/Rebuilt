@@ -73,6 +73,13 @@ public class Autos {
         Pose2d shotPoseRL = new Pose2d(13.5, 0.6, new Rotation2d());
         Pose2d shotPoseRR = new Pose2d(13.5, 7.4, new Rotation2d());
 
+        //Depot poses
+        Pose2d preIntDepotBlue = new Pose2d(1.0, 6.0, new Rotation2d(Math.PI));
+        Pose2d preIntDepotRed = new Pose2d(15.5, 2.0, new Rotation2d());
+        Pose2d intDepotBlue = new Pose2d(0.6, 6.0, new Rotation2d(Math.PI));
+        Pose2d intDepotRed = new Pose2d(15.9, 2.0, new Rotation2d());
+        
+
     public Autos(
         Swerve swerve,
         Shooter shooter,
@@ -364,6 +371,30 @@ public class Autos {
             swerve.pidToPose(()->preIntRR).alongWith(intake.stop()).until(()->swerve.isOnTargetTranslate()),
             swerve.pidToPose(()->shotPoseRR).until(()->swerve.isOnTargetTranslate()),
             basicShootToEmpty()
+        );
+    }
+    public Command depotAutoBlue(){
+        return Commands.sequence(
+            basicShootInitial8(),
+            swerve.pidToPose(()->preIntDepotBlue).alongWith(intake.intake()).until(()->swerve.isOnTargetTranslate()),
+            new ParallelCommandGroup(
+                swerve.pidToPose(()->intDepotBlue),
+                intake.intake(),
+                shooter.shootHub(),
+                spindexer.feedToShooterForce()
+            )
+        );
+    }
+    public Command depotAutoRed(){
+        return Commands.sequence(
+            basicShootInitial8(),
+            swerve.pidToPose(()->preIntDepotRed).alongWith(intake.intake()).until(()->swerve.isOnTargetTranslate()),
+            new ParallelCommandGroup(
+                swerve.pidToPose(()->intDepotRed),
+                intake.intake(),
+                shooter.shootHub(),
+                spindexer.feedToShooterForce()
+            )
         );
     }
    
