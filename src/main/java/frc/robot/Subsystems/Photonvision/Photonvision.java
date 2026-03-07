@@ -9,6 +9,7 @@ import static edu.wpi.first.units.Units.Meters;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.function.BiConsumer;
 
 import org.photonvision.EstimatedRobotPose;
 import org.photonvision.PhotonCamera;
@@ -33,6 +34,8 @@ import frc.robot.Subsystems.Swerve.Swerve;
 
 public class Photonvision extends SubsystemBase {
   private Swerve swerve;
+  private boolean leftHasTarget;
+  private boolean rightHasTarget;
 
   private AprilTagFieldLayout aprilTagFieldLayout = AprilTagFieldLayout.loadField(AprilTagFields.k2026RebuiltWelded);
 
@@ -94,20 +97,39 @@ public class Photonvision extends SubsystemBase {
       visionEstimate = poseEstimator.estimateCoprocMultiTagPose(result);
       if (visionEstimate.isEmpty()){
         visionEstimate = poseEstimator.estimateLowestAmbiguityPose(result);
+        if(poseEstimator.equals(rightEstimator)){
+          rightHasTarget = false;
+        }
+        else if(poseEstimator.equals(leftEstimator)){
+          leftHasTarget = false;
+        };
       }
       updateEstimationStdDevs(visionEstimate, result.getTargets());
     }
 
     visionEstimate.ifPresent(
+      
       est ->{
         var estimatedStdDevs = getEstimationStdDevs();
 
         swerve.swerveDrive.addVisionMeasurement(est.estimatedPose.toPose2d(),est.timestampSeconds, estimatedStdDevs);
         visionField2d.getObject(camera.getName()).setPose(est.estimatedPose.toPose2d());
+        if(poseEstimator.equals(rightEstimator)){
+          rightHasTarget = true;
+        }
+        else if(poseEstimator.equals(leftEstimator)){
+          leftHasTarget = true;
+        };
       }
+      
       
     );
   }
+
+  public boolean hasTarget(){
+    return leftHasTarget || rightHasTarget;
+  }
+
 
   public void updateEstimationStdDevs(Optional<EstimatedRobotPose> estimatedPose, List<PhotonTrackedTarget> targets){
     if( estimatedPose.isEmpty() ){

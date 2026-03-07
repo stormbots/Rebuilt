@@ -45,7 +45,7 @@ public class RobotContainer {
   Spindexer spindexer = new Spindexer(shooter.isReadyToAcceptFuel.and(swerve::isOnTargetAngle));
   QuestNavSubsystem questnav = new QuestNavSubsystem(swerve);
   Pathing pathing = new Pathing(swerve);
-  Signals signlas = new Signals();
+  Signals signals = new Signals();
   Autos autos = new Autos(swerve, shooter, intake, questnav, spindexer, pathing, targeting);
   // Bling bling = new Bling(); //TODO: Currently no bling lights on bot
   FieldBehaviour fieldBehaviour = new FieldBehaviour();
@@ -78,8 +78,8 @@ public class RobotContainer {
 
     //QuestNav initialization?
     //THIS IS VERY JANK, FIX LATER, should be part of the auto starting sequence, should setQuestPose THEN wantToTrack, this was dumb
-    driver.povDown().onTrue(new InstantCommand(()->questnav.setQuestPose(new Pose3d(0.0, 7.5, 0.0, new Rotation3d(0.0, 0.0, 0.0)))));
-    driver.povUp().onTrue(new InstantCommand(()->questnav.wantToTrack(true)));
+    // driver.povDown().onTrue(new InstantCommand(()->questnav.setQuestPose(new Pose3d(0.0, 7.5, 0.0, new Rotation3d(0.0, 0.0, 0.0)))));
+    // driver.povUp().onTrue(new InstantCommand(()->questnav.wantToTrack(true)));
 
     // new Trigger(DriverStation::isEnabled)
     // .whileTrue(
@@ -91,6 +91,10 @@ public class RobotContainer {
     // new Trigger(()->Timer.getFPGATimestamp() > 1)
     // .and(DriverStation::isDisabled)
     // .whileTrue(syncQuestPose);
+
+
+    new Trigger(photonvision::hasTarget).and(DriverStation::isDisabled)
+    .whileTrue(signals.showVisionOkay());
 
     //while disabled
     //and see target
@@ -116,10 +120,13 @@ public class RobotContainer {
 
     driver.start().onTrue(
       Commands.sequence(
-        swerve.testZeroPose().withTimeout(0.1),
-        new InstantCommand(()->questnav.setQuestPose(new Pose3d(swerve.getSwervePose().getX(), swerve.getSwervePose().getY(), 0.0, new Rotation3d(0.0, 0.0, 0.0)))).withTimeout(0.1),
-        new InstantCommand(()->questnav.wantToTrack(true)))
-      );
+        new InstantCommand(()->questnav.wantToTrack(false)),
+        swerve.zeroGyro(),
+        // new InstantCommand(()->questnav.setQuestPose(new Pose3d(swerve.getSwervePose().getX(), swerve.getSwervePose().getY(), 0.0, new Rotation3d(0.0, 0.0, 0.0))))
+        Commands.none()
+      ).withTimeout(0.1)
+    );
+      
 
     // driver.rightTrigger().whileTrue(shooter.shootHub());
     // driver.leftTrigger().whileTrue(spindexer.feedToShooter());
@@ -143,7 +150,7 @@ public class RobotContainer {
       ()->-driver.getLeftY()/3.0, 
       ()->-driver.getLeftX()/3.0, 
       ()->-driver.getRightX()/3.0
-    )
+      )
     );
 
     // driver.start().onTrue(swerve.zeroGyro()); //zero heading, occulus implementation added later
@@ -185,6 +192,12 @@ public class RobotContainer {
     // operator.rightTrigger().whileTrue(climber.setStage2Voltage(-12));
     operator.povUp().whileTrue(spindexer.unclog()); // shake dye rotor / unclog
 
+    operator.y()
+    .whileTrue(shooter.testSetFlywheelRPM(2800))
+    .whileTrue(shooter.testSetHoodAngle(Degrees.of(35)))
+    .whileTrue(shooter.testSetTurretAngle(Degrees.of(180)))
+    .whileTrue(spindexer.feedToShooterForce());
+
     // operator.povRight()
     // .whileTrue(intake.intake())
     // .whileTrue(spindexer.spinDyeRotor())
@@ -200,6 +213,13 @@ public class RobotContainer {
     }))
     ;
 
+    operator.povRight()
+    .whileTrue(shooter.testSetFlywheelRPM(2260))
+    .whileTrue(shooter.testSetHoodAngle(Degrees.of(30)))
+    .whileTrue(shooter.testSetTurretAngle(Degrees.of(180)))
+    .whileTrue(spindexer.feedToShooterForce());
+
+
     double bool =  swerve.getSwervePose().getRotation().getMeasure()
       .isNear(Degrees.of(90), Degrees.of(90)) ? 90 : -90;
 
@@ -213,6 +233,8 @@ public class RobotContainer {
       return targeting.getHeadingToTarget(swerve.getSwervePose().getTranslation(), targeting.getPassTarget()).plus(Rotation2d.k180deg);
     }))
     ;
+
+    
     // Commands.either(/*-90 */, /* 90 */, /*whichever is closer */)
     // Commands.either(
     //   swerve.turnToHeading(()->new Rotation2d()), 

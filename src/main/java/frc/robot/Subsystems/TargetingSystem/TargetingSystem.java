@@ -167,7 +167,7 @@ public class TargetingSystem extends SubsystemBase {
     SmartDashboard.putNumber("shooter/lut/distance", magnitude.in(Inches));
     var entry = lut.get(magnitude.in(Inches));   
     var angle = entry[1];
-    var rpm = entry[2]+150;
+    var rpm = entry[2]+110;
     SmartDashboard.putNumber("shooter/lut/rpm", rpm);
     SmartDashboard.putNumber("shooter/lut/hoodangle", angle);
     
@@ -261,6 +261,8 @@ public class TargetingSystem extends SubsystemBase {
     return swerve.getSwervePose().getY() > 4.2 ? redHigh : redLow;
   }
 
+
+
   public ShooterState getPass(){
     // Translation2d target = new Translation2d(2, 2); //get best target
     // return getLUTShooterState(swerve::getSwervePose,()->target, passLUT);
@@ -268,7 +270,7 @@ public class TargetingSystem extends SubsystemBase {
     Translation2d turretTranslation = getTurretCenterpoint().toTranslation2d();
     Rotation2d heading = getHeadingToTarget(turretTranslation, getPassTarget());
 
-    return new ShooterState(heading.minus(swerve.getSwervePose().getRotation()).getMeasure(), Degrees.of(28), 3500);
+    return new ShooterState(heading.minus(swerve.getSwervePose().getRotation()).getMeasure(), Degrees.of(30), 2760);
   }
 
 

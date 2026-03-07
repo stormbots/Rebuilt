@@ -9,6 +9,8 @@ import static edu.wpi.first.units.Units.Degrees;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Supplier;
 
+import javax.sound.midi.Sequence;
+
 import com.studica.frc.AHRS;
 
 import edu.wpi.first.math.geometry.Pose2d;
@@ -71,6 +73,8 @@ public class Autos {
         autoChooser.addOption("Basic Shoot 8 anywhere", this::basicShootInitial8);
         autoChooser.addOption("Right Blue go center", this::centerShootRightBlue);
         autoChooser.addOption("Right Red go center", this::centerShootRightBlue);
+        autoChooser.addOption("Left Blue go center", this::centerShootLeftBlue);
+        autoChooser.addOption("Left Red go center", this::centerShootLeftRed);
 
 
     }
@@ -116,6 +120,13 @@ public class Autos {
             constraints,
             new Path.Waypoint(new Translation2d(4.0, 0.8), new Rotation2d(1.5707963267948966))
         );
+        Path.PathConstraints constraints2 = new Path.PathConstraints()
+            .setMaxVelocityMetersPerSec(4.0)
+            .setMaxAccelerationMetersPerSec2(4.0)
+            .setMaxVelocityDegPerSec(360.0)
+            .setMaxAccelerationDegPerSec2(580.0)
+            .setEndTranslationToleranceMeters(0.4)
+            .setEndRotationToleranceDeg(5.0);
         Path pathInt = new Path(
             constraints,
             new Path.Waypoint(new Translation2d(7.7, 0.8), new Rotation2d(1.5707963267948966)),
@@ -133,38 +144,58 @@ public class Autos {
             Commands.print("3"),
             shooter.testSetHoodAngle(Degrees.of(0)).withTimeout(0.5),
             Commands.print("4"),
-            pathing.followPath(pointStart).withTimeout(0.3),
-            Commands.print("5"),
-            pathing.followPath(pathInt).withTimeout(10.0),
+            new ParallelCommandGroup(
+                pathing.followPath(pathInt).withTimeout(15.0),
+                Commands.sequence(
+                    new WaitCommand(2.0),
+                    intake.intake())),
             Commands.print("8"),
             intake.stop().withTimeout(0.2),
             Commands.print("9"),
-            pathing.followPath(pointPostInt).withTimeout(2.5),
+            pathing.followPath(pointPostInt).withTimeout(7.5),
             Commands.print("10"),
             basicShootInitial8()
         );
     }
     public Command centerShootLeftBlue(){
-        Path pointStart = new Path(
-            new Path.Waypoint(new Translation2d(4.0, 0.8), new Rotation2d(0))
+        Path.PathConstraints constraints = new Path.PathConstraints()
+            .setMaxVelocityMetersPerSec(4.0)
+            .setMaxAccelerationMetersPerSec2(4.0)
+            .setMaxVelocityDegPerSec(360.0)
+            .setMaxAccelerationDegPerSec2(580.0)
+            .setEndTranslationToleranceMeters(0.4)
+            .setEndRotationToleranceDeg(5.0);
+          Path pointStart = new Path(
+            constraints,
+            new Path.Waypoint(new Translation2d(4.0, 7.4), new Rotation2d(-1.5707963267948966))
         );
-        Path pointPreInt = new Path(
-            new Path.Waypoint(new Translation2d(7.7, 0.8), new Rotation2d(0))
+        Path pathInt = new Path(
+            constraints,
+            new Path.Waypoint(new Translation2d(7.7, 7.4), new Rotation2d(-1.5707963267948966)),
+            new Path.Waypoint(new Translation2d(7.7, 5.0), new Rotation2d(-1.5707963267948966)),
+            new Path.Waypoint(new Translation2d(7.7, 7.4), new Rotation2d(-1.5707963267948966))
         );
         Path pointPostInt = new Path(
-            new Path.Waypoint(new Translation2d(7.7, 2.5), new Rotation2d(0))
+            constraints,
+            new Path.Waypoint(new Translation2d(7.7, 7.4), new Rotation2d(-1.5707963267948966)),
+            new Path.Waypoint(new Translation2d(4.0, 7.4), new Rotation2d(-1.5707963267948966))
         );
         return Commands.sequence(
             Commands.print("1"),
             basicShootInitial8(),
             Commands.print("3"),
             shooter.testSetHoodAngle(Degrees.of(0)).withTimeout(0.5),
-            pathing.followPath(pointStart),
-            pathing.followPath(pointPreInt),
-            pathing.followPath(pointPostInt).alongWith(intake.intake()),
-            pathing.followPath(pointPreInt),
-            intake.stop(),
-            pathing.followPath(pointStart),
+            Commands.print("4"),
+            new ParallelCommandGroup(
+                pathing.followPath(pathInt).withTimeout(15.0),
+                Commands.sequence(
+                    new WaitCommand(2.0),
+                    intake.intake())),
+            Commands.print("8"),
+            intake.stop().withTimeout(0.2),
+            Commands.print("9"),
+            pathing.followPath(pointPostInt).withTimeout(7.5),
+            Commands.print("10"),
             basicShootInitial8()
         );
     }
@@ -178,18 +209,18 @@ public class Autos {
             .setEndRotationToleranceDeg(5.0);
           Path pointStart = new Path(
             constraints,
-            new Path.Waypoint(new Translation2d(4.0, 0.8), new Rotation2d(1.5707963267948966))
+            new Path.Waypoint(new Translation2d(4.0, 0.6), new Rotation2d(-1.5707963267948966))
         );
         Path pathInt = new Path(
             constraints,
-            new Path.Waypoint(new Translation2d(7.7, 0.8), new Rotation2d(1.5707963267948966)),
-            new Path.Waypoint(new Translation2d(7.7, 2.5), new Rotation2d(1.5707963267948966)),
-            new Path.Waypoint(new Translation2d(7.7, 0.8), new Rotation2d(1.5707963267948966))
+            new Path.Waypoint(new Translation2d(7.7, 0.6), new Rotation2d(-1.5707963267948966)),
+            new Path.Waypoint(new Translation2d(7.7, 2.5), new Rotation2d(-1.5707963267948966)),
+            new Path.Waypoint(new Translation2d(7.7, 0.6), new Rotation2d(-1.5707963267948966))
         );
         Path pointPostInt = new Path(
             constraints,
-            new Path.Waypoint(new Translation2d(7.7, 0.8), new Rotation2d(1.5707963267948966)),
-            new Path.Waypoint(new Translation2d(4.0, 0.8), new Rotation2d(1.5707963267948966))
+            new Path.Waypoint(new Translation2d(7.7, 0.6), new Rotation2d(-1.5707963267948966)),
+            new Path.Waypoint(new Translation2d(4.0, 0.6), new Rotation2d(-1.5707963267948966))
         );
         return Commands.sequence(
             Commands.print("1"),
@@ -197,27 +228,58 @@ public class Autos {
             Commands.print("3"),
             shooter.testSetHoodAngle(Degrees.of(0)).withTimeout(0.5),
             Commands.print("4"),
-            pathing.followPathTeamFlipped(pointStart).withTimeout(0.3),
-            Commands.print("5"),
-            pathing.followPathTeamFlipped(pathInt).withTimeout(10.0),
+            new ParallelCommandGroup(
+                pathing.followPathTeamFlipped(pathInt).withTimeout(15.0),
+                Commands.sequence(
+                    new WaitCommand(2.0),
+                    intake.intake())),
             Commands.print("8"),
             intake.stop().withTimeout(0.2),
             Commands.print("9"),
-            pathing.followPathTeamFlipped(pointPostInt).withTimeout(2.5),
+            pathing.followPathTeamFlipped(pointPostInt).withTimeout(7.5),
             Commands.print("10"),
             basicShootInitial8()
         );
     }
     public Command centerShootLeftRed(){
+        Path.PathConstraints constraints = new Path.PathConstraints()
+            .setMaxVelocityMetersPerSec(4.0)
+            .setMaxAccelerationMetersPerSec2(4.0)
+            .setMaxVelocityDegPerSec(360.0)
+            .setMaxAccelerationDegPerSec2(580.0)
+            .setEndTranslationToleranceMeters(0.4)
+            .setEndRotationToleranceDeg(5.0);
+          Path pointStart = new Path(
+            constraints,
+            new Path.Waypoint(new Translation2d(4.0, 7.4), new Rotation2d(-1.5707963267948966))
+        );
+        Path pathInt = new Path(
+            constraints,
+            new Path.Waypoint(new Translation2d(7.7, 7.4), new Rotation2d(-1.5707963267948966)),
+            new Path.Waypoint(new Translation2d(7.7, 5.0), new Rotation2d(-1.5707963267948966)),
+            new Path.Waypoint(new Translation2d(7.7, 7.4), new Rotation2d(-1.5707963267948966))
+        );
+        Path pointPostInt = new Path(
+            constraints,
+            new Path.Waypoint(new Translation2d(7.7, 7.4), new Rotation2d(-1.5707963267948966)),
+            new Path.Waypoint(new Translation2d(4.0, 7.4), new Rotation2d(-1.5707963267948966))
+        );
         return Commands.sequence(
             Commands.print("1"),
             basicShootInitial8(),
             Commands.print("3"),
             shooter.testSetHoodAngle(Degrees.of(0)).withTimeout(0.5),
+            Commands.print("4"),
             new ParallelCommandGroup(
-                pathing.followPath(new Path("orbitAHHH")),
-                intake.intake().withTimeout(5.0)
-            ),
+                pathing.followPathTeamFlipped(pathInt).withTimeout(15.0),
+                Commands.sequence(
+                    new WaitCommand(2.0),
+                    intake.intake())),
+            Commands.print("8"),
+            intake.stop().withTimeout(0.2),
+            Commands.print("9"),
+            pathing.followPathTeamFlipped(pointPostInt).withTimeout(7.5),
+            Commands.print("10"),
             basicShootInitial8()
         );
     }
