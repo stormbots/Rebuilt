@@ -79,9 +79,15 @@ public class Autos {
         //Depot poses
         Pose2d preIntDepotBlue = new Pose2d(1.0, 6.0, new Rotation2d(Math.PI));
         Pose2d preIntDepotRed = new Pose2d(15.5, 2.0, new Rotation2d());
-        Pose2d intDepotBlue = new Pose2d(0.4, 6.0, new Rotation2d(Math.PI));
-        Pose2d intDepotRed = new Pose2d(16.1, 2.0, new Rotation2d());
+        Pose2d intDepotBlue = new Pose2d(0.52, 6.0, new Rotation2d(Degrees.of(180-15)));
+        Pose2d intDepotRed = new Pose2d(16.02, 2.0, new Rotation2d(Degrees.of(15)));
         
+        //Goofy stuff
+        Pose2d duringIntOscillateB = new Pose2d(0.52, 6.0, new Rotation2d(Degrees.of(160)));
+        Pose2d duringIntOscillateB2 = new Pose2d(0.52, 6.0, new Rotation2d(Degrees.of(200)));
+        //Red
+        Pose2d duringIntOscillateR = new Pose2d(16.02, 6.0, new Rotation2d(Degrees.of(20)));
+        Pose2d duringIntOscillateR2 = new Pose2d(16.02, 6.0, new Rotation2d(Degrees.of(-20)));
 
     public Autos(
         Swerve swerve,
@@ -387,11 +393,10 @@ public class Autos {
             swerve.pidToPose(()->preIntDepotBlue).alongWith(intake.intake()).until(()->swerve.isOnTargetTranslate()),
             new ParallelCommandGroup(
                 swerve.pidToPose(()->intDepotBlue),
-                intake.intake().withTimeout(2.0).andThen(intake.stop()),
+                intake.intake(),
                 shooter.shootHub(),
                 spindexer.feedToShooterForce()
-            ),
-            intake.stop()
+            )
         );
     }
     public Command depotAutoRed(){
@@ -403,11 +408,10 @@ public class Autos {
             swerve.pidToPose(()->preIntDepotRed).alongWith(intake.intake()).until(()->swerve.isOnTargetTranslate()),
             new ParallelCommandGroup(
                 swerve.pidToPose(()->intDepotRed),
-                intake.intake().withTimeout(2.0).andThen(intake.stop()),
+                intake.intake(),
                 shooter.shootHub(),
                 spindexer.feedToShooterForce()
-            ),
-            intake.stop()
+            )
         );
     }
    

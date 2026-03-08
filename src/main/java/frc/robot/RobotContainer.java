@@ -23,6 +23,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
+import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Subsystems.FieldBehaviour;
@@ -245,7 +246,8 @@ public class RobotContainer {
     .whileTrue(shooter.shoot(()->targeting.fixedPassOppAlliance()));
     operator.y()
     .whileTrue(shooter.shoot(()->targeting.fixedPassNeutral()))
-    .whileTrue(spindexer.feedToShooter());
+    .whileTrue(new WaitCommand(.25).andThen(spindexer.feedToShooter()))
+;
 
 
     // operator.rightBumper() stage2 hook up, lock out if not end of match  
@@ -269,7 +271,7 @@ public class RobotContainer {
 
     operator.x() // shoot + hopper feed
     .whileTrue(shooter.shootHub())
-    .whileTrue(spindexer.feedToShooter())
+    .whileTrue(new WaitCommand(.25).andThen(spindexer.feedToShooter()))
     .whileTrue(swerve.turnToHeadingNiche(()->{
       return targeting.getHeadingToTarget(swerve.getSwervePose().getTranslation(), targeting.getHubTarget()).plus(Rotation2d.k180deg);
     }))
