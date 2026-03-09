@@ -22,6 +22,7 @@ import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.FunctionalCommand;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
@@ -44,7 +45,7 @@ public class Hood extends SubsystemBase {
   public static final double minAngle = homeAngle+0.5;
   public static final double maxAngle = 43.0;
 
-  private boolean homed = false;
+  private boolean homed = true;//TODO:make actual homed thingy
 
   private Angle targetAngle = Degrees.of(minAngle);
   private Angle tolerance = Degrees.of(3); 
@@ -57,7 +58,7 @@ public class Hood extends SubsystemBase {
   public Hood() {
     motor.configure(getMotorConfig(), ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
 
-    setDefaultCommand(run(this::stop));
+    setDefaultCommand(setAngle(()->Degrees.of(0.0), ()->Degrees.of(0.5)));
   }
 
   @Override
@@ -86,7 +87,7 @@ public class Hood extends SubsystemBase {
 
     config.closedLoop
       .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
-      .p(2*0.3/30)
+      .p(2 * 0.3 / 30 * 5 * 1.2)
     ;
 
     //do not enable soft limits until homed
@@ -106,14 +107,14 @@ public class Hood extends SubsystemBase {
 
   public Command setAngle(Supplier<Angle> angle, Supplier<Angle> tolerance){
     return run(()->{
-      if(homed){
+      // if(homed){
         this.targetAngle = angle.get();
         this.tolerance = tolerance.get();
         motor.getClosedLoopController().setSetpoint(
           targetAngle.in(Degrees),
           ControlType.kPosition
         );
-      }
+      // }
     });
   }
 
@@ -126,7 +127,7 @@ public class Hood extends SubsystemBase {
   }
 
   public boolean getOnTarget(){
-    return homed && MathUtil.isNear(targetAngle.in(Degrees), motor.getEncoder().getPosition(), tolerance.in(Degrees));
+    return MathUtil.isNear(targetAngle.in(Degrees), motor.getEncoder().getPosition(), tolerance.in(Degrees));
   }
 
 

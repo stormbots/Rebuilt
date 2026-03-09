@@ -4,6 +4,7 @@
 
 package frc.robot.Subsystems.Spindexer;
 
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -15,11 +16,11 @@ public class Spindexer extends SubsystemBase{
   private DyeRotor dyeRotor = new DyeRotor();
   private UpGoer upGoer = new UpGoer();
   SpindexerVisual mech = new SpindexerVisual();
-  private Trigger shooterReady; 
+  private Trigger readyToFeed; 
   
   /** Creates a new Spindexer. */
-  public Spindexer(Trigger shooterReady){
-      this.shooterReady = shooterReady;
+  public Spindexer(Trigger readyToFeed){
+      this.readyToFeed = readyToFeed;
   }
 
   public Command spinDyeRotor(){
@@ -42,9 +43,18 @@ public class Spindexer extends SubsystemBase{
     );
 
     return Commands.repeatingSequence(
-      stop().until(shooterReady),
-      feed.until(shooterReady.negate())
+      stop().until(readyToFeed),
+      feed.until(readyToFeed.negate())
     );
+  }
+
+  public Command feedToShooterForce(){
+    var feed = Commands.parallel(
+      dyeRotor.feed(),
+      upGoer.feed()
+    );
+
+    return feed;
   }
 
   public Command unclog(){
@@ -80,5 +90,6 @@ public class Spindexer extends SubsystemBase{
 
   public void periodic(){
     mech.update(dyeRotor.getPosition(), upGoer.getVelocity());
+    SmartDashboard.putBoolean("spindexer/readyToShoot", readyToFeed.getAsBoolean());
   }
 }

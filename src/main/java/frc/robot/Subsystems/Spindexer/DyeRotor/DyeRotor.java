@@ -17,6 +17,7 @@ import com.revrobotics.spark.config.SparkFlexConfig;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class DyeRotor extends SubsystemBase{
@@ -56,6 +57,7 @@ public class DyeRotor extends SubsystemBase{
         SmartDashboard.putNumber("DyeRotor/Output", motor.getAppliedOutput());
         SmartDashboard.putNumber("DyeRotor/Position",motor.getEncoder().getPosition());
         SmartDashboard.putNumber("DyeRotor/Velocity",motor.getEncoder().getVelocity());
+        SmartDashboard.putNumber("DyeRotor/Current",motor.getOutputCurrent());
     }
 
     @Override
@@ -81,7 +83,7 @@ public class DyeRotor extends SubsystemBase{
 
     public Command feed(){
         //return setVelocity(2);
-        return setVoltage(3);
+        return setVoltage(5);
     }
 
     public Command intake(){
@@ -89,7 +91,13 @@ public class DyeRotor extends SubsystemBase{
     }
 
     public Command unclog(){
-        return setVoltage(-8);
+        return Commands.sequence(
+            setVoltage(-4).withTimeout(0.5),
+            setVoltage(4).withTimeout(0.5),
+            setVoltage(-4).withTimeout(0.5),
+            setVoltage(4)
+        );
+
     }
 
     public AngularVelocity getVelocity(){

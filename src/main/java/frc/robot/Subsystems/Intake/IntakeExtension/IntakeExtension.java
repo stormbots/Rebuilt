@@ -49,7 +49,7 @@ public class IntakeExtension extends SubsystemBase {
     //Not used in Intake system, but the port on one side is borrowed for turret
     config.absoluteEncoder
       .positionConversionFactor(360.0)
-      .inverted(false)
+      .inverted(true)
     ;
 
     //TODO Set feed-forwards for intake arm?
@@ -85,7 +85,7 @@ public class IntakeExtension extends SubsystemBase {
     //Assume the proper startup position
     motor.getEncoder().setPosition(90);
     
-    // setDefaultCommand(up());
+    setDefaultCommand(up());
   }
 
   @Override
@@ -136,12 +136,36 @@ public class IntakeExtension extends SubsystemBase {
     });
   }
 
+  private Command setAngleMaxMotion(double degrees, double arbitraryFFVolts){
+    return run(()->{
+      motor
+      .getClosedLoopController()
+      .setSetpoint(
+        degrees, 
+        ControlType.kMAXMotionPositionControl, 
+        ClosedLoopSlot.kSlot0, 
+        arbitraryFFVolts, 
+        ArbFFUnits.kVoltage
+      );
+      //FIXME: Get kSmartMaxMotion working. Weird issues in sim.
+    });
+  }
+
   public Command up(){
     return Commands.sequence(
       setAngle(90, 0).until(()->getAngle().in(Degree) > 80),
       setAngle(90, 0)
     )
     .withName("Up")
+    ;
+  }
+
+  public Command upTrapeziodal(){
+    return Commands.sequence(
+      // setAngleMaxMotion(90, 0).until(()->getAngle().in(Degree) > 80),
+      setAngleMaxMotion(90, 0)
+    )
+    .withName("Up Trapezoidal")
     ;
   }
 

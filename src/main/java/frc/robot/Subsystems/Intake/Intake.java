@@ -8,9 +8,11 @@ import static edu.wpi.first.units.Units.Degree;
 
 import com.stormbots.CRTAbsoluteEncoder;
 
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Subsystems.Intake.IntakeExtension.IntakeExtension;
 import frc.robot.Subsystems.Intake.Rollers.Rollers;
@@ -34,11 +36,12 @@ public class Intake extends SubsystemBase {
   @Override
   public void periodic(){
     visual.update(left.getAngle(), rollers.getPosition(),rollers.getVelocity());
+    SmartDashboard.putNumber("shooter/turret/e2", left.getAbsoluteEncoder().getPosition());
   }
 
   public Command intake(){
     return Commands.parallel(
-      rollers.intake(),
+      new WaitCommand(0.05).andThen(rollers.intake()),
       left.down(),
       right.down()
     )    

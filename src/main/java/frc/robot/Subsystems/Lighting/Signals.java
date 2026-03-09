@@ -19,7 +19,6 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 /** Add your docs here. */
 public class Signals extends SubsystemBase {
-
   double[] ownedSegments=new double[]{0,1,2,3};
   public WLED wled = new WLED(new SerialPort(115200, Port.kUSB1));
   LedSegment seg = new LedSegment(0, 0, 60, false);
@@ -28,9 +27,10 @@ public class Signals extends SubsystemBase {
 
   
   public Signals(){
-    seg.setDefaultCommand(showAllianceColorBoring(seg));
-    seg2.setDefaultCommand(showAllianceColorBoring(seg2));
+    seg.setDefaultCommand(showAllianceColorBoring(seg).ignoringDisable(true));
+    seg2.setDefaultCommand(showAllianceColorBoring(seg2).ignoringDisable(true));
   }
+  
 
   private Command showAllianceColorBoring(LedSegment segment){
     HashMap<Optional<Alliance>,Command> map = new HashMap<>();
@@ -79,6 +79,14 @@ public class Signals extends SubsystemBase {
     Commands.waitSeconds(0.5)
   );
  }
+
+ public Command showVisionOkay(){
+    return Commands.sequence(
+      seg.solidColor(CustomColor.kGreen),
+      seg2.solidColor(CustomColor.kGreen),
+      Commands.waitSeconds(0.5)
+    );
+  }
 
 }
 

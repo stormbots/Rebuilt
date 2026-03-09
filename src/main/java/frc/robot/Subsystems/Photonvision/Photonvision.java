@@ -9,6 +9,7 @@ import static edu.wpi.first.units.Units.Meters;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.function.BiConsumer;
 
 import org.photonvision.EstimatedRobotPose;
 import org.photonvision.PhotonCamera;
@@ -27,24 +28,40 @@ import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
+import frc.robot.Subsystems.Questnav.QuestNavSubsystem;
 import frc.robot.Subsystems.Swerve.Swerve;
 
 public class Photonvision extends SubsystemBase {
   private Swerve swerve;
+  private boolean leftHasTarget;
+  private boolean rightHasTarget;
+
   private AprilTagFieldLayout aprilTagFieldLayout = AprilTagFieldLayout.loadField(AprilTagFields.k2026RebuiltWelded);
-  private Optional<PhotonCamera> centerCamera = Optional.empty();
+
+  private Optional<PhotonCamera> rightCamera = Optional.empty();
+  private Optional<PhotonCamera> leftCamera = Optional.empty();
+
   private Matrix<N3, N1> currentStdDevs = VecBuilder.fill(Double.MAX_VALUE, Double.MAX_VALUE, Double.MAX_VALUE);
   private Matrix<N3, N1> singleTagStdDevs = VecBuilder.fill(4, 4, 8);
   private Matrix<N3, N1> multiTagStdDevs = VecBuilder.fill(0.5, 0.5, 1);
-  private Transform3d cameraToCenter = new Transform3d(new Translation3d(
-    Inch.of(6).in(Meters), 
-    Inch.of(6).in(Meters), 
-    Inch.of(0).in(Meters)), 
-    new Rotation3d(0.0, 0.0, 45.0)
+
+  private Transform3d rightCameraToCenter = new Transform3d(new Translation3d(
+    Inch.of(12).in(Meters), 
+    Inch.of(-9).in(Meters), 
+    Inch.of(18.65).in(Meters)), 
+    new Rotation3d(0.0, 0.0, Math.toRadians(-56.5))
+  );
+  private Transform3d leftCameraToCenter = new Transform3d(new Translation3d(
+    Inch.of(12).in(Meters), 
+    Inch.of(9).in(Meters), 
+    Inch.of(18.65).in(Meters)), 
+    new Rotation3d(0.0, 0.0, Math.toRadians(56.5))
   );
 
   private Field2d visionField2d = new Field2d();
-  private PhotonPoseEstimator centerEstimator = new PhotonPoseEstimator(aprilTagFieldLayout, cameraToCenter);
+  private PhotonPoseEstimator rightEstimator = new PhotonPoseEstimator(aprilTagFieldLayout, rightCameraToCenter);
+  private PhotonPoseEstimator leftEstimator = new PhotonPoseEstimator(aprilTagFieldLayout, leftCameraToCenter);
 
   /** Creates a new Photonvision.
    *  @param swerve 
@@ -54,17 +71,23 @@ public class Photonvision extends SubsystemBase {
     SmartDashboard.putData("visionfield", visionField2d);
 
     try{
-      centerCamera = Optional.of(new PhotonCamera("Arducam_OV9782_USB_Camera"));
+      rightCamera = Optional.of(new PhotonCamera("Right"));
+      leftCamera = Optional.of(new PhotonCamera("Left"));
     }
     catch(Error e){
       System.err.print(e);
-      centerCamera = Optional.empty();
+      rightCamera = Optional.empty();
     }
+
   }
 
   public void updateOdometry(){
-    if(centerCamera.isPresent()){
-      updateCameraSideOdometry(centerEstimator, centerCamera.get());
+    if(rightCamera.isPresent()){
+      updateCameraSideOdometry(rightEstimator, rightCamera.get());
+    }
+
+    if(leftCamera.isPresent()){
+      updateCameraSideOdometry(leftEstimator, leftCamera.get());
     }
   }
 
@@ -74,20 +97,39 @@ public class Photonvision extends SubsystemBase {
       visionEstimate = poseEstimator.estimateCoprocMultiTagPose(result);
       if (visionEstimate.isEmpty()){
         visionEstimate = poseEstimator.estimateLowestAmbiguityPose(result);
+        if(poseEstimator.equals(rightEstimator)){
+          rightHasTarget = false;
+        }
+        else if(poseEstimator.equals(leftEstimator)){
+          leftHasTarget = false;
+        };
       }
       updateEstimationStdDevs(visionEstimate, result.getTargets());
     }
 
     visionEstimate.ifPresent(
+      
       est ->{
         var estimatedStdDevs = getEstimationStdDevs();
 
         swerve.swerveDrive.addVisionMeasurement(est.estimatedPose.toPose2d(),est.timestampSeconds, estimatedStdDevs);
         visionField2d.getObject(camera.getName()).setPose(est.estimatedPose.toPose2d());
+        if(poseEstimator.equals(rightEstimator)){
+          rightHasTarget = true;
+        }
+        else if(poseEstimator.equals(leftEstimator)){
+          leftHasTarget = true;
+        };
       }
+      
       
     );
   }
+
+  public boolean hasTarget(){
+    return leftHasTarget || rightHasTarget;
+  }
+
 
   public void updateEstimationStdDevs(Optional<EstimatedRobotPose> estimatedPose, List<PhotonTrackedTarget> targets){
     if( estimatedPose.isEmpty() ){
@@ -99,7 +141,7 @@ public class Photonvision extends SubsystemBase {
       double avgDistance = 0.0;
 
       for(var tag : targets){
-        var tagPose = centerEstimator.getFieldTags().getTagPose( tag.getFiducialId() );
+        var tagPose = rightEstimator.getFieldTags().getTagPose( tag.getFiducialId() );
         if( tagPose.isEmpty() ) continue;
         numTags++;
         avgDistance += tagPose
@@ -137,5 +179,8 @@ public class Photonvision extends SubsystemBase {
     // This method will be called once per scheduler run
     visionField2d.setRobotPose(swerve.getSwervePose());
     updateOdometry();
+
+    SmartDashboard.putBoolean("vision/rightCameraPresent", rightCamera.isPresent());
+    SmartDashboard.putBoolean("vision/leftCameraPresent", leftCamera.isPresent());
   }
 }

@@ -5,6 +5,7 @@ import static edu.wpi.first.units.Units.Degrees;
 import java.lang.annotation.Target;
 import java.util.function.Supplier;
 
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -27,7 +28,7 @@ Flywheel flywheel = new Flywheel();
     TargetingSystem targeting;
 
     //TODO: Sync this method/concept with shooter code
-    public Trigger isReadyToAcceptFuel = new Trigger(()->true);
+    public Trigger isReadyToAcceptFuel = new Trigger(()->flywheel.getOnTarget() && hood.getOnTarget() && turret.getOnTarget()).debounce(0.05);
 
 
     /** Just set up the mechanism2d so we can visualize the system all at once */
@@ -58,6 +59,13 @@ Flywheel flywheel = new Flywheel();
             turret.setAngle(targets)
         );
     }
+    public Command shootNoTurret(Supplier<TargetingSystem.ShooterState> targets){
+        return Commands.parallel(
+            flywheel.setRPM(targets),
+            hood.setAngle(targets),
+            turret.setAngle(()->Degrees.of(180.0), ()->Degrees.of(5.0))
+        );
+    }
 
     public Command testSetTurretAngle(Angle angle){
         return turret.setAngle(()->angle, ()->Degrees.of(3));
@@ -71,9 +79,9 @@ Flywheel flywheel = new Flywheel();
         return flywheel.setRPM(()->rpm, ()->300);
     }
     
-    public Command testFlywheelVoltage(double volts){
-        return flywheel.setVoltageCommand(volts);
-    }
+    // public Command testFlywheelVoltage(double volts){
+    //     return flywheel.setVoltageCommand(volts);
+    // }
 
     public Command testHome(){
         return hood.homingCommand();
@@ -105,9 +113,23 @@ Flywheel flywheel = new Flywheel();
     public Command shootHub(){
         return shoot(targeting::getHub);
     }
+    public Command shootHubAuto(){
+        return shootNoTurret(targeting::getHub);
+    }
 
     public Command pass(){
         return shoot(targeting::getPass);
+    }
+
+
+    // For tuning LUTs, read 
+    public Command shootWithDashboardValues(){
+        return Commands.none();
+    // return shooter.shoot(()->new TargetingSystem.ShooterState(
+    //   Degrees.of(0), 
+    //   Degrees.of(SmartDashboard.getNumber("robotContainer/hoodAngle", hoodAngle)), 
+    //   SmartDashboard.getNumber("robotContainer/flywheelrpm", rpm)))
+    // );
     }
 
     public Command doTheObviousThingDriversWant(){

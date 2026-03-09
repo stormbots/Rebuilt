@@ -33,11 +33,11 @@ public class Turret extends SubsystemBase {
   public static final double kGear1ToothCount = 20;
   public static final double kGear2ToothCount = 21;
   
-  public static final double kGearing = (1.0 / 3.0) * (10.0 / 132.0);
+  public static final double kGearing = (1.0 / 3.0) * (10.0 / 132.0) * (177.0/198.0);
 
   //How much in ONE direction, hence max range divided by 2
-  public static final double kMinRotation = -45;
-  public static final double kMaxRotation = 45;
+  public static final double kMinRotation = 90.0;
+  public static final double kMaxRotation = 270.0;
 
   Angle targetPosition = Degrees.of(0);
   Angle tolerance = Degrees.of(3);
@@ -50,7 +50,7 @@ public class Turret extends SubsystemBase {
 
     motor.configure(getMotorConfig(), ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
 
-    CRTAbsoluteEncoder.getInstance().setParams(kTurretGearToothCount, kGear1ToothCount, kGear2ToothCount, false);
+    CRTAbsoluteEncoder.getInstance().setParams(kTurretGearToothCount, kGear1ToothCount, kGear2ToothCount, true);
     CRTAbsoluteEncoder.getInstance().setRelativeEncoder(motor.getEncoder());
     CRTAbsoluteEncoder.getInstance().setEncoder1(motor.getAbsoluteEncoder());
 
@@ -61,7 +61,7 @@ public class Turret extends SubsystemBase {
   public void periodic() {
     // This method will be called once per scheduler run
     SmartDashboard.putNumber("shooter/turret/applied", motor.getAppliedOutput());
-    SmartDashboard.putNumber("shooter/turret/outc", motor.getOutputCurrent());
+    SmartDashboard.putNumber("shooter/turret/current", motor.getOutputCurrent());
     SmartDashboard.putNumber("shooter/turret/target", targetPosition.in(Degrees));
     SmartDashboard.putNumber("shooter/turret/tolerance", tolerance.in(Degrees));
     SmartDashboard.putBoolean("shooter/turret/ontarget", getOnTarget());
@@ -79,7 +79,9 @@ public class Turret extends SubsystemBase {
 
   public Command setAngle(Supplier<Angle> position, Supplier<Angle> tolerance){
     return run(()->{
-      this.targetPosition = position.get();
+      SmartDashboard.putNumber("shooter/turret/preClampedTarget", position.get().in(Degrees));
+      double normalizedPosition = position.get().in(Degrees) < 0 ? position.get().in(Degrees) + 360.0 : position.get().in(Degrees);
+      this.targetPosition = Degrees.of(MathUtil.clamp(normalizedPosition, kMinRotation, kMaxRotation));
       this.tolerance = tolerance.get();
       motor.getClosedLoopController().setSetpoint(
         targetPosition.in(Degrees), 
@@ -125,7 +127,7 @@ public class Turret extends SubsystemBase {
 
     config.absoluteEncoder
       .positionConversionFactor(360.0)
-      .inverted(false)
+      .inverted(true)
     ;
 
     return config;
