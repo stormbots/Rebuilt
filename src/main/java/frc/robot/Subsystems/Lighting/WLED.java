@@ -26,16 +26,51 @@ public class WLED extends SubsystemBase{
   private static SerialPort serialport;
   private static ArrayList<LedSegment> segments = new ArrayList<LedSegment>();
   private static ArrayList<Boolean> updated = new ArrayList<Boolean>();
-  private static int calls;
+  public static int calls;
+  public static int defaultPattern;
+  private static int indivualRoll;
+  public static int numPatterns = 24;
+  public static int chanceIndividual = 3;
+  public static int backupPattern;
   public WLED(SerialPort serialPort) {
+    if (chanceIndividual==0){
+      chanceIndividual = 2;
+    }
     try{
       serialport.toString();
     }
     catch (NullPointerException n){
       this.serialport = serialPort;
     }
-    calls = 0; 
+
+    try{
+      defaultPattern *= 1;
+    }
+    catch (NullPointerException n){
+      defaultPattern = ((int)Math.random()*(numPatterns));
+    }
+
+    try{
+      indivualRoll *= 1;
+    }
+    catch (NullPointerException n){
+      indivualRoll = ((int)Math.random()*(chanceIndividual*2)+1);
+    }
+
+    try{
+      backupPattern *= 1;
+    }
+    catch (NullPointerException n){
+      backupPattern = ((int)Math.random()*(numPatterns));
+    }
+  if (indivualRoll == (chanceIndividual*2)-1){
+    defaultPattern = numPatterns;
   }
+  else if (indivualRoll == chanceIndividual*2){
+    defaultPattern = numPatterns+1;
+  }
+  calls = 0; 
+}
 
   public LedSegment getLedSegment(int id, int start, int stop, boolean reverse){
     return new LedSegment(id, start, stop, reverse);

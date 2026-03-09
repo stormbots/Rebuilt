@@ -5,10 +5,17 @@
 package frc.robot.Subsystems.Lighting;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Optional;
+import java.util.function.Supplier;
 
+import com.ctre.phoenix6.controls.SolidColor;
+
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
@@ -40,9 +47,31 @@ public class LedSegment extends LedBase {
 
     public void setColor(CustomColor... color){
       if(this.col == null || !compareColors(col, color)){
-        this.col = color;
+        if (color.length<col.length){
+          boolean colorReset =false;
+          for (int i = 0; i < col.length;i++){
+            if (i<color.length){
+              col[i] = color[i];
+            }
+            else if (!col[i].equals(CustomColor.kBlack)){ 
+              col[i] = CustomColor.kBlack;
+              colorReset = true;
+            }
+          }
+          if (colorReset){
+            color = this.col;
+          }
+          else{
+            this.col = color;
+          }   
+        }
+        else{
+          this.col = color;
+        }
+       
         data.setColor(color);
         setFreeze(false); //if individual control is set, it freezez the segment, this is called to authomattically acount for that
+        setPalette(0);
       }
     }
 
@@ -308,7 +337,201 @@ public class LedSegment extends LedBase {
       return new InstantCommand(()->{
         setEffect(110);
         setIntensity(1);
-      }, this);      
+      }, this);
+    }
+
+    public Command showAllianceColorInteresting(){
+
+      HashMap<Optional<Alliance>,CustomColor> colorMap = new HashMap<>();
+      colorMap.put(Optional.of(Alliance.Red), CustomColor.kRed);
+      colorMap.put(Optional.of(Alliance.Blue), CustomColor.kBlue);
+      Supplier<CustomColor> colorSupplier = ()-> colorMap.get(DriverStation.getAlliance());
+
+      HashMap<Optional<Alliance>,Integer> palatteMap = new HashMap<>();
+      palatteMap.put(Optional.of(Alliance.Red), 35);
+      palatteMap.put(Optional.of(Alliance.Blue), 36);
+      Supplier<Integer> palatteSupplier = ()-> palatteMap.get(DriverStation.getAlliance());
+
+      HashMap<Integer,Command> patternMap = new HashMap<>();
+      patternMap.put(0, Commands.runOnce(()->{
+        setEffect(27);
+        setColor(colorSupplier.get());
+        setSpeed(128);
+        setIntensity(128);
+      }, this));
+
+      patternMap.put(1, Commands.runOnce(()->{
+        setEffect(68);
+        setColor(colorSupplier.get());
+        setSpeed(64);
+      }, this));
+
+      patternMap.put(2, Commands.runOnce(()->{
+        setEffect(2);
+        setColor(colorSupplier.get());
+        setSpeed(128);
+      }, this));
+
+      patternMap.put(3, Commands.runOnce(()->{
+        setEffect(102);
+        setColor(colorSupplier.get());
+        setSpeed(200);
+        setIntensity(255);
+      }, this));
+
+      patternMap.put(4, Commands.runOnce(()->{
+        setEffect(28);
+        setColor(colorSupplier.get());
+        setSpeed(128);
+        setIntensity(128);
+      }, this));
+
+      patternMap.put(5, Commands.runOnce(()->{
+        setEffect(111);
+        setColor(colorSupplier.get());
+        setSpeed(25);
+        setIntensity(128);
+      }, this));
+
+      patternMap.put(6, Commands.runOnce(()->{
+        setEffect(67);
+        setColor(colorSupplier.get());
+        setSpeed(64);
+        setIntensity(128);
+      }, this));
+
+      patternMap.put(7, Commands.runOnce(()->{
+        setEffect(12);
+        setColor(colorSupplier.get());
+        setSpeed(25);
+      }, this));
+
+      patternMap.put(8, Commands.runOnce(()->{
+        setEffect(66);
+        setPalette(palatteSupplier.get());
+        setSpeed(64);
+        setIntensity(160);
+        setCustomSlider1(16);
+      }, this));
+
+      patternMap.put(9, Commands.runOnce(()->{
+        setEffect(46);
+        setColor(colorSupplier.get());
+        setSpeed(128);
+        setIntensity(62);
+      }, this));
+
+      patternMap.put(10, Commands.runOnce(()->{
+        setEffect(132);
+        setColor(colorSupplier.get());
+        setSpeed(128);
+        setIntensity(128);
+      }, this));
+
+      patternMap.put(11, Commands.runOnce(()->{
+        setEffect(156);
+        setColor(colorSupplier.get());
+        setSpeed(128);
+        setIntensity(128);
+      }, this));
+
+      patternMap.put(12, Commands.runOnce(()->{
+        setEffect(41);
+        setColor(colorSupplier.get());
+        setSpeed(128);
+        setIntensity(128);
+      }, this));
+
+      patternMap.put(13, Commands.runOnce(()->{
+        setEffect(47);
+        setColor(colorSupplier.get());
+        setSpeed(128);
+        setIntensity(16);
+      }, this));
+
+      patternMap.put(14, Commands.runOnce(()->{
+        setEffect(131);
+        setColor(colorSupplier.get());
+        setSpeed(128);
+        setIntensity(64);
+      }, this));
+
+      patternMap.put(15, Commands.runOnce(()->{
+        setEffect(76);
+        setPalette(palatteSupplier.get());
+        setSpeed(128);
+        setIntensity(128);
+      }, this));
+
+      patternMap.put(16, Commands.runOnce(()->{
+        setEffect(135);
+        setColor(colorSupplier.get());
+        setSpeed(128);
+        setIntensity(128);
+      }, this));
+
+      patternMap.put(17, Commands.runOnce(()->{
+        setEffect(133);
+        setColor(colorSupplier.get());
+        setSpeed(128);
+        setIntensity(128);
+      }, this));
+
+      patternMap.put(18, Commands.runOnce(()->{
+        setEffect(15);
+        setColor(colorSupplier.get());
+        setSpeed(128);
+        setIntensity(128);
+      }, this));
+
+      patternMap.put(19, Commands.runOnce(()->{
+        setEffect(16);
+        setColor(colorSupplier.get());
+        setSpeed(128);
+      }, this));
+
+      patternMap.put(20, Commands.runOnce(()->{
+        setEffect(108);
+        setColor(colorSupplier.get());
+        setSpeed(64);
+        setIntensity(32);
+      }, this));
+
+      patternMap.put(21, Commands.runOnce(()->{
+        setEffect(113);
+        setColor(colorSupplier.get());
+        setPalette(4);
+        setSpeed(128);
+        setSpeed(128);
+      }, this));
+
+      patternMap.put(22, solidColor(colorSupplier.get()));
+
+      patternMap.put(23, Commands.runOnce(()->{
+        setEffect(108);
+        setColor(colorSupplier.get());
+        setSpeed(32);
+        setIntensity(0);
+      }, this));
+
+      patternMap.put(WLED.numPatterns, pride());
+
+      patternMap.put(WLED.numPatterns+1, seguimosAqui());
+
+      HashMap<Boolean,Command> disableMap = new HashMap<>();
+      disableMap.put(true, solidColor(CustomColor.kPurple));
+      disableMap.put(false, Commands.select(patternMap, ()->WLED.defaultPattern));
+
+      HashMap<Boolean,Command> enableMap = new HashMap<>();
+      enableMap.put(true, Commands.select(patternMap, ()->WLED.backupPattern));
+      enableMap.put(false, Commands.select(patternMap, ()->WLED.defaultPattern));
+
+      HashMap<Boolean,Command> allianceMap = new HashMap<>();
+      allianceMap.put(true, Commands.select(disableMap, ()->DriverStation.getAlliance().isEmpty()));
+      allianceMap.put(false, Commands.select(enableMap, ()->WLED.defaultPattern>=WLED.numPatterns));
+
+      return Commands.select(allianceMap, ()->DriverStation.isDisabled());
+      
     }
 
     public Command pride(){
@@ -341,7 +564,7 @@ public class LedSegment extends LedBase {
      * <p>
      * - Benito Antonio Martínez Ocasio, 2026
     */
-    public Command seguimosAquí(){
+    public Command seguimosAqui(){
       double duration = 2.5;
       LedMultiRange chile = new LedMultiRange(new LedRange(CustomColor.kChileBlue),new LedRange(CustomColor.kWhite,15,3), new LedRange(CustomColor.kChileBlue),new LedRange(CustomColor.kWhite,3,2),new LedRange(CustomColor.kRed));
       LedMultiRange argentina = new LedMultiRange(new LedRange(CustomColor.kArgentinaBlue),new LedRange(CustomColor.kWhite,12,5), new LedRange(CustomColor.kArgentinaYellow),new LedRange(CustomColor.kWhite,12,8),new LedRange(CustomColor.kArgentinaBlue));
