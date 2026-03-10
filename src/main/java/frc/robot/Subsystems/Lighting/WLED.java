@@ -17,7 +17,6 @@ import com.google.gson.JsonSerializationContext;
 import com.google.gson.JsonSerializer;
 
 import edu.wpi.first.wpilibj.SerialPort;
-import edu.wpi.first.wpilibj.SerialPort.Port;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Subsystems.Lighting.LedSegment.LedMultiRange;
@@ -40,7 +39,7 @@ public class WLED extends SubsystemBase{
       serialport.toString();
     }
     catch (NullPointerException n){
-      this.serialport = serialPort;
+      WLED.serialport = serialPort;
     }
 
     try{

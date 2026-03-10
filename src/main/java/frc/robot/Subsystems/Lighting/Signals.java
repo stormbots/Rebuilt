@@ -9,14 +9,12 @@ import java.util.List;
 import java.util.Optional;
 
 import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.SerialPort;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
+import edu.wpi.first.wpilibj.SerialPort;
 import edu.wpi.first.wpilibj.SerialPort.Port;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
-import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import edu.wpi.first.wpilibj2.command.WaitCommand;
 /** Add your docs here. */
 public class Signals extends SubsystemBase {
   double[] ownedSegments=new double[]{0,1,2,3};
@@ -50,8 +48,8 @@ public class Signals extends SubsystemBase {
 
  public Command hopperLow(){
   return Commands.sequence(
-    seg.blink(CustomColor.kYellow,230),
-    seg2.blink(CustomColor.kYellow,230),
+    seg.blinkSmooth(128,CustomColor.kYellow),
+    seg2.blinkSmooth(128,CustomColor.kYellow),
     Commands.waitSeconds(1)
   );
  }
@@ -64,13 +62,22 @@ public class Signals extends SubsystemBase {
   );
  }
 
- public Command shiftChange(){
+ public Command shiftStart(){
   return Commands.sequence(
     seg.solidColor(CustomColor.kWhite),
     seg2.solidColor(CustomColor.kWhite),
     Commands.waitSeconds(0.5)
   );
  }
+
+ public Command shiftEnd(){
+  return Commands.sequence(
+    seg.blinkSmooth(128,CustomColor.kWhite),
+    seg2.blinkSmooth(128,CustomColor.kWhite),
+    Commands.waitSeconds(1)
+  );
+ }
+
 
  public Command climbOkay(){
   return Commands.sequence(
@@ -85,6 +92,13 @@ public class Signals extends SubsystemBase {
       seg.solidColor(CustomColor.kGreen),
       seg2.solidColor(CustomColor.kGreen),
       Commands.waitSeconds(0.5)
+    );
+  }
+
+  public Command showVisionNotOkay(){
+    return Commands.sequence(
+      seg.solidColor(CustomColor.kBlack),
+      seg2.solidColor(CustomColor.kBlack)
     );
   }
 

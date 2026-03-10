@@ -9,8 +9,6 @@ import java.util.HashMap;
 import java.util.Optional;
 import java.util.function.Supplier;
 
-import com.ctre.phoenix6.controls.SolidColor;
-
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -46,9 +44,10 @@ public class LedSegment extends LedBase {
     }
 
     public void setColor(CustomColor... color){
+      boolean colorReset =false;
       if(this.col == null || !compareColors(col, color)){
+        if(this.col != null){
         if (color.length<col.length){
-          boolean colorReset =false;
           for (int i = 0; i < col.length;i++){
             if (i<color.length){
               col[i] = color[i];
@@ -60,6 +59,10 @@ public class LedSegment extends LedBase {
           }
           if (colorReset){
             color = this.col;
+            }
+            else{
+              this.col = color;
+            }   
           }
           else{
             this.col = color;
@@ -70,7 +73,7 @@ public class LedSegment extends LedBase {
         }
        
         data.setColor(color);
-        setFreeze(false); //if individual control is set, it freezez the segment, this is called to authomattically acount for that
+        setFreeze(false); //if individual control is set, it freezes the segment, this is called to automatically acount for that
         setPalette(0);
       }
     }
@@ -148,7 +151,7 @@ public class LedSegment extends LedBase {
     }
 
     public void setPalette(int palette){
-      if(this.pal.isEmpty() || !this.bri.get().equals(palette)){
+      if(this.pal.isEmpty() || !this.pal.get().equals(palette)){
         this.pal = Optional.of(palette);
         data.setPalette(palette);
         setFreeze(false);
@@ -188,8 +191,17 @@ public class LedSegment extends LedBase {
     public Command blink(CustomColor color, int speed){
       return new InstantCommand(()->{
         setEffect(1);
-        setColor(color,CustomColor.kBlack);
+        setColor(color);
         setSpeed(speed);
+      }, this);
+    }
+
+    public Command blinkSmooth(int speed, CustomColor...color){
+      return new InstantCommand(()->{
+        setEffect(108);
+        setColor(color);
+        setSpeed(speed);
+        setIntensity(0);
       }, this);
     }
 

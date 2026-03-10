@@ -9,7 +9,6 @@ import static edu.wpi.first.units.Units.Meters;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.function.BiConsumer;
 
 import org.photonvision.EstimatedRobotPose;
 import org.photonvision.PhotonCamera;
@@ -28,8 +27,6 @@ import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import edu.wpi.first.wpilibj2.command.button.Trigger;
-import frc.robot.Subsystems.Questnav.QuestNavSubsystem;
 import frc.robot.Subsystems.Swerve.Swerve;
 
 public class Photonvision extends SubsystemBase {
@@ -128,6 +125,10 @@ public class Photonvision extends SubsystemBase {
 
   public boolean hasTarget(){
     return leftHasTarget || rightHasTarget;
+  }
+
+  public boolean doesNotHaveTarget(){
+    return !hasTarget();
   }
 
 
