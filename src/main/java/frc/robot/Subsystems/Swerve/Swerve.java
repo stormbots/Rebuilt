@@ -262,6 +262,10 @@ public class Swerve extends SubsystemBase {
     return swerveDrive.getRobotVelocity();
   }
 
+  public ChassisSpeeds getFieldRelativeChassisSpeeds(){
+    return swerveDrive.getRobotVelocity();
+  }
+
 
   public boolean isOnTargetAngle(){
     return isOnTargetAngle;

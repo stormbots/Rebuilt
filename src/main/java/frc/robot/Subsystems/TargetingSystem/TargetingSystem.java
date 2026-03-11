@@ -28,6 +28,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Translation3d;
+import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -186,6 +187,48 @@ public class TargetingSystem extends SubsystemBase {
     // return new ShooterState(Degrees.of(0), Degrees.of(angle), rpm);
   }
 
+  public Translation2d getBotVelCompensatedTarget(Supplier<Pose2d> botPose, Supplier<Translation2d> target, LUT lut, Supplier<ChassisSpeeds> botVelocity){
+    Distance magnitude = getDistanceToTarget(botPose.get().getTranslation(), target.get());
+    
+    var entry = lut.get(magnitude.in(Inches));   
+    var tof = entry[3];
+
+    Translation2d botVelocityTranslation = new Translation2d(botVelocity.get().vxMetersPerSecond, botVelocity.get().vyMetersPerSecond);
+
+    //Bot velocity * Time of Flight = how much impact in the unit of distance the bots velocity will have on the shot
+    //Since we want to compensate for this, find the inverse of this vector and apply to our target
+    Translation2d distanceCompensation = botVelocityTranslation.times(tof).unaryMinus(); 
+
+    //This is where we would have to aim, assuming we are static, to compensate
+    //Hence, call it virtual target, as it is not our "true" target, but is effectively what is known to the shooter
+    Translation2d virtualTarget = target.get().plus(distanceCompensation);
+
+    //However, with a changed target, our shot trajectory changes
+    //Hence, we will have a changed time of flight
+    //Repeat the above process until the change between each iteration is negligible
+    //Essentially, the virtual target stabilizes
+    //TODO: change from a static amount of 3 iterations to dynamically ensuring percent change is negligible (eg. 2% or less)
+    for(int i=0; i<3; i++){
+      magnitude = getDistanceToTarget(botPose.get().getTranslation(), virtualTarget);
+
+      entry = lut.get(magnitude.in(Inches));
+      tof = entry[3]; 
+
+      distanceCompensation = botVelocityTranslation.times(tof).unaryMinus(); 
+      //new distance compensation is always applied to TARGET not VIRTUALTARGET
+      //This is since the goal of each iteration is to get a tof that approaches the tof of ideal shot
+      virtualTarget = target.get().plus(distanceCompensation);
+    }
+
+    return virtualTarget;
+  }
+
+  //Compensates for drivetrain velocity
+  public ShooterState getLUTShooterStateBotVelCompensated(Supplier<Pose2d> botPose, Supplier<Translation2d> target, LUT lut, Supplier<ChassisSpeeds> botVelocity){
+    Supplier<Translation2d> virtualTarget = ()->getBotVelCompensatedTarget(botPose, target, lut, botVelocity);
+
+    return getLUTShooterState(botPose, virtualTarget, lut);
+  }
 
   @Override
   public void periodic() {
@@ -241,6 +284,10 @@ public class TargetingSystem extends SubsystemBase {
     return getLUTShooterState(swerve::getSwervePose, this::getHubTarget, hubLUT);
   }
 
+  public ShooterState getHubBotVelCompensated(){
+    return getLUTShooterStateBotVelCompensated(swerve::getSwervePose, this::getHubTarget, hubLUT, swerve::getFieldRelativeChassisSpeeds);
+  }
+
   //IDT this is needed for now. We'll see. if it is, i'd like getPass() to use this method
   // public ShooterState getGroundShot(Pose2d target){
   //   return getGroundShooterState(swerve.getSwervePose(),target.getTranslation(), passLUT);
@@ -278,6 +325,10 @@ public class TargetingSystem extends SubsystemBase {
     // Rotation2d heading = getHeadingToTarget(turretTranslation, getPassTarget());
 
     // return new ShooterState(heading.minus(swerve.getSwervePose().getRotation()).getMeasure(), Degrees.of(30), 2760);
+  }
+
+  public ShooterState getPassBotVelCompensated(){
+    return getLUTShooterStateBotVelCompensated(swerve::getSwervePose, this::getPassTarget, passLUT, swerve::getFieldRelativeChassisSpeeds);
   }
 
   public ShooterState fixedShot(){
