@@ -77,7 +77,7 @@ public class Climber extends SubsystemBase {
     public Command climbL1(){
         return Commands.sequence(
             grabber.grab().until(grabber.isPossiblyConnected).withTimeout(0.5),
-            stage1.setHeight(Inches.of(3))
+            stage1.setHeight(Inches.of(0))
         )
         .finallyDo(stage1::stopMotor)
         .withName("Climb");
