@@ -22,6 +22,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
@@ -90,37 +91,17 @@ public class RobotContainer {
    
     CRTAbsoluteEncoder.getInstance().sync();
 
-
-    //QuestNav initialization?
-    //THIS IS VERY JANK, FIX LATER, should be part of the auto starting sequence, should setQuestPose THEN wantToTrack, this was dumb
-    // driver.povDown().onTrue(new InstantCommand(()->questna v.setQuestPose(new Pose3d(0.0, 7.5, 0.0, new Rotation3d(0.0, 0.0, 0.0)))));
-    // driver.povUp().onTrue(new InstantCommand(()->questnav.wantToTrack(true)));
-
-
+    //I DONT WANT TO GET RID OF THIS STUFF YET IDK WHATS GOING ON HERE
     // new Trigger(DriverStation::isEnabled)
     // .whileTrue(
     //   swerve.addFieldInput( ()->fieldBehaviour.getSwerveInputs(swerve.getSwervePose()) )
     // );
 
 
-    // syncQuestPose.runsWhenDisabled();
-
-
-    // new Trigger(()->Timer.getFPGATimestamp() > 1)
-    // .and(DriverStation::isDisabled)
-    // .whileTrue(syncQuestPose);
-
-
 
 
     new Trigger(photonvision::hasTarget).and(DriverStation::isDisabled)
     .whileTrue(signals.showVisionOkay());
-
-
-    //while disabled
-    //and see target
-    //update quest pose
-    //onEnable
 
 
   }
@@ -153,6 +134,7 @@ public class RobotContainer {
       Commands.sequence(
         new InstantCommand(()->questnav.wantToTrack(false)),
         swerve.zeroGyro(),
+        //    IFFFF QUEST IS GOOD BUT CAMS AREN'T, UNCOMMENT THIS AND HAVE JACOB GO TO CORNER FOR ZERO
         // new InstantCommand(()->questnav.setQuestPose(new Pose3d(swerve.getSwervePose().getX(), swerve.getSwervePose().getY(), 0.0, new Rotation3d(0.0, 0.0, 0.0))))
         Commands.none()
       ).withTimeout(0.1)
@@ -167,24 +149,7 @@ public class RobotContainer {
       .whileTrue(swerve.turnToHeading(()->new Rotation2d(Degrees.of(90)))
     );
    
-
-
-    // driver.povLeft().whileTrue(shooter.testHome());
-    // driver.a().whileTrue(swerve.turnToHeading(()->{
-    //   return targeting.getHeadingToTarget(swerve.getSwervePose().getTranslation(), targeting.getTarLockTemp().getTranslation()).plus(Rotation2d.k180deg);
-    // }));
-
-
-
-
-    // driver.povDown().whileTrue(shooter.testHome());
-    // driver.a().whileTrue(swerve.turnToHeading(()->{
-    //   return targeting.getHeadingToTarget(swerve.getSwervePose().getTranslation(), targeting.getTarLockTemp().getTranslation()).plus(Rotation2d.k180deg);
-    // }));
     // END PROGRAMMING DEBUG BUTTONS
-
-
-
 
     driver.leftBumper().whileTrue(
       swerve.setPrimaryInputs(
@@ -194,48 +159,24 @@ public class RobotContainer {
       )
     );
 
-
-    // driver.start().onTrue(swerve.zeroGyro()); //zero heading, occulus implementation added later
-
-
     driver.a().whileTrue(swerve.turnToHeading(()->new Rotation2d())); // face swerve away from driver
     // driver.b() //TODO: face any 45 to prepare for bump crossing
 
-
     driver.x() // extend intake // This button is useless and will never be used
     .whileTrue(intake.intake())
-    // .whileTrue(spindexer.spinDyeRotor())
+    .whileTrue(spindexer.unclog())
     .whileFalse(intake.stop());
-
 
     driver.y().whileTrue(intake.eject()); //intake eject //also will never be used
 
-
     // driver.(back left paddle) //global stow/defense mode
 
-
     driver.povUp().whileTrue(shooter.testHome());
-    //  driver.y().whileTrue(shooter.testSetHoodAngle(Degrees.of(30)));
-
-    
-
-
-
-
-
 
   }
 
 
   private void configureOperatorBindings() {
-
-
-
-
-    // operator.leftTrigger() // Stage2 hook down, lock out if not end of match
-    // operator.leftBumper().whileTrue(climber.setStage1Voltage(12));
-    // operator.leftTrigger().whileTrue(climber.setStage1Voltage(-12));
-
 
     operator.leftBumper()
       .whileTrue(climber.prepareForClimbL1())
@@ -243,80 +184,77 @@ public class RobotContainer {
     ;
 
     operator.rightBumper()
-    .whileTrue(shooter.shoot(()->targeting.fixedPassOppAlliance()));
+    .whileTrue(fixedPassOpp());
     operator.y()
-    .whileTrue(shooter.shoot(()->targeting.fixedPassNeutral()))
-    .whileTrue(new WaitCommand(.25).andThen(spindexer.feedToShooter()))
-;
+    .whileTrue(fixedPass())
+    ;
 
-
+    //  CLIMBER STUFFS, OBVIOUSLY MASSIVE COMMENTED CODE IS CHOPPED BUT NEEDS TO STAY FOR NOW
     // operator.rightBumper() stage2 hook up, lock out if not end of match  
     // operator.rightBumper().whileTrue(climber.setStage2Voltage(12));
     // // operator.rightTrigger() stage2 hook down, lock out if not end of match
     // operator.rightTrigger().whileTrue(climber.setStage2Voltage(-12));
     operator.povUp().whileTrue(spindexer.unclog()); // shake dye rotor / unclog
 
-
-    
-
-
-    // operator.povRight()
-    // .whileTrue(intake.intake())
-    // .whileTrue(spindexer.spinDyeRotor())
-    // .whileFalse(intake.stop());
-
-
     operator.povDown().whileTrue(intake.eject()); // intake.eject()
 
-
     operator.x() // shoot + hopper feed
-    .whileTrue(shooter.shootHub())
-    .whileTrue(new WaitCommand(.25).andThen(spindexer.feedToShooter()))
-    .whileTrue(swerve.turnToHeadingNiche(()->{
-      return targeting.getHeadingToTarget(swerve.getSwervePose().getTranslation(), targeting.getHubTarget()).plus(Rotation2d.k180deg);
-    }))
+    .whileTrue(shootHub())
     ;
 
-
+    //TALK TO ABBY MAKE THIS A DIFFERENT BUTTON
     operator.povRight()
-    .whileTrue(shooter.shoot(()->targeting.fixedShot()))
-    .whileTrue(spindexer.feedToShooter());
-
-
-
-
-    double bool =  swerve.getSwervePose().getRotation().getMeasure()
-      .isNear(Degrees.of(90), Degrees.of(90)) ? 90 : -90;
-
+    .whileTrue(fixedShot());
 
     operator.a().whileTrue(climber.stow()); // global stow (unnecessary, this is default)
     operator.povLeft().whileTrue(climber.goHome());
 
 
     operator.b()// passing: Face driver station wall and launch at fixed rpm/angle/distance
-    .whileTrue(shooter.pass())
-    .whileTrue(spindexer.feedToShooter())
-    .whileTrue(swerve.verifyAngleTargetPass(()->{
-      return targeting.getHeadingToTarget(swerve.getSwervePose().getTranslation(), targeting.getPassTarget()).plus(Rotation2d.k180deg);
-    }))
+    .whileTrue(pass())
     ;
-
-
-   
-    // Commands.either(/*-90 */, /* 90 */, /*whichever is closer */)
-    // Commands.either(
-    //   swerve.turnToHeading(()->new Rotation2d()),
-    //   swerve.turnToHeading(()->new Rotation2d()),
-    //   swerve.getSwervePose().getRotation())
-
 
     // operator.back() // re-home intake, hood, turret? hood? not doing this rn
 
-
   }
 
-
-
+  //BUTTON FUNCTIONS/STATES
+  public Command pass(){
+    return new ParallelCommandGroup(
+      swerve.verifyAngleTargetPass(()->{
+        return targeting.getHeadingToTarget(swerve.getSwervePose().getTranslation(), targeting.getPassTarget()).plus(Rotation2d.k180deg);
+      }),
+      shooter.pass(),
+      spindexer.feedToShooter()
+    );
+    }
+    public Command shootHub(){
+      return new ParallelCommandGroup(
+        swerve.turnToHeadingNiche(()->{
+          return targeting.getHeadingToTarget(swerve.getSwervePose().getTranslation(), targeting.getHubTarget()).plus(Rotation2d.k180deg);
+        }),
+        shooter.shootHub(),
+        spindexer.feedToShooter()
+        );
+    }
+    public Command fixedShot(){
+      return new ParallelCommandGroup(
+        shooter.shoot(()->targeting.fixedShot()),
+        spindexer.feedToShooter()
+      );
+    }
+    public Command fixedPass(){
+      return new ParallelCommandGroup(
+        shooter.shoot(()->targeting.fixedPassNeutral()),
+        spindexer.feedToShooter()
+      );
+    }
+    public Command fixedPassOpp(){
+      return new ParallelCommandGroup(
+        shooter.shoot(()->targeting.fixedPassOppAlliance()),
+        spindexer.feedToShooter()
+      );
+    }
 
   public Command getAutonomousCommand() {
     //TODO: Get this from Autos.java instead

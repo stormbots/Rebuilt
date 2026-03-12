@@ -241,17 +241,6 @@ public class TargetingSystem extends SubsystemBase {
     return getLUTShooterState(swerve::getSwervePose, this::getHubTarget, hubLUT);
   }
 
-  //IDT this is needed for now. We'll see. if it is, i'd like getPass() to use this method
-  // public ShooterState getGroundShot(Pose2d target){
-  //   return getGroundShooterState(swerve.getSwervePose(),target.getTranslation(), passLUT);
-  // }
-
-
-  // private Translation2d getClosest(Translation2d bot, Collection<Translation2d> targets){
-  //   // ArrayList<Translation2d>.of(new Translation2d(),new Translation2d());
-  //   new Arraylist {new Translation2d(),new Translation2d()};
-  //   return bot.nearest(aaaaa);
-  // }
 
   public Angle getNearestAllianceWallAngle(Pose2d botPose){
     if( swerve.getSwervePose().getRotation().getMeasure().isNear(Degrees.of(90), Degrees.of(90)) ) return Degree.of(90);
@@ -266,18 +255,8 @@ public class TargetingSystem extends SubsystemBase {
     return swerve.getSwervePose().getY() > 4.2 ? redHigh : redLow;
   }
 
-
-
   public ShooterState getPass(){
     return getLUTShooterState(swerve::getSwervePose, this::getPassTarget, passLUT);
-
-    // Translation2d target = new Translation2d(2, 2); //get best target
-    // return getLUTShooterState(swerve::getSwervePose,()->target, passLUT);
-
-    // Translation2d turretTranslation = getTurretCenterpoint().toTranslation2d();
-    // Rotation2d heading = getHeadingToTarget(turretTranslation, getPassTarget());
-
-    // return new ShooterState(heading.minus(swerve.getSwervePose().getRotation()).getMeasure(), Degrees.of(30), 2760);
   }
 
   public ShooterState fixedShot(){

@@ -112,10 +112,6 @@ public class Autos {
 
         //ACTUAL OPTIONS BELOW HERE
         autoChooser.addOption("Basic Shoot 8 anywhere", this::basicShootInitial8);
-        autoChooser.addOption("Right Blue go center", this::centerShootRightBlue);
-        autoChooser.addOption("Right Red go center", this::centerShootRightBlue);
-        autoChooser.addOption("Left Blue go center", this::centerShootLeftBlue);
-        autoChooser.addOption("Left Red go center", this::centerShootLeftRed);
         autoChooser.addOption("Left Blue go center not BLINE", this::notBlineCenterBlueLeftShoot);
         autoChooser.addOption("Right Blue go center not BLINE", this::notBlineCenterBlueRightShoot);
         autoChooser.addOption("Left Red go center not BLINE", this::notBlineCenterRedLeftShoot);
@@ -126,13 +122,6 @@ public class Autos {
 
     //Get Auto Command
     public Command getAutonomousCommand(){
-        // try{
-        //      return selectedAutoFuture.get();
-        // }
-        // catch(Exception e){
-        //     System.err.println("Failed to build auto command ");
-        //     System.err.println(e);
-        // }
         return autoChooser.getSelected().get();
     }
 
@@ -163,183 +152,6 @@ public class Autos {
             ).withTimeout(3)
         );
     }
-    public Command centerShootRightBlue(){
-        Path.PathConstraints constraints = new Path.PathConstraints()
-            .setMaxVelocityMetersPerSec(4.0)
-            .setMaxAccelerationMetersPerSec2(4.0)
-            .setMaxVelocityDegPerSec(360.0)
-            .setMaxAccelerationDegPerSec2(580.0)
-            .setEndTranslationToleranceMeters(0.4)
-            .setEndRotationToleranceDeg(5.0);
-          Path pointStart = new Path(
-            constraints,
-            new Path.Waypoint(new Translation2d(4.0, 0.8), new Rotation2d(1.5707963267948966))
-        );
-        Path.PathConstraints constraints2 = new Path.PathConstraints()
-            .setMaxVelocityMetersPerSec(4.0)
-            .setMaxAccelerationMetersPerSec2(4.0)
-            .setMaxVelocityDegPerSec(360.0)
-            .setMaxAccelerationDegPerSec2(580.0)
-            .setEndTranslationToleranceMeters(0.4)
-            .setEndRotationToleranceDeg(5.0);
-        Path pathInt = new Path(
-            constraints,
-            new Path.Waypoint(new Translation2d(7.7, 0.8), new Rotation2d(1.5707963267948966)),
-            new Path.Waypoint(new Translation2d(7.7, 2.5), new Rotation2d(1.5707963267948966)),
-            new Path.Waypoint(new Translation2d(7.7, 0.8), new Rotation2d(1.5707963267948966))
-        );
-        Path pointPostInt = new Path(
-            constraints,
-            new Path.Waypoint(new Translation2d(7.7, 0.8), new Rotation2d(1.5707963267948966)),
-            new Path.Waypoint(new Translation2d(4.0, 0.8), new Rotation2d(1.5707963267948966))
-        );
-        return Commands.sequence(
-            Commands.print("1"),
-            basicShootInitial8(),
-            Commands.print("3"),
-            shooter.testSetHoodAngle(Degrees.of(0)).withTimeout(0.5),
-            Commands.print("4"),
-            new ParallelCommandGroup(
-                pathing.followPath(pathInt).withTimeout(15.0),
-                Commands.sequence(
-                    new WaitCommand(2.0),
-                    intake.intake())),
-            Commands.print("8"),
-            intake.stop().withTimeout(0.2),
-            Commands.print("9"),
-            pathing.followPath(pointPostInt).withTimeout(7.5),
-            Commands.print("10"),
-            basicShootInitial8()
-        );
-    }
-    public Command centerShootLeftBlue(){
-        Path.PathConstraints constraints = new Path.PathConstraints()
-            .setMaxVelocityMetersPerSec(4.0)
-            .setMaxAccelerationMetersPerSec2(4.0)
-            .setMaxVelocityDegPerSec(360.0)
-            .setMaxAccelerationDegPerSec2(580.0)
-            .setEndTranslationToleranceMeters(0.4)
-            .setEndRotationToleranceDeg(5.0);
-          Path pointStart = new Path(
-            constraints,
-            new Path.Waypoint(new Translation2d(4.0, 7.4), new Rotation2d(-1.5707963267948966))
-        );
-        Path pathInt = new Path(
-            constraints,
-            new Path.Waypoint(new Translation2d(7.7, 7.4), new Rotation2d(-1.5707963267948966)),
-            new Path.Waypoint(new Translation2d(7.7, 5.0), new Rotation2d(-1.5707963267948966)),
-            new Path.Waypoint(new Translation2d(7.7, 7.4), new Rotation2d(-1.5707963267948966))
-        );
-        Path pointPostInt = new Path(
-            constraints,
-            new Path.Waypoint(new Translation2d(7.7, 7.4), new Rotation2d(-1.5707963267948966)),
-            new Path.Waypoint(new Translation2d(4.0, 7.4), new Rotation2d(-1.5707963267948966))
-        );
-        return Commands.sequence(
-            Commands.print("1"),
-            basicShootInitial8(),
-            Commands.print("3"),
-            shooter.testSetHoodAngle(Degrees.of(0)).withTimeout(0.5),
-            Commands.print("4"),
-            new ParallelCommandGroup(
-                pathing.followPath(pathInt).withTimeout(15.0),
-                Commands.sequence(
-                    new WaitCommand(2.0),
-                    intake.intake())),
-            Commands.print("8"),
-            intake.stop().withTimeout(0.2),
-            Commands.print("9"),
-            pathing.followPath(pointPostInt).withTimeout(7.5),
-            Commands.print("10"),
-            basicShootInitial8()
-        );
-    }
-    public Command centerShootRightRed(){
-         Path.PathConstraints constraints = new Path.PathConstraints()
-            .setMaxVelocityMetersPerSec(4.0)
-            .setMaxAccelerationMetersPerSec2(4.0)
-            .setMaxVelocityDegPerSec(360.0)
-            .setMaxAccelerationDegPerSec2(580.0)
-            .setEndTranslationToleranceMeters(0.4)
-            .setEndRotationToleranceDeg(5.0);
-          Path pointStart = new Path(
-            constraints,
-            new Path.Waypoint(new Translation2d(4.0, 0.6), new Rotation2d(-1.5707963267948966))
-        );
-        Path pathInt = new Path(
-            constraints,
-            new Path.Waypoint(new Translation2d(7.7, 0.6), new Rotation2d(-1.5707963267948966)),
-            new Path.Waypoint(new Translation2d(7.7, 2.5), new Rotation2d(-1.5707963267948966)),
-            new Path.Waypoint(new Translation2d(7.7, 0.6), new Rotation2d(-1.5707963267948966))
-        );
-        Path pointPostInt = new Path(
-            constraints,
-            new Path.Waypoint(new Translation2d(7.7, 0.6), new Rotation2d(-1.5707963267948966)),
-            new Path.Waypoint(new Translation2d(4.0, 0.6), new Rotation2d(-1.5707963267948966))
-        );
-        return Commands.sequence(
-            Commands.print("1"),
-            basicShootInitial8(),
-            Commands.print("3"),
-            shooter.testSetHoodAngle(Degrees.of(0)).withTimeout(0.5),
-            Commands.print("4"),
-            new ParallelCommandGroup(
-                pathing.followPathTeamFlipped(pathInt).withTimeout(15.0),
-                Commands.sequence(
-                    new WaitCommand(2.0),
-                    intake.intake())),
-            Commands.print("8"),
-            intake.stop().withTimeout(0.2),
-            Commands.print("9"),
-            pathing.followPathTeamFlipped(pointPostInt).withTimeout(7.5),
-            Commands.print("10"),
-            basicShootInitial8()
-        );
-    }
-    public Command centerShootLeftRed(){
-        Path.PathConstraints constraints = new Path.PathConstraints()
-            .setMaxVelocityMetersPerSec(4.0)
-            .setMaxAccelerationMetersPerSec2(4.0)
-            .setMaxVelocityDegPerSec(360.0)
-            .setMaxAccelerationDegPerSec2(580.0)
-            .setEndTranslationToleranceMeters(0.4)
-            .setEndRotationToleranceDeg(5.0);
-          Path pointStart = new Path(
-            constraints,
-            new Path.Waypoint(new Translation2d(4.0, 7.4), new Rotation2d(-1.5707963267948966))
-        );
-        Path pathInt = new Path(
-            constraints,
-            new Path.Waypoint(new Translation2d(7.7, 7.4), new Rotation2d(-1.5707963267948966)),
-            new Path.Waypoint(new Translation2d(7.7, 5.0), new Rotation2d(-1.5707963267948966)),
-            new Path.Waypoint(new Translation2d(7.7, 7.4), new Rotation2d(-1.5707963267948966))
-        );
-        Path pointPostInt = new Path(
-            constraints,
-            new Path.Waypoint(new Translation2d(7.7, 7.4), new Rotation2d(-1.5707963267948966)),
-            new Path.Waypoint(new Translation2d(4.0, 7.4), new Rotation2d(-1.5707963267948966))
-        );
-        return Commands.sequence(
-            Commands.print("1"),
-            basicShootInitial8(),
-            Commands.print("3"),
-            shooter.testSetHoodAngle(Degrees.of(0)).withTimeout(0.5),
-            Commands.print("4"),
-            new ParallelCommandGroup(
-                pathing.followPathTeamFlipped(pathInt).withTimeout(15.0),
-                Commands.sequence(
-                    new WaitCommand(2.0),
-                    intake.intake())),
-            Commands.print("8"),
-            intake.stop().withTimeout(0.2),
-            Commands.print("9"),
-            pathing.followPathTeamFlipped(pointPostInt).withTimeout(7.5),
-            Commands.print("10"),
-            basicShootInitial8()
-        );
-    }
-
-
     public Command notBlineCenterBlueLeftShoot(){
         return Commands.sequence(
             basicShootInitial8(),
@@ -386,9 +198,6 @@ public class Autos {
     }
     public Command depotAutoBlue(){
         return Commands.sequence(
-            // questNav.wantToTrackCommand(false),
-            // questNav.setQuestPoseCommand(new Pose3d(new Pose2d(4.0, 5.88, new Rotation2d()))),
-            // questNav.wantToTrackCommand(true),
             basicShootInitial8(),
             swerve.pidToPose(()->preIntDepotBlue).alongWith(intake.intake()).until(()->swerve.isOnTargetTranslate()),
             new ParallelCommandGroup(
@@ -401,9 +210,7 @@ public class Autos {
     }
     public Command depotAutoRed(){
         return Commands.sequence(
-            // questNav.wantToTrackCommand(false),
-            // questNav.setQuestPoseCommand(new Pose3d(new Pose2d(4.0, 5.88, new Rotation2d()))),
-            // questNav.wantToTrackCommand(true),
+
             basicShootInitial8(),
             swerve.pidToPose(()->preIntDepotRed).alongWith(intake.intake()).until(()->swerve.isOnTargetTranslate()),
             new ParallelCommandGroup(
@@ -414,5 +221,33 @@ public class Autos {
             )
         );
     }
+
+    public Command pass(){
+        return new ParallelCommandGroup(
+            shooter.pass(),
+            spindexer.feedToShooterForce()
+        );
+    }
+    public Command shootAuto(){
+        return new ParallelCommandGroup(
+            shooter.shootHub(),
+            spindexer.feedToShooterForce()
+        );
+    }
+    public Command intakeWhilePassing(){
+        return new ParallelCommandGroup(
+            intake.intake(),
+            shooter.pass(),
+            spindexer.feedToShooterForce()
+        );
+    }
+    public Command intakeWhileShooting(){
+        return new ParallelCommandGroup(
+            intake.intake(),
+            shooter.shootHub(),
+            spindexer.feedToShooterForce()
+        );
+    }
+
    
 }
