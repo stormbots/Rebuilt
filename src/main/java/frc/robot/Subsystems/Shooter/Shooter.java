@@ -8,6 +8,7 @@ import java.util.function.Supplier;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
@@ -124,12 +125,13 @@ Flywheel flywheel = new Flywheel();
 
     // For tuning LUTs, read 
     public Command shootWithDashboardValues(){
-        return Commands.none();
-    // return shooter.shoot(()->new TargetingSystem.ShooterState(
-    //   Degrees.of(0), 
-    //   Degrees.of(SmartDashboard.getNumber("robotContainer/hoodAngle", hoodAngle)), 
-    //   SmartDashboard.getNumber("robotContainer/flywheelrpm", rpm)))
-    // );
+    // return Commands.none();
+    SmartDashboard.putNumber("robotContainer/hoodAngle", 0);
+    SmartDashboard.putNumber("robotContainer/flywheelrpm", 0);
+    return this.shoot(()->new TargetingSystem.ShooterState(
+      Degrees.of(180), 
+      Degrees.of(SmartDashboard.getNumber("robotContainer/hoodAngle", hood.getAngle().in(Degrees))), 
+      SmartDashboard.getNumber("robotContainer/flywheelrpm", flywheel.getRPM())));
     }
 
     public Command doTheObviousThingDriversWant(){
