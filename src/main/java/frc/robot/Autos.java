@@ -5,7 +5,9 @@
 
 package frc.robot;
 
+import static edu.wpi.first.units.Units.Degree;
 import static edu.wpi.first.units.Units.Degrees;
+import static edu.wpi.first.units.Units.Inches;
 
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Supplier;
@@ -19,6 +21,8 @@ import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -34,6 +38,7 @@ import frc.robot.Subsystems.Spindexer.Spindexer;
 import frc.robot.Subsystems.Swerve.Pathing;
 import frc.robot.Subsystems.Swerve.Swerve;
 import frc.robot.Subsystems.TargetingSystem.TargetingSystem;
+import frc.robot.lib.BLine.FlippingUtil;
 import frc.robot.lib.BLine.Path;
 
 
@@ -111,18 +116,26 @@ public class Autos {
         autoChooser.addOption("VV UNTESTED VV",()->new InstantCommand());
 
         //ACTUAL OPTIONS BELOW HERE
-        autoChooser.addOption("Basic Shoot 8 anywhere", this::basicShootInitial8);
-        autoChooser.addOption("Left Blue go center not BLINE", this::notBlineCenterBlueLeftShoot);
-        autoChooser.addOption("Right Blue go center not BLINE", this::notBlineCenterBlueRightShoot);
-        autoChooser.addOption("Left Red go center not BLINE", this::notBlineCenterRedLeftShoot);
-        autoChooser.addOption("Right Red go center not BLINE", this::notBlineCenterRedRightShoot);
-        autoChooser.addOption("Blue Depot", this::depotAutoBlue);
-        autoChooser.addOption("Red Depot", this::depotAutoRed);
+        // autoChooser.addOption("Basic Shoot 8 anywhere", this::basicShootInitial8);
+        // autoChooser.addOption("Left Blue go center not BLINE", this::notBlineCenterBlueLeftShoot);
+        // autoChooser.addOption("Right Blue go center not BLINE", this::notBlineCenterBlueRightShoot);
+        // autoChooser.addOption("Left Red go center not BLINE", this::notBlineCenterRedLeftShoot);
+        // autoChooser.addOption("Right Red go center not BLINE", this::notBlineCenterRedRightShoot);
+        autoChooser.addOption("Red testing", this::redTesting);
+        autoChooser.addOption("Red Left Center Shoot Slow", this::slowTestinCenterShotAutoRedLeft);
+        // autoChooser.addOption("Blue Depot", this::depotAutoBlue);
+        // autoChooser.addOption("Red Depot", this::depotAutoRed);
     }
 
     //Get Auto Command
     public Command getAutonomousCommand(){
         return autoChooser.getSelected().get();
+    }
+
+    private Pose2d autoFlippedPose(double x, double y, double degrees){
+        var pose = new Pose2d(x,y,new Rotation2d(Degree.of(degrees)));
+        if(DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Red ) pose = FlippingUtil.flipFieldPose(pose);
+        return pose;
     }
 
     /////////////////////////
@@ -133,11 +146,7 @@ public class Autos {
             swerve.turnToHeading(()->{
                 return targeting.getHeadingToTarget(swerve.getSwervePose().getTranslation(), targeting.getHubTarget()).plus(Rotation2d.k180deg);
             }).until(()->swerve.isOnTargetAngle()).withTimeout(1.0),
-            new ParallelCommandGroup(
-                shooter.shootHubVelComp(),
-                new WaitCommand(0.3)
-                .andThen(spindexer.feedToShooterForce())
-            ).withTimeout(1.5)
+            shootAuto().withTimeout(1.5)
         );
     }
     public Command basicShootToEmpty(){
@@ -145,11 +154,7 @@ public class Autos {
             swerve.turnToHeading(()->{
                 return targeting.getHeadingToTarget(swerve.getSwervePose().getTranslation(), targeting.getHubTarget()).plus(Rotation2d.k180deg);
             }).until(()->swerve.isOnTargetAngle()).withTimeout(1.0),
-            new ParallelCommandGroup(
-                shooter.shootHubVelComp(),
-                new WaitCommand(0.3)
-                .andThen(spindexer.feedToShooterForce())
-            ).withTimeout(3)
+            shootAuto().withTimeout(3)
         );
     }
     public Command notBlineCenterBlueLeftShoot(){
@@ -221,13 +226,36 @@ public class Autos {
             )
         );
     }
+    public Command redTesting(){
+        Path pathAuto = new Path("testingStuffs");
+        return pathing.followPathTeamFlipped(pathAuto).finallyDo(
+            ()->swerve.stop()
+        );
+    }
 
-    public Command centerShootAutoBlueRight(){
-        Path pathAuto = new Path("centerShootAuto");
-        
+    public Command slowTestinCenterShotAutoBLUERIGHT(){
+        Pose2d first = new Pose2d(7.3, 0.6, new Rotation2d());
+        Pose2d second = new Pose2d(7.3, 3.0, new Rotation2d(Degrees.of(45)));
+        Pose2d third = new Pose2d(3.0, 0.6, new Rotation2d(Degrees.of(180)));
         return Commands.sequence(
-            basicShootInitial8(),
-            pathing.followPath(pathAuto)
+            swerve.pidToPose(()->first).until(()->swerve.isOnTargetTranslate()),
+            swerve.pidToPose(()->second, 1.0, Inches.of(5)).alongWith(intake.intake()).until(()->swerve.isOnTargetTranslate()),
+            swerve.pidToPose(()->first).until(()->swerve.isOnTargetTranslate()),
+            swerve.pidToPose(()->third).until(()->swerve.isOnTargetTranslate()),
+            shootAuto()
+        );
+    }
+
+    public Command slowTestinCenterShotAutoRedLeft(){
+        Pose2d first = new Pose2d(9.25, 0.6, new Rotation2d());
+        Pose2d second = new Pose2d(9.25, 3.0, new Rotation2d(Degrees.of(135)));
+        Pose2d third = new Pose2d(14, 0.6, new Rotation2d());
+        return Commands.sequence(
+            swerve.pidToPose(()->first).until(()->swerve.isOnTargetTranslate()),
+            swerve.pidToPose(()->second, 1.0, Inches.of(5)).alongWith(intake.intake()).until(()->swerve.isOnTargetTranslate()),
+            swerve.pidToPose(()->first).until(()->swerve.isOnTargetTranslate()),
+            swerve.pidToPose(()->third).until(()->swerve.isOnTargetTranslate()),
+            shootAuto().withTimeout(10)
         );
     }
 
@@ -239,7 +267,7 @@ public class Autos {
     }
     public Command shootAuto(){
         return new ParallelCommandGroup(
-            shooter.shootHub(),
+            shooter.shootHubNoTur(),
             spindexer.feedToShooterForce()
         );
     }

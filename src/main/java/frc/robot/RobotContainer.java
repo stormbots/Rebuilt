@@ -108,12 +108,12 @@ public class RobotContainer {
 
 
   private void configureDebugBindings(){
-    debug.a().whileTrue(swerve.pidToPose(()->new Pose2d(4.0, 0.6, new Rotation2d())));
-    debug.b().whileTrue(swerve.pidToPose(()->new Pose2d(7.7, 0.6, new Rotation2d(-Math.PI/2))));
-    debug.x().whileTrue(swerve.pidToPose(()->new Pose2d(4.0, 7.4, new Rotation2d())));
-    debug.y().whileTrue(swerve.pidToPose(()->new Pose2d(7.7, 7.4, new Rotation2d(Math.PI/2))));
-    debug.povRight().whileTrue(swerve.pidToPose(()->new Pose2d(12.5, 7.4, new Rotation2d())));
-    debug.povLeft().whileTrue(swerve.pidToPose(()->new Pose2d(12.5, 0.6, new Rotation2d())));
+    // debug.a().whileTrue(swerve.pidToPose(()->new Pose2d(4.0, 0.6, new Rotation2d())));
+    // debug.b().whileTrue(swerve.pidToPose(()->new Pose2d(7.7, 0.6, new Rotation2d(-Math.PI/2))));
+    // debug.x().whileTrue(swerve.pidToPose(()->new Pose2d(4.0, 7.4, new Rotation2d())));
+    // debug.y().whileTrue(swerve.pidToPose(()->new Pose2d(7.7, 7.4, new Rotation2d(Math.PI/2))));
+    // debug.povRight().whileTrue(swerve.pidToPose(()->new Pose2d(12.5, 7.4, new Rotation2d())));
+    // debug.povLeft().whileTrue(swerve.pidToPose(()->new Pose2d(12.5, 0.6, new Rotation2d())));
   }
 
 
@@ -164,6 +164,7 @@ public class RobotContainer {
 
     driver.x() // extend intake // This button is useless and will never be used
     .whileTrue(intake.intake())
+
     .whileFalse(intake.stop());
 
     driver.y().whileTrue(intake.eject()); //intake eject //also will never be used
@@ -177,43 +178,70 @@ public class RobotContainer {
 
   private void configureOperatorBindings() {
 
-    operator.leftBumper()
-      .whileTrue(climber.prepareForClimbL1())
-      .onFalse(climber.climbL1())
-    ;
+    operator.rightTrigger()
+    .whileTrue(shootHub());
 
     operator.rightBumper()
-    .whileTrue(fixedPassOpp());
-    operator.y()
-    .whileTrue(fixedPass())
-    ;
-
-    //  CLIMBER STUFFS, OBVIOUSLY MASSIVE COMMENTED CODE IS CHOPPED BUT NEEDS TO STAY FOR NOW
-    // operator.rightBumper() stage2 hook up, lock out if not end of match  
-    // operator.rightBumper().whileTrue(climber.setStage2Voltage(12));
-    // // operator.rightTrigger() stage2 hook down, lock out if not end of match
-    // operator.rightTrigger().whileTrue(climber.setStage2Voltage(-12));
-    operator.povUp().whileTrue(spindexer.unclog()); // shake dye rotor / unclog
-
-    operator.povDown().whileTrue(intake.eject()); // intake.eject()
-
-    operator.x() // shoot + hopper feed
-    .whileTrue(shootHub())
-    ;
-
-    //TALK TO ABBY MAKE THIS A DIFFERENT BUTTON
-    operator.povRight()
     .whileTrue(fixedShot());
 
-    operator.a().whileTrue(climber.stow()); // global stow (unnecessary, this is default)
-    operator.povLeft().whileTrue(climber.goHome());
+    operator.leftTrigger()
+    .whileTrue(pass());
+
+    operator.leftBumper()
+    .whileTrue(fixedPass());
+    //DO TS LATER
+    // operator.povDown()
+    // .whileTrue(globalStow());
+
+    operator.povUp()
+    .whileTrue(spindexer.unclog());
+
+    operator.b()
+    .whileTrue(climber.prepareForClimbL1())
+    .onFalse(climber.climbL1());
+    //MAN GRABBER DO TS
+    // operator.y()
+    // .whileTrue(grabberstuffs);
+    // STAGE 2 STUFFS
+    // operator.x()
+    // .whileTrue(command);
+    // operator.leftBumper()
+    //   .whileTrue(climber.prepareForClimbL1())
+    //   .onFalse(climber.climbL1())
+    // ;
+
+    // operator.rightBumper()
+    // .whileTrue(fixedPassOpp());
+    // operator.y()
+    // .whileTrue(fixedPass())
+    // ;
+
+    // //  CLIMBER STUFFS, OBVIOUSLY MASSIVE COMMENTED CODE IS CHOPPED BUT NEEDS TO STAY FOR NOW
+    // // operator.rightBumper() stage2 hook up, lock out if not end of match  
+    // // operator.rightBumper().whileTrue(climber.setStage2Voltage(12));
+    // // // operator.rightTrigger() stage2 hook down, lock out if not end of match
+    // // operator.rightTrigger().whileTrue(climber.setStage2Voltage(-12));
+    // operator.povUp().whileTrue(spindexer.unclog()); // shake dye rotor / unclog
+
+    // operator.povDown().whileTrue(intake.eject()); // intake.eject()
+
+    // operator.x() // shoot + hopper feed
+    // .whileTrue(shootHub())
+    // ;
+
+    // //TALK TO ABBY MAKE THIS A DIFFERENT BUTTON
+    // operator.povRight()
+    // .whileTrue(fixedShot());
+
+    // operator.a().whileTrue(climber.stow()); // global stow (unnecessary, this is default)
+    // operator.povLeft().whileTrue(climber.goHome());
 
 
-    operator.b()// passing: Face driver station wall and launch at fixed rpm/angle/distance
-    .whileTrue(pass())
-    ;
+    // operator.b()// passing: Face driver station wall and launch at fixed rpm/angle/distance
+    // .whileTrue(pass())
+    // ;
 
-    // operator.back() // re-home intake, hood, turret? hood? not doing this rn
+    // // operator.back() // re-home intake, hood, turret? hood? not doing this rn
 
   }
 
@@ -229,10 +257,10 @@ public class RobotContainer {
     }
     public Command shootHub(){
       return new ParallelCommandGroup(
-        swerve.turnToHeadingNiche(()->{
+        swerve.turnToHeadingWithinTurretRange(()->{
           return targeting.getHeadingToTarget(swerve.getSwervePose().getTranslation(), targeting.getHubTarget()).plus(Rotation2d.k180deg);
         }),
-        shooter.shootHubVelComp(),
+        shooter.shootHub(),
         spindexer.feedToShooter()
         );
     }

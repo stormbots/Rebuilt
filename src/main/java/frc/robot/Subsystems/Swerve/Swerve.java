@@ -6,6 +6,9 @@
 package frc.robot.Subsystems.Swerve;
 
 
+import static edu.wpi.first.units.Units.Inches;
+import static edu.wpi.first.units.Units.Meter;
+
 import java.io.File;
 import java.util.Optional;
 import java.util.function.DoubleSupplier;
@@ -22,6 +25,7 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
+import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.Filesystem;
@@ -40,7 +44,7 @@ import swervelib.telemetry.SwerveDriveTelemetry.TelemetryVerbosity;
 public class Swerve extends SubsystemBase {
 
 
-  final double maximumSpeed = 2.0;
+  final double maximumSpeed = 5.0;
   public SwerveDrive swerveDrive;
   Field2d odometryField = new Field2d();
   private boolean isOnTargetAngle = true;
@@ -340,7 +344,16 @@ public class Swerve extends SubsystemBase {
       isOnTargetAngle = false;
     });
   }
-  public Command turnToHeadingNiche(Supplier<Rotation2d> bearing){
+  public Command stop(){
+    return Commands.run(()->{
+    primaryInputs.tx = 0;
+    primaryInputs.ty = 0;
+    primaryInputs.r = 0;
+    secondaryInputs.tx = 0;
+    secondaryInputs.ty = 0;
+    secondaryInputs.r = 0;});
+  }
+  public Command turnToHeadingWithinTurretRange(Supplier<Rotation2d> bearing){
     return Commands.run(()->{
       isOnTargetAngle = false;
       var error = bearing.get().minus(swerveDrive.getPose().getRotation());
@@ -361,9 +374,12 @@ public class Swerve extends SubsystemBase {
     })
     ;
   }
-
-
   public Command pidToPose(Supplier<Pose2d> targetPoseSupplier){
+    return pidToPose(targetPoseSupplier,maximumSpeed,Inches.of(5));
+  }
+
+
+  public Command pidToPose(Supplier<Pose2d> targetPoseSupplier, double maxVelocityMPS, Distance tolerance){
     return Commands.run(() -> {
       isOnTargetTranslate = false;
       isOnTargetAngle = false;
@@ -387,12 +403,12 @@ public class Swerve extends SubsystemBase {
       double rOutput = MathUtil.clamp(angleError.getDegrees() * kPRotation, -1.0, 1.0);
 
 
-      secondaryInputs.tx = xOutput;
-      secondaryInputs.ty = yOutput;
+      secondaryInputs.tx = xOutput*maxVelocityMPS/maximumSpeed;
+      secondaryInputs.ty = yOutput*maxVelocityMPS/maximumSpeed;
       secondaryInputs.r = rOutput;
 
-
-      if (Math.abs(errorX) < 0.05 && Math.abs(errorY) < 0.05) {
+      
+      if (Math.hypot(errorX, errorY) < tolerance.in(Meter)) {
         isOnTargetTranslate = true;
       }
 

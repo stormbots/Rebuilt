@@ -29,9 +29,9 @@ public class Pathing extends SubsystemBase {
   TargetingSystem targeting;
 
   FollowPath.Builder pathBuilder;
-  double autoinputx;
-  double autoinputy;
-  double autoinputr;
+  // double autoinputx;
+  // double autoinputy;
+  // double autoinputr;
 
   public Pathing(Swerve swerve,
         Shooter shooter,
@@ -48,9 +48,9 @@ public class Pathing extends SubsystemBase {
     swerve::getSwervePose, 
     swerve::getChassisSpeedsRobotRelative, 
     this::setAutoInputs, 
-    new PIDController(0.125, 0.0, 0.0),    // Translation PID
-    new PIDController(0.5, 0.0, 0.0),    // Rotation PID
-    new PIDController(2.0, 0.0, 0.002)     // Cross-track PID
+    new PIDController(5.0, 0.0, 0.0),    // Translation PID
+    new PIDController(3.0, 0.0, 0.0),    // Rotation PID
+    new PIDController(2.0, 0.0, 0.0)     // Cross-track PID
     );
     FollowPath.registerEventTrigger("intake", intake.intake());
     FollowPath.registerEventTrigger("shoot", shootAuto());
@@ -78,9 +78,9 @@ public class Pathing extends SubsystemBase {
     //Converting robot relative from bline for field relative inputs
     Rotation2d heading = swerve.getSwervePose().getRotation(); 
     ChassisSpeeds fieldRelative = ChassisSpeeds.fromRobotRelativeSpeeds(robotRelative, heading);
-    autoinputx = fieldRelative.vxMetersPerSecond * 2.0;
-    autoinputy = fieldRelative.vyMetersPerSecond *2.0 ;
-    autoinputr = fieldRelative.omegaRadiansPerSecond *2.0;
+    // autoinputx = fieldRelative.vxMetersPerSecond * 2.0;
+    // autoinputy = fieldRelative.vyMetersPerSecond *2.0 ;
+    // autoinputr = fieldRelative.omegaRadiansPerSecond *2.0;
     swerve.setPrimaryInputsVoid(()->fieldRelative.vxMetersPerSecond, ()->fieldRelative.vyMetersPerSecond, ()->fieldRelative.omegaRadiansPerSecond);
 }
   
@@ -88,21 +88,24 @@ public class Pathing extends SubsystemBase {
   public void periodic() {
     // This method will be called once per scheduler run
   }
+
   public Command pass(){
         return new ParallelCommandGroup(
             shooter.pass(),
             spindexer.feedToShooterForce()
         );
     }
+
     public Command shootAuto(){
         return new ParallelCommandGroup(
-        swerve.turnToHeadingNiche(()->{
+        swerve.turnToHeadingWithinTurretRange(()->{
           return targeting.getHeadingToTarget(swerve.getSwervePose().getTranslation(), targeting.getHubTarget()).plus(Rotation2d.k180deg);
         }),
-        shooter.shootHub(),
+        shooter.shootHubNoTur(),
         spindexer.feedToShooter()
         );
     }
+
     public Command intakeWhilePassing(){
         return new ParallelCommandGroup(
             intake.intake(),
@@ -110,12 +113,13 @@ public class Pathing extends SubsystemBase {
             spindexer.feedToShooterForce()
         );
     }
-    public Command intakeWhileShooting(){
-        return new ParallelCommandGroup(
-            intake.intake(),
-            shooter.shootHub(),
-            spindexer.feedToShooterForce()
-        );
-    }
+
+  public Command intakeWhileShooting(){
+      return new ParallelCommandGroup(
+          intake.intake(),
+          shooter.shootHub(),
+          spindexer.feedToShooterForce()
+      );
+  }
 
 }
