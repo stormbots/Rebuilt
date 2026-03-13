@@ -75,30 +75,36 @@ public class TargetingSystem extends SubsystemBase {
 
   // distance, hoodangle, flywheel rpm
   LUT hubLUT = new LUT(new double[][]{
-    {22+14, 5, 2050},
-    {32+22, 10, 2050},
-    {48+22, 10, 2100},
-    {60+22, 13, 2100},
-    {72+22, 23, 2100},
-    {84+22, 26, 2100},
-    {96+22, 30, 2150},
-    {108+22, 30, 2200},
-    {120+22, 30, 2300},
-    {132+22, 30, 2350},
-    {144+22, 30, 2400},
-    {156+22, 30, 2450},
-    {168+22, 30, 2500},
-    {180+22, 30, 2550},
-    {192+22, 30, 2625}
-    // {96+22, 30, 2150, 0.5763},
-    // {108+22, 30, 2200, 0.6094},
-    // {120+22, 30, 2300, 0.64250},
-    // {132+22, 30, 2350, 0.67559},
-    // {144+22, 30, 2400, 0.70869},
-    // {156+22, 30, 2450, 0.74179},
-    // {168+22, 30, 2500, 0.77489},
-    // {180+22, 30, 2550, 0.80798},
-    // {192+22, 30, 2625, 0.84108}
+    // {22+14, 5, 2050},
+    // {32+22, 10, 2050},
+    // {48+22, 10, 2100},
+    // {60+22, 13, 2100},
+    // {72+22, 23, 2100},
+    // {84+22, 26, 2100},
+    // {96+22, 30, 2150},
+    // {108+22, 30, 2200},
+    // {120+22, 30, 2300},
+    // {132+22, 30, 2350},
+    // {144+22, 30, 2400},
+    // {156+22, 30, 2450},
+    // {168+22, 30, 2500},
+    // {180+22, 30, 2550},
+    // {192+22, 30, 2625}
+    {22+14, 5, 2050, 0.8},
+    {32+22, 10, 2050, 0.8},
+    {48+22, 10, 2100, 0.8},
+    {60+22, 13, 2100, 0.8},
+    {72+22, 23, 2100, 0.8},
+    {84+22, 26, 2100, 0.8},
+    {96+22, 30, 2150, 0.5763},
+    {108+22, 30, 2200, 0.6094},
+    {120+22, 30, 2300, 0.64250},
+    {132+22, 30, 2350, 0.67559},
+    {144+22, 30, 2400, 0.70869},
+    {156+22, 30, 2450, 0.74179},
+    {168+22, 30, 2500, 0.77489},
+    {180+22, 30, 2550, 0.80798},
+    {192+22, 30, 2625, 0.84108}
   });
   
 
@@ -182,7 +188,7 @@ public class TargetingSystem extends SubsystemBase {
     SmartDashboard.putNumber("shooter/lut/distance", magnitude.in(Inches));
     var entry = lut.get(magnitude.in(Inches));   
     var angle = entry[1];
-    var rpm = entry[2]+110;
+    var rpm = entry[2]+100;
     SmartDashboard.putNumber("shooter/lut/rpm", rpm);
     SmartDashboard.putNumber("shooter/lut/hoodangle", angle);
     
@@ -217,7 +223,7 @@ public class TargetingSystem extends SubsystemBase {
     //Repeat the above process until the change between each iteration is negligible
     //Essentially, the virtual target stabilizes
     //TODO: change from a static amount of 3 iterations to dynamically ensuring percent change is negligible (eg. 2% or less)
-    for(int i=0; i<3; i++){
+    for(int i=0; i<5; i++){
       magnitude = getDistanceToTarget(botPose.get().getTranslation(), virtualTarget);
 
       entry = lut.get(magnitude.in(Inches));

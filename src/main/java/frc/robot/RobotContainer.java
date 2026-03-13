@@ -53,7 +53,7 @@ public class RobotContainer {
   Climber climber = new Climber();
   Spindexer spindexer = new Spindexer(shooter.isReadyToAcceptFuel.and(swerve::isOnTargetAngle));
   QuestNavSubsystem questnav = new QuestNavSubsystem(swerve);
-  Pathing pathing = new Pathing(swerve);
+  Pathing pathing = new Pathing(swerve, shooter, intake, spindexer, targeting);
   Signals signals = new Signals();
   Autos autos = new Autos(swerve, shooter, intake, questnav, spindexer, pathing, targeting);
   // Bling bling = new Bling(); //TODO: Currently no bling lights on bot
@@ -164,7 +164,6 @@ public class RobotContainer {
 
     driver.x() // extend intake // This button is useless and will never be used
     .whileTrue(intake.intake())
-    .whileTrue(spindexer.unclog())
     .whileFalse(intake.stop());
 
     driver.y().whileTrue(intake.eject()); //intake eject //also will never be used
@@ -233,7 +232,7 @@ public class RobotContainer {
         swerve.turnToHeadingNiche(()->{
           return targeting.getHeadingToTarget(swerve.getSwervePose().getTranslation(), targeting.getHubTarget()).plus(Rotation2d.k180deg);
         }),
-        shooter.shootHub(),
+        shooter.shootHubVelComp(),
         spindexer.feedToShooter()
         );
     }

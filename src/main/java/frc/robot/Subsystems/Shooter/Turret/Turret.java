@@ -36,8 +36,8 @@ public class Turret extends SubsystemBase {
   public static final double kGearing = (1.0 / 3.0) * (10.0 / 132.0) * (177.0/198.0);
 
   //How much in ONE direction, hence max range divided by 2
-  public static final double kMinRotation = 90.0;
-  public static final double kMaxRotation = 270.0;
+  public static final double kMinRotation = 110.0;
+  public static final double kMaxRotation = 260.0;
 
   Angle targetPosition = Degrees.of(0);
   Angle tolerance = Degrees.of(3);
@@ -102,7 +102,7 @@ public class Turret extends SubsystemBase {
     SparkFlexConfig config = new SparkFlexConfig();
 
     config
-      .smartCurrentLimit(30)
+      .smartCurrentLimit(60)
       .idleMode(IdleMode.kBrake)
       //giving positive power should turn the turret CCW
       .inverted(false)
@@ -115,7 +115,7 @@ public class Turret extends SubsystemBase {
 
     config.closedLoop
       .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
-      .p(0.3 * 12 / 90.0)
+      .p(0.3 * 12 * 2.5 / 90.0)
     ;
 
     config.softLimit

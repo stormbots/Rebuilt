@@ -134,7 +134,7 @@ public class Autos {
                 return targeting.getHeadingToTarget(swerve.getSwervePose().getTranslation(), targeting.getHubTarget()).plus(Rotation2d.k180deg);
             }).until(()->swerve.isOnTargetAngle()).withTimeout(1.0),
             new ParallelCommandGroup(
-                shooter.shootHubAuto(),
+                shooter.shootHubVelComp(),
                 new WaitCommand(0.3)
                 .andThen(spindexer.feedToShooterForce())
             ).withTimeout(1.5)
@@ -146,7 +146,7 @@ public class Autos {
                 return targeting.getHeadingToTarget(swerve.getSwervePose().getTranslation(), targeting.getHubTarget()).plus(Rotation2d.k180deg);
             }).until(()->swerve.isOnTargetAngle()).withTimeout(1.0),
             new ParallelCommandGroup(
-                shooter.shootHubAuto(),
+                shooter.shootHubVelComp(),
                 new WaitCommand(0.3)
                 .andThen(spindexer.feedToShooterForce())
             ).withTimeout(3)
@@ -219,6 +219,15 @@ public class Autos {
                 shooter.shootHub(),
                 spindexer.feedToShooterForce()
             )
+        );
+    }
+
+    public Command centerShootAutoBlueRight(){
+        Path pathAuto = new Path("centerShootAuto");
+        
+        return Commands.sequence(
+            basicShootInitial8(),
+            pathing.followPath(pathAuto)
         );
     }
 

@@ -3,36 +3,65 @@
 // the WPILib BSD license file in the root directory of this project.
 
 package frc.robot.Subsystems.Swerve;
+import static edu.wpi.first.units.Units.Degrees;
 
 
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Subsystems.Intake.Intake;
+import frc.robot.Subsystems.Shooter.Shooter;
+import frc.robot.Subsystems.Spindexer.Spindexer;
+import frc.robot.Subsystems.TargetingSystem.TargetingSystem;
 import frc.robot.lib.BLine.FollowPath;
 import frc.robot.lib.BLine.Path;
 
 
 public class Pathing extends SubsystemBase {
   /** Creates a new Pathing. */
-  Swerve swerveSubsystem;
+  Swerve swerve;
+  Shooter shooter;
+  Intake intake;
+  Spindexer spindexer;
+  TargetingSystem targeting;
+
   FollowPath.Builder pathBuilder;
   double autoinputx;
   double autoinputy;
   double autoinputr;
 
-  public Pathing(Swerve swerveSubsytem) {
-    this.swerveSubsystem = swerveSubsytem;
+  public Pathing(Swerve swerve,
+        Shooter shooter,
+        Intake intake,
+        Spindexer spindexer,
+        TargetingSystem targeting) {
+    this.swerve = swerve;
+    this.shooter = shooter;
+    this.intake = intake;
+    this.targeting = targeting;
+    this.spindexer = spindexer;
     pathBuilder = new FollowPath.Builder(
-    swerveSubsystem, 
-    swerveSubsystem::getSwervePose, 
-    swerveSubsystem::getChassisSpeedsRobotRelative, 
+    swerve, 
+    swerve::getSwervePose, 
+    swerve::getChassisSpeedsRobotRelative, 
     this::setAutoInputs, 
     new PIDController(0.125, 0.0, 0.0),    // Translation PID
     new PIDController(0.5, 0.0, 0.0),    // Rotation PID
     new PIDController(2.0, 0.0, 0.002)     // Cross-track PID
     );
+    FollowPath.registerEventTrigger("intake", intake.intake());
+    FollowPath.registerEventTrigger("shoot", shootAuto());
+    FollowPath.registerEventTrigger("intakeWhileShooting", intakeWhileShooting());
+    FollowPath.registerEventTrigger("intakeWhilePassing", intakeWhilePassing());
+    FollowPath.registerEventTrigger("pass", pass());
+    FollowPath.registerEventTrigger("intakeStop", intake.stop());
+    FollowPath.registerEventTrigger("hoodDown", shooter.testSetHoodAngle(Degrees.of(0)));
+    
+
+
   }
 
   public Command followPath(Path path){
@@ -47,16 +76,46 @@ public class Pathing extends SubsystemBase {
 
   private void setAutoInputs(ChassisSpeeds robotRelative) {
     //Converting robot relative from bline for field relative inputs
-    Rotation2d heading = swerveSubsystem.getSwervePose().getRotation(); 
+    Rotation2d heading = swerve.getSwervePose().getRotation(); 
     ChassisSpeeds fieldRelative = ChassisSpeeds.fromRobotRelativeSpeeds(robotRelative, heading);
     autoinputx = fieldRelative.vxMetersPerSecond * 2.0;
     autoinputy = fieldRelative.vyMetersPerSecond *2.0 ;
     autoinputr = fieldRelative.omegaRadiansPerSecond *2.0;
-    swerveSubsystem.setPrimaryInputsVoid(()->fieldRelative.vxMetersPerSecond, ()->fieldRelative.vyMetersPerSecond, ()->fieldRelative.omegaRadiansPerSecond);
+    swerve.setPrimaryInputsVoid(()->fieldRelative.vxMetersPerSecond, ()->fieldRelative.vyMetersPerSecond, ()->fieldRelative.omegaRadiansPerSecond);
 }
   
   @Override
   public void periodic() {
     // This method will be called once per scheduler run
   }
+  public Command pass(){
+        return new ParallelCommandGroup(
+            shooter.pass(),
+            spindexer.feedToShooterForce()
+        );
+    }
+    public Command shootAuto(){
+        return new ParallelCommandGroup(
+        swerve.turnToHeadingNiche(()->{
+          return targeting.getHeadingToTarget(swerve.getSwervePose().getTranslation(), targeting.getHubTarget()).plus(Rotation2d.k180deg);
+        }),
+        shooter.shootHub(),
+        spindexer.feedToShooter()
+        );
+    }
+    public Command intakeWhilePassing(){
+        return new ParallelCommandGroup(
+            intake.intake(),
+            shooter.pass(),
+            spindexer.feedToShooterForce()
+        );
+    }
+    public Command intakeWhileShooting(){
+        return new ParallelCommandGroup(
+            intake.intake(),
+            shooter.shootHub(),
+            spindexer.feedToShooterForce()
+        );
+    }
+
 }

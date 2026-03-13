@@ -113,8 +113,8 @@ Flywheel flywheel = new Flywheel();
     public Command shootHub(){
         return shoot(targeting::getHub);
     }
-    public Command shootHubAuto(){
-        return shootNoTurret(targeting::getHub);
+    public Command shootHubVelComp(){
+        return shoot(targeting::getHubBotVelCompensated);
     }
 
     public Command pass(){
