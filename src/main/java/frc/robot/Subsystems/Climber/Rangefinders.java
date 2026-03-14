@@ -21,7 +21,7 @@ public class Rangefinders {
      * @param facingAngleDegrees Valid for +90 or -90 degrees
      * @return
      */
-    public SwerveInputs generateInputs(double facingAngleDegrees){
+    public  SwerveInputs generateInputs(double facingAngleDegrees){
         swerveInputs.clear();
         if(facingAngleDegrees == 90){
             if(left.isBreakBeamTripped.getAsBoolean() && right.isBreakBeamTripped.getAsBoolean()){

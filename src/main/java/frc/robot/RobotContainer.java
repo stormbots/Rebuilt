@@ -4,7 +4,7 @@
 
 package frc.robot;
 
-//import com.stormbots.CRTAbsoluteEncoder;
+import com.stormbots.CRTAbsoluteEncoder;
 
 import static edu.wpi.first.units.Units.Degree;
 import static edu.wpi.first.units.Units.Degrees;
@@ -36,17 +36,17 @@ import frc.robot.lib.BLine.Path;
 public class RobotContainer {
 
   Swerve swerve = new Swerve();
-  // Photonvision photonvision = new Photonvision(swerve);
-  // TargetingSystem targeting = new TargetingSystem(swerve);
-  // Shooter shooter = new Shooter(targeting);
-  // Intake intake = new Intake();
+  Photonvision photonvision = new Photonvision(swerve);
+  TargetingSystem targeting = new TargetingSystem(swerve);
+  Shooter shooter = new Shooter(targeting);
+  Intake intake = new Intake();
   Climber climber = new Climber();
-  // Spindexer spindexer = new Spindexer(shooter.isReadyToAcceptFuel.and(swerve::isOnTargetAngle));
-  // QuestNavSubsystem questnav = new QuestNavSubsystem(swerve);
-  // Pathing pathing = new Pathing(swerve);
-  // Signals signlas = new Signals();
-  // // Bling bling = new Bling(); //TODO: Currently no bling lights on bot
-  // FieldBehaviour fieldBehaviour = new FieldBehaviour();
+  Spindexer spindexer = new Spindexer(shooter.isReadyToAcceptFuel.and(swerve::isOnTargetAngle));
+  QuestNavSubsystem questnav = new QuestNavSubsystem(swerve);
+  Pathing pathing = new Pathing(swerve);
+  Signals signlas = new Signals();
+  // Bling bling = new Bling(); //TODO: Currently no bling lights on bot
+  FieldBehaviour fieldBehaviour = new FieldBehaviour();
 
 
   CommandXboxController driver = new CommandXboxController(0);
@@ -59,14 +59,14 @@ public class RobotContainer {
     SmartDashboard.putNumber("robotContainer/flywheelrpm", rpm);
     SmartDashboard.putNumber("robotContainer/hoodAngle", hoodAngle);
 
-    // HopperSensors.getInstance(); //Ensure this always exists and is updating
-    // questnav.setQuestPose(new Pose3d(swerve.swerveDrive.getPose().getX(), swerve.swerveDrive.getPose().getY(), 0.0, new Rotation3d(0.0, 0.0, 0.0)));
+    HopperSensors.getInstance(); //Ensure this always exists and is updating
+    questnav.setQuestPose(new Pose3d(swerve.swerveDrive.getPose().getX(), swerve.swerveDrive.getPose().getY(), 0.0, new Rotation3d(0.0, 0.0, 0.0)));
     
     configureDriverBindings();
     configureOperatorBindings();
 
     
-    //CRTAbsoluteEncoder.getInstance().sync();
+    CRTAbsoluteEncoder.getInstance().sync();
 
     // new Trigger(DriverStation::isEnabled){
       //wait for PV to have seen a tag
@@ -75,8 +75,8 @@ public class RobotContainer {
 
     //QuestNav initialization?
     //THIS IS VERY JANK, FIX LATER, should be part of the auto starting sequence, should setQuestPose THEN wantToTrack, this was dumb
-    // driver.povDown().onTrue(new InstantCommand(()->questnav.setQuestPose(new Pose3d(0.0, 7.5, 0.0, new Rotation3d(0.0, 0.0, 0.0)))));
-    // driver.povUp().onTrue(new InstantCommand(()->questnav.wantToTrack()));
+    driver.povDown().onTrue(new InstantCommand(()->questnav.setQuestPose(new Pose3d(0.0, 7.5, 0.0, new Rotation3d(0.0, 0.0, 0.0)))));
+    driver.povUp().onTrue(new InstantCommand(()->questnav.wantToTrack()));
 
     // new Trigger(DriverStation::isEnabled)
     // .whileTrue(
@@ -97,10 +97,9 @@ public class RobotContainer {
 
     driver.start().onTrue(
       Commands.sequence(
-        swerve.testZeroPose().withTimeout(0.1)
-        // new InstantCommand(()->questnav.setQuestPose(new Pose3d(swerve.getSwervePose().getX(), swerve.getSwervePose().getY(), 0.0, new Rotation3d(0.0, 0.0, 0.0)))).withTimeout(0.1),
-        // new InstantCommand(()->questnav.wantToTrack())
-        )
+        swerve.testZeroPose().withTimeout(0.1),
+        new InstantCommand(()->questnav.setQuestPose(new Pose3d(swerve.getSwervePose().getX(), swerve.getSwervePose().getY(), 0.0, new Rotation3d(0.0, 0.0, 0.0)))).withTimeout(0.1),
+        new InstantCommand(()->questnav.wantToTrack()))
       );
 
     // driver.rightTrigger().whileTrue(shooter.shootHub());
@@ -133,24 +132,17 @@ public class RobotContainer {
     driver.a().whileTrue(swerve.turnToHeading(()->new Rotation2d())); // face swerve away from driver
     // driver.b() //TODO: face any 45 to prepare for bump crossing
 
-    // driver.x() // extend intake // This button is useless and will never be used
-    // .whileTrue(intake.intake()).whileFalse(intake.stop());
+    driver.x() // extend intake // This button is useless and will never be used
+    .whileTrue(intake.intake()).whileFalse(intake.stop());
 
-    // driver.y().whileTrue(intake.eject()); //intake eject //also will never be used
+    driver.y().whileTrue(intake.eject()); //intake eject //also will never be used
 
-    // // driver.(back left paddle) //global stow/defense mode
+    // driver.(back left paddle) //global stow/defense mode
 
-    // driver.povUp().whileTrue(shooter.testHome());
-    // //  driver.y().whileTrue(shooter.testSetHoodAngle(Degrees.of(30)));
+    driver.povUp().whileTrue(shooter.testHome());
+    //  driver.y().whileTrue(shooter.testSetHoodAngle(Degrees.of(30)));
 
-    driver.rightBumper().whileTrue(Commands.parallel(
-      climber.prepareForClimbL1(),
-      // swerve.turnToHeading(()->new Rotation2d(Degree.of(90))),
-      swerve.addSecondaryInputsTrueFielcentric(()->climber.generateInputs(swerve.getSwervePose())),
-      Commands.none()
-    ).until(climber::isLinedUpWithL1)
-    .andThen(climber.climbL1())
-    );
+
 
   }
 
@@ -170,24 +162,24 @@ public class RobotContainer {
     // operator.rightBumper().whileTrue(climber.setStage2Voltage(12));
     // // operator.rightTrigger() stage2 hook down, lock out if not end of match
     // operator.rightTrigger().whileTrue(climber.setStage2Voltage(-12));
-    // operator.povUp().whileTrue(spindexer.unclog()); // shake dye rotor / unclog
+    operator.povUp().whileTrue(spindexer.unclog()); // shake dye rotor / unclog
 
-    // operator.povDown().whileTrue(intake.eject()); // intake.eject()
+    operator.povDown().whileTrue(intake.eject()); // intake.eject()
 
-    // operator.x() // shoot + hopper feed
-    // .whileTrue(shooter.shootHub())
-    // .whileTrue(spindexer.feedToShooter())
-    // .whileTrue(swerve.turnToHeading(()->{
-    //   return targeting.getHeadingToTarget(swerve.getSwervePose().getTranslation(), targeting.getTarLockTemp().getTranslation()).plus(Rotation2d.k180deg);
-    // }));
+    operator.x() // shoot + hopper feed
+    .whileTrue(shooter.shootHub())
+    .whileTrue(spindexer.feedToShooter())
+    .whileTrue(swerve.turnToHeading(()->{
+      return targeting.getHeadingToTarget(swerve.getSwervePose().getTranslation(), targeting.getTarLockTemp().getTranslation()).plus(Rotation2d.k180deg);
+    }));
 
 
-    // operator.a().whileTrue(climber.stow()); // global stow (unnecessary, this is default)
+    operator.a().whileTrue(climber.stow()); // global stow (unnecessary, this is default)
 
-    // operator.b()// passing: Face driver station wall and launch at fixed rpm/angle/distance
-    // .whileTrue(shooter.pass())
-    // .whileTrue(spindexer.feedToShooter())
-    //.whileTrue(swerve.turnToHeading(()->new Rotation2d()));
+    operator.b()// passing: Face driver station wall and launch at fixed rpm/angle/distance
+    .whileTrue(shooter.pass())
+    .whileTrue(spindexer.feedToShooter())
+    .whileTrue(swerve.turnToHeading(()->new Rotation2d()));
 
     // operator.back() // re-home intake, hood, turret? hood? not doing this rn
 
@@ -197,7 +189,14 @@ public class RobotContainer {
     //once in place
     //climb
 
-    
+    operator.rightBumper().whileTrue(Commands.parallel(
+      climber.prepareForClimbL1(),
+      swerve.turnToHeading(()->new Rotation2d(Degree.of(90))),
+      swerve.addSecondaryInputsTrueFielcentric(()->climber.generateInputs(swerve.getSwervePose())),
+      Commands.none()
+    ).until(climber::isLinedUpWithL1)
+    .andThen(climber.climbL1())
+    );
 
 
   }
