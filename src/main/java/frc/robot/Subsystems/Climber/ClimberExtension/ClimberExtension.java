@@ -92,7 +92,7 @@ public class ClimberExtension extends SubsystemBase {
         enableBottomLimit(false);
         setCurrentLimit(kHomeCurrentMaxOutput);
       },
-      ()->{motor.setVoltage(-12);},
+      ()->{motor.setVoltage(-1);},
       (cancelled)->{
         if(cancelled==false){
           isHomed = true;

@@ -116,8 +116,9 @@ public class RobotContainer {
     // debug.povRight().whileTrue(swerve.pidToPose(()->new Pose2d(12.5, 7.4, new Rotation2d())));
     // debug.povLeft().whileTrue(swerve.pidToPose(()->new Pose2d(12.5, 0.6, new Rotation2d())));
     debug.x()
-    .whileTrue(shooter.testSetFlywheelRPM(SmartDashboard.getNumber("robotContainer/flywheelrpm", rpm)))
-    .whileTrue(shooter.testSetHoodAngle(Degree.of(SmartDashboard.getNumber("robotContainer/hoodAngle", hoodAngle))));
+    .whileTrue(shooter.shootWithDashboardValues())
+    .whileTrue(Commands.waitSeconds(1).andThen(spindexer.feedToShooterForce()))
+    ;
 
     debug.a()
     .whileTrue(shooter.testTurretVoltage(()->debug.getLeftY()*8));
