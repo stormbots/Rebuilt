@@ -116,11 +116,10 @@ public class Autos {
         autoChooser.addOption("VV UNTESTED VV",()->new InstantCommand());
 
         //ACTUAL OPTIONS BELOW HERE
-        // autoChooser.addOption("Basic Shoot 8 anywhere", this::basicShootInitial8);
-        // autoChooser.addOption("Left Blue go center not BLINE", this::notBlineCenterBlueLeftShoot);
-        // autoChooser.addOption("Right Blue go center not BLINE", this::notBlineCenterBlueRightShoot);
-        // autoChooser.addOption("Left Red go center not BLINE", this::notBlineCenterRedLeftShoot);
-        // autoChooser.addOption("Right Red go center not BLINE", this::notBlineCenterRedRightShoot);
+        autoChooser.addOption("Blue Left Go Center", this::BlueLeftGoCenter);
+        autoChooser.addOption("Blue Right Go Center", this::BlueRightGoCenter);
+        autoChooser.addOption("Red Left Go Center", this::RedLeftGoCenter);
+        autoChooser.addOption("Red Right Go Center", this::RedRightGoCenter);
         autoChooser.addOption("Red testing", this::redTesting);
         autoChooser.addOption("Red Left Center Shoot Slow", this::slowTestinCenterShotAutoRedLeft);
         // autoChooser.addOption("Blue Depot", this::depotAutoBlue);
@@ -157,45 +156,45 @@ public class Autos {
             shootAuto().withTimeout(3)
         );
     }
-    public Command notBlineCenterBlueLeftShoot(){
+    public Command BlueLeftGoCenter(){
         return Commands.sequence(
             basicShootInitial8(),
             shooter.testSetHoodAngle(Degrees.of(0)).withTimeout(0.5),
             swerve.pidToPose(()->preIntBL).until(()->swerve.isOnTargetTranslate()),
-            swerve.pidToPose(()->postIntBL).alongWith(intake.intake()).until(()->swerve.isOnTargetTranslate()),
+            swerve.pidToPose(()->postIntBL, 1.0, Inches.of(5)).alongWith(intake.intake()).until(()->swerve.isOnTargetTranslate()),
             swerve.pidToPose(()->preIntBL).alongWith(intake.stop()).until(()->swerve.isOnTargetTranslate()),
             swerve.pidToPose(()->shotPoseBL).until(()->swerve.isOnTargetTranslate()),
             basicShootToEmpty()
         );
     }
-    public Command notBlineCenterBlueRightShoot(){
+    public Command BlueRightGoCenter(){
         return Commands.sequence(
             basicShootInitial8(),
             shooter.testSetHoodAngle(Degrees.of(0)).withTimeout(0.5),
             swerve.pidToPose(()->preIntBR).until(()->swerve.isOnTargetTranslate()),
-            swerve.pidToPose(()->postIntBR).alongWith(intake.intake()).until(()->swerve.isOnTargetTranslate()),
+            swerve.pidToPose(()->postIntBR, 1.0, Inches.of(5)).alongWith(intake.intake()).until(()->swerve.isOnTargetTranslate()),
             swerve.pidToPose(()->preIntBR).alongWith(intake.stop()).until(()->swerve.isOnTargetTranslate()),
             swerve.pidToPose(()->shotPoseBR).until(()->swerve.isOnTargetTranslate()),
             basicShootToEmpty()
         );
     }
-    public Command notBlineCenterRedLeftShoot(){
+    public Command RedLeftGoCenter(){
         return Commands.sequence(
             basicShootInitial8(),
             shooter.testSetHoodAngle(Degrees.of(0)).withTimeout(0.5),
             swerve.pidToPose(()->preIntRL).until(()->swerve.isOnTargetTranslate()),
-            swerve.pidToPose(()->postIntRL).alongWith(intake.intake()).until(()->swerve.isOnTargetTranslate()),
+            swerve.pidToPose(()->postIntRL, 1.0, Inches.of(5)).alongWith(intake.intake()).until(()->swerve.isOnTargetTranslate()),
             swerve.pidToPose(()->preIntRL).alongWith(intake.stop()).until(()->swerve.isOnTargetTranslate()),
             swerve.pidToPose(()->shotPoseRL).until(()->swerve.isOnTargetTranslate()),
             basicShootToEmpty()
         );
     }
-    public Command notBlineCenterRedRightShoot(){
+    public Command RedRightGoCenter(){
         return Commands.sequence(
             basicShootInitial8(),
             shooter.testSetHoodAngle(Degrees.of(0)).withTimeout(0.5),
             swerve.pidToPose(()->preIntRR).until(()->swerve.isOnTargetTranslate()),
-            swerve.pidToPose(()->postIntRR).alongWith(intake.intake()).until(()->swerve.isOnTargetTranslate()),
+            swerve.pidToPose(()->postIntRR, 1.0, Inches.of(5)).alongWith(intake.intake()).until(()->swerve.isOnTargetTranslate()),
             swerve.pidToPose(()->preIntRR).alongWith(intake.stop()).until(()->swerve.isOnTargetTranslate()),
             swerve.pidToPose(()->shotPoseRR).until(()->swerve.isOnTargetTranslate()),
             basicShootToEmpty()
@@ -232,7 +231,6 @@ public class Autos {
             ()->swerve.stop()
         );
     }
-
     public Command slowTestinCenterShotAutoBLUERIGHT(){
         Pose2d first = new Pose2d(7.3, 0.6, new Rotation2d());
         Pose2d second = new Pose2d(7.3, 3.0, new Rotation2d(Degrees.of(45)));
@@ -245,7 +243,6 @@ public class Autos {
             shootAuto()
         );
     }
-
     public Command slowTestinCenterShotAutoRedLeft(){
         Pose2d first = new Pose2d(9.25, 0.6, new Rotation2d());
         Pose2d second = new Pose2d(9.25, 3.0, new Rotation2d(Degrees.of(135)));
@@ -258,7 +255,6 @@ public class Autos {
             shootAuto().withTimeout(10)
         );
     }
-
     public Command pass(){
         return new ParallelCommandGroup(
             shooter.pass(),
@@ -285,6 +281,4 @@ public class Autos {
             spindexer.feedToShooterForce()
         );
     }
-
-   
 }
