@@ -353,16 +353,35 @@ public class LedSegment extends LedBase {
     }
 
     public Command showAllianceColorInteresting(){
+      return Commands.select(getPatternMap(), ()->WLED.getDefaultPattern());
+    }
 
-      HashMap<Optional<Alliance>,CustomColor> colorMap = new HashMap<>();
-      colorMap.put(Optional.of(Alliance.Red), CustomColor.kRed);
-      colorMap.put(Optional.of(Alliance.Blue), CustomColor.kBlue);
-      Supplier<CustomColor> colorSupplier = ()-> colorMap.get(DriverStation.getAlliance());
+    private CustomColor getAllianceColor(){
+      if (DriverStation.getAlliance().isPresent()){
+        if (DriverStation.getAlliance().get().equals(Alliance.Red)){
+          return CustomColor.kRed;
+        }
+        else return CustomColor.kBlue;
+      }
+      else return CustomColor.kBlack;
+    }
+      
 
-      HashMap<Optional<Alliance>,Integer> palatteMap = new HashMap<>();
-      palatteMap.put(Optional.of(Alliance.Red), 35);
-      palatteMap.put(Optional.of(Alliance.Blue), 36);
-      Supplier<Integer> palatteSupplier = ()-> palatteMap.get(DriverStation.getAlliance());
+    private int getAlliancePalatte(){
+      if (DriverStation.getAlliance().isPresent()){
+        if (DriverStation.getAlliance().get().equals(Alliance.Red)){
+          return 35;
+        }
+        else return 36;
+      }
+      else return 0;
+    }
+    private HashMap<Integer,Command> getPatternMap(){
+      
+      Supplier<CustomColor> colorSupplier = ()-> getAllianceColor();
+
+      
+      Supplier<Integer> palatteSupplier = ()-> getAlliancePalatte();
 
       HashMap<Integer,Command> patternMap = new HashMap<>();
       patternMap.put(0, Commands.runOnce(()->{
@@ -517,9 +536,7 @@ public class LedSegment extends LedBase {
         setSpeed(128);
       }, this));
 
-      patternMap.put(22, solidColor(colorSupplier.get()));
-
-      patternMap.put(23, Commands.runOnce(()->{
+      patternMap.put(22, Commands.runOnce(()->{
         setEffect(108);
         setColor(colorSupplier.get());
         setSpeed(32);
@@ -530,21 +547,40 @@ public class LedSegment extends LedBase {
 
       patternMap.put(WLED.numPatterns+1, seguimosAqui());
 
-      HashMap<Boolean,Command> disableMap = new HashMap<>();
-      disableMap.put(true, solidColor(CustomColor.kPurple));
-      disableMap.put(false, Commands.select(patternMap, ()->WLED.defaultPattern));
+      patternMap.put(WLED.numPatterns+2, solidColor(CustomColor.kPurple));
 
-      HashMap<Boolean,Command> enableMap = new HashMap<>();
-      enableMap.put(true, Commands.select(patternMap, ()->WLED.backupPattern));
-      enableMap.put(false, Commands.select(patternMap, ()->WLED.defaultPattern));
+      patternMap.put(WLED.numPatterns+3, solidColor(colorSupplier.get()));
 
-      HashMap<Boolean,Command> allianceMap = new HashMap<>();
-      allianceMap.put(true, Commands.select(disableMap, ()->DriverStation.getAlliance().isEmpty()));
-      allianceMap.put(false, Commands.select(enableMap, ()->WLED.defaultPattern>=WLED.numPatterns));
+      return patternMap;
 
-      return Commands.select(allianceMap, ()->DriverStation.isDisabled());
-      
     }
+
+    public Command debugStrips(){
+      SmartDashboard.putNumber("leds/Strip1Start", 1);
+      SmartDashboard.putNumber("leds/Strip1end", 16);
+      SmartDashboard.putNumber("leds/Strip2Start", 18);
+      SmartDashboard.putNumber("leds/Strip2end", 26);
+      SmartDashboard.putNumber("leds/Strip3Start", 28);
+      SmartDashboard.putNumber("leds/Strip3end", 36);
+
+      Supplier<Integer> start1 = ()->(int)SmartDashboard.getNumber("leds/Strip1Start", 1);
+      Supplier<Integer> stop1 = ()->(int)SmartDashboard.getNumber("leds/Strip1end", 16);
+      Supplier<Integer> start2 = ()->(int)SmartDashboard.getNumber("leds/Strip2Start", 18);
+      Supplier<Integer> stop2 = ()->(int)SmartDashboard.getNumber("leds/Strip2end", 26);
+      Supplier<Integer> start3 = ()->(int)SmartDashboard.getNumber("leds/Strip3Start", 28);
+      Supplier<Integer> stop3 = ()->(int)SmartDashboard.getNumber("leds/Strip3end", 36);
+      LedMultiRange debug = new LedMultiRange(new LedRange(CustomColor.kBlack), 
+      new LedRange(start1.get(), stop1.get(), CustomColor.kRed),
+      new LedRange(CustomColor.kBlack),
+      new LedRange(start2.get(), stop2.get(), CustomColor.kGreen),
+      new LedRange(CustomColor.kBlack),
+      new LedRange(start3.get(), stop3.get(), CustomColor.kBlue),
+      new LedRange(CustomColor.kBlack));
+
+      return stripes(debug);
+    }
+
+    
 
     public Command pride(){
       double duration = 2.5;

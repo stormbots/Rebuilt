@@ -25,8 +25,8 @@ public class Signals extends SubsystemBase {
 
   
   public Signals(){
-    seg.setDefaultCommand(showAllianceColorBoring(seg).ignoringDisable(true));
-    seg2.setDefaultCommand(showAllianceColorBoring(seg2).ignoringDisable(true));
+    seg.setDefaultCommand(seg.showAllianceColorInteresting().ignoringDisable(true));
+    seg2.setDefaultCommand(seg2.showAllianceColorInteresting().ignoringDisable(true));
   }
   
 

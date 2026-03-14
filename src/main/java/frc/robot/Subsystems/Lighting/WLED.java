@@ -16,6 +16,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonSerializationContext;
 import com.google.gson.JsonSerializer;
 
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.SerialPort;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -25,12 +26,11 @@ public class WLED extends SubsystemBase{
   private static SerialPort serialport;
   private static ArrayList<LedSegment> segments = new ArrayList<LedSegment>();
   private static ArrayList<Boolean> updated = new ArrayList<Boolean>();
-  public static int calls;
-  public static int defaultPattern;
-  private static int indivualRoll;
-  public static int numPatterns = 24;
-  public static int chanceIndividual = 3;
-  public static int backupPattern;
+  private static int calls;
+  private static int defaultPattern = -1;
+  private static int indivualRoll = -1;
+  public static final int numPatterns = 24;
+  private static int chanceIndividual = 10;
   public WLED(SerialPort serialPort) {
     if (chanceIndividual==0){
       chanceIndividual = 2;
@@ -42,43 +42,45 @@ public class WLED extends SubsystemBase{
       WLED.serialport = serialPort;
     }
 
-    try{
-      defaultPattern *= 1;
-    }
-    catch (NullPointerException n){
-      defaultPattern = ((int)Math.random()*(numPatterns));
+    if (defaultPattern == -1){
+      defaultPattern = (int)(Math.random()*(numPatterns));
     }
 
-    try{
-      indivualRoll *= 1;
+    if (indivualRoll == -1){
+      indivualRoll = (int)(Math.random()*(chanceIndividual*2)+1);
     }
-    catch (NullPointerException n){
-      indivualRoll = ((int)Math.random()*(chanceIndividual*2)+1);
-    }
-
-    try{
-      backupPattern *= 1;
-    }
-    catch (NullPointerException n){
-      backupPattern = ((int)Math.random()*(numPatterns));
-    }
-  if (indivualRoll == (chanceIndividual*2)-1){
-    defaultPattern = numPatterns;
-  }
-  else if (indivualRoll == chanceIndividual*2){
-    defaultPattern = numPatterns+1;
-  }
-  calls = 0; 
+    calls = 0; 
 }
 
   public LedSegment getLedSegment(int id, int start, int stop, boolean reverse){
     return new LedSegment(id, start, stop, reverse);
   }
 
+
+  public static int getDefaultPattern(){
+    if (DriverStation.getAlliance().isEmpty()){
+      return numPatterns+2;
+    }
+    else if(indivualRoll == (chanceIndividual*2)-1){
+      return numPatterns;
+    }
+    else if(indivualRoll == chanceIndividual*2){
+      return numPatterns+1;
+    }
+    else if (DriverStation.isEnabled()){
+      return numPatterns+3;
+    }
+    else{
+      return defaultPattern;
+    }
+      
+  }
+  
+
   @Override
   public void periodic() {
     serializeSegments();
-    SmartDashboard.putString("updated",updated.toString());
+    SmartDashboard.putNumber("leds/defaultPattern", getDefaultPattern());
   }
 
   private static String gsonSerialize(LedSegment segment){
