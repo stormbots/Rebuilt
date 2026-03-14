@@ -547,7 +547,7 @@ public class LedSegment extends LedBase {
 
       patternMap.put(WLED.numPatterns+1, seguimosAqui());
 
-      patternMap.put(WLED.numPatterns+2, solidColor(CustomColor.kPurple));
+      patternMap.put(WLED.numPatterns+2, solidColor(CustomColor.kBlack));
 
       patternMap.put(WLED.numPatterns+3, solidColor(colorSupplier.get()));
 

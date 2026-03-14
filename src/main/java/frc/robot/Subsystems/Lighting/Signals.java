@@ -97,8 +97,8 @@ public class Signals extends SubsystemBase {
 
   public Command showVisionNotOkay(){
     return Commands.sequence(
-      seg.solidColor(CustomColor.kBlack),
-      seg2.solidColor(CustomColor.kBlack)
+      seg.solidColor(CustomColor.kYellow),
+      seg2.solidColor(CustomColor.kYellow)
     );
   }
 
