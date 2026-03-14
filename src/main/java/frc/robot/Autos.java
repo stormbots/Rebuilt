@@ -97,6 +97,7 @@ public class Autos {
         this.targeting = targeting;
 
         SmartDashboard.putData("AutoSelector/chooser",autoChooser);
+
         autoChooser.setDefaultOption("Select Auto",()->new InstantCommand());
         autoChooser.addOption("VV UNTESTED VV",()->new InstantCommand());
 
@@ -118,7 +119,7 @@ public class Autos {
         return autoChooser.getSelected().get();
     }
 
-    private Pose2d autoFlippedPose(double x, double y, double degrees){
+    private Pose2d autoTeamFlippedPose(double x, double y, double degrees){
         var pose = new Pose2d(x,y,new Rotation2d(Degree.of(degrees)));
         if(DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Red ) pose = FlippingUtil.flipFieldPose(pose);
         return pose;
@@ -189,7 +190,7 @@ public class Autos {
             driveToPose(preTrenchOutBlueRight, intakeWhilePassing()),
             driveToPose(shotPoseRight, intakeOnly()),
             //drive along the wall, satisfied with a job well done
-            driveToPoseSlowly(new Pose2d(0.5, 0.5, new Rotation2d(Degrees.of(180))), intakeWhileShooting()),
+            driveToPoseSlowly(0.5, 0.5, 180, intakeWhileShooting()),
             Commands.none()
         )
         .withTimeout(20)
@@ -217,14 +218,14 @@ public class Autos {
     }
     
     public Command driveToPose(Pose2d targetPose, Command superState){
-        return swerve.pidToPose(()->autoFlippedPose(targetPose.getX(), targetPose.getY(), targetPose.getRotation().getDegrees()))
+        return swerve.pidToPose(()->autoTeamFlippedPose(targetPose.getX(), targetPose.getY(), targetPose.getRotation().getDegrees()))
         .alongWith(superState)
         .until(()->swerve.isOnTargetTranslate())
         ;
     }
 
     public Command driveToPoseSlowly(Pose2d targetPose, Command superState){
-        return swerve.pidToPose(()->autoFlippedPose(targetPose.getX(), targetPose.getY(), targetPose.getRotation().getDegrees()), 0.5, Inches.of(5))
+        return swerve.pidToPose(()->autoTeamFlippedPose(targetPose.getX(), targetPose.getY(), targetPose.getRotation().getDegrees()), 0.5, Inches.of(5))
         .alongWith(superState)
         .until(()->swerve.isOnTargetTranslate())
         ;

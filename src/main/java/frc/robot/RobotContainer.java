@@ -118,6 +118,9 @@ public class RobotContainer {
     debug.x()
     .whileTrue(shooter.testSetFlywheelRPM(SmartDashboard.getNumber("robotContainer/flywheelrpm", rpm)))
     .whileTrue(shooter.testSetHoodAngle(Degree.of(SmartDashboard.getNumber("robotContainer/hoodAngle", hoodAngle))));
+
+    debug.a()
+    .whileTrue(shooter.testTurretVoltage(()->debug.getLeftY()*8));
   }
 
 

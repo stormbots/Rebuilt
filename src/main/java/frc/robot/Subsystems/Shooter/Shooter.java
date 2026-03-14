@@ -2,6 +2,7 @@ package frc.robot.Subsystems.Shooter;
 
 import static edu.wpi.first.units.Units.Degrees;
 
+import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
 
 import edu.wpi.first.units.measure.Angle;
@@ -136,6 +137,10 @@ public class Shooter {
         .beforeStarting(()->stowed=true)
         .finallyDo(()->stowed=false)
         ;
+    }
+
+    public Command testTurretVoltage(DoubleSupplier voltage){
+        return turret.setVoltage(voltage);
     }
 
 

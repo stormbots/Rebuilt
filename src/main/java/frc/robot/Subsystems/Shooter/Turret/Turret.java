@@ -7,6 +7,7 @@ package frc.robot.Subsystems.Shooter.Turret;
 import static edu.wpi.first.units.Units.Degree;
 import static edu.wpi.first.units.Units.Degrees;
 
+import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
 
 import com.revrobotics.PersistMode;
@@ -36,8 +37,8 @@ public class Turret extends SubsystemBase {
   public static final double kGearing = (1.0 / 3.0) * (10.0 / 132.0) * (177.0/198.0);
 
   //How much in ONE direction, hence max range divided by 2
-  public static final double kMinRotation = 170.0;
-  public static final double kMaxRotation = 190.0;
+  public static final double kMinRotation = 70.0;
+  public static final double kMaxRotation = 335.0;
 
   Angle targetPosition = Degrees.of(0);
   Angle tolerance = Degrees.of(3);
@@ -88,6 +89,12 @@ public class Turret extends SubsystemBase {
         ControlType.kPosition
       );
     });
+  }
+
+  public Command setVoltage(DoubleSupplier voltage){
+    return run(()-> {
+      motor.setVoltage(voltage.getAsDouble());
+    }).finallyDo(()->motor.setVoltage(0));
   }
 
   public Command setAngle(Supplier<TargetingSystem.ShooterState> targetSupplier){
