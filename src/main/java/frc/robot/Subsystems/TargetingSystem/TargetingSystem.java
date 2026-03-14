@@ -12,11 +12,6 @@ import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.Radians;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
 import java.util.function.Supplier;
 
 import com.stormbots.LUT;
@@ -136,28 +131,33 @@ public class TargetingSystem extends SubsystemBase {
     this.swerve = swerve;
     SmartDashboard.putData("targeting/field",field);
 
-    
     field.getObject("testbot").setPose(new Pose2d(1,2,new Rotation2d()));
+
     field.getObject("pass").setPoses(
-      new Pose2d(1,1.5,new Rotation2d()),
-      new Pose2d(1,6.5,new Rotation2d())
-      );
+      new Pose2d(blueLow,new Rotation2d()),
+      new Pose2d(blueHigh,new Rotation2d()),
+      new Pose2d(redLow,new Rotation2d()),
+      new Pose2d(redHigh,new Rotation2d())
+    );
   }
 
   /** Figure out the best target based on conditions or field position */
-  private Pose2d getBestTarget(Pose2d botPosition){
-    var pass=field.getObject("pass").getPoses();
-    if(botPosition.getX()<4.6) return new Pose2d(Constants.Field.blueHub,new Rotation2d());
-    if(botPosition.getY()>=4) return pass.get(1);
-    if(botPosition.getY()<4) return pass.get(0);
-    return pass.get(0);
+  public Pose2d getBestTarget(Pose2d botPosition){
+    var alliance = DriverStation.getAlliance().orElse(Alliance.Blue);
+
+    if(alliance==Alliance.Blue){
+      if(botPosition.getX()<4.6) return new Pose2d(getHubTarget(),new Rotation2d());
+    }else{
+      if(botPosition.getX()>11.9) return new Pose2d(getHubTarget(),new Rotation2d());
+    }
+    return new Pose2d(getPassTarget(),new Rotation2d());
   }
 
   public Pose2d getTarLockTemp(){
     return new Pose2d(Constants.Field.blueHub,new Rotation2d());
   }
 
-  public Pose2d getBestTarget(){
+  private Pose2d getBestTarget(){
     return getBestTarget(swerve.getSwervePose());
   }
 
@@ -251,20 +251,35 @@ public class TargetingSystem extends SubsystemBase {
     field.setRobotPose(botpose);
 
     //Moving the Robot on the field is annoying, so sub in a draggable object for testing
-    if(DriverStation.isDisabled()) botpose = field.getObject("testbot").getPose();
+    //Key functions don't accept poses and read only swerve pose; Disabling this to avoid confusion
+    // if(DriverStation.isDisabled()) botpose = field.getObject("testbot").getPose();
+
 
     var target = getBestTarget(botpose);
     var angle = getHeadingToTarget(botpose.getTranslation(),target.getTranslation());
     var turret = new Pose2d(botpose.getX(),botpose.getY(),angle);
 
+    var bestTarget = getBestTarget(botpose);
+
     field.getObject("turret").setPose(turret);
-    field.getObject("bestTarget").setPose(getBestTarget(botpose));
+    field.getObject("bestTarget").setPose(bestTarget);
+
+    // field.getObject("bestTargetCompensated").setPose(compen);
 
     if(Robot.isSimulation()){
         //Generate a slightly fancier version for the 3D viewer
         var turret3d=new Pose3d(getTurretCenterpoint(),new Rotation3d(angle));
         DogLog.log("targeting/Turret", turret3d);
     }
+
+    var compensatedTarget = getBotVelCompensatedTarget(
+      swerve::getSwervePose,
+      bestTarget::getTranslation,
+      hubLUT,
+      swerve::getChassisSpeedsFieldRelative
+    );
+
+    field.getObject("bestTargetCompensated").setPose(new Pose2d(compensatedTarget,new Rotation2d()));
 
   }
 

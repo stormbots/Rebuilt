@@ -181,4 +181,8 @@ public class Hood extends SubsystemBase {
 
     homed=true;
   }
+
+  public Command stow(){
+    return setAngle(()->Degrees.of(0), ()->Degrees.of(10));
+  }
 }
