@@ -5,7 +5,9 @@
 
 package frc.robot;
 
+import static edu.wpi.first.units.Units.Degree;
 import static edu.wpi.first.units.Units.Degrees;
+import static edu.wpi.first.units.Units.Inches;
 
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Supplier;
@@ -19,6 +21,8 @@ import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -34,6 +38,7 @@ import frc.robot.Subsystems.Spindexer.Spindexer;
 import frc.robot.Subsystems.Swerve.Pathing;
 import frc.robot.Subsystems.Swerve.Swerve;
 import frc.robot.Subsystems.TargetingSystem.TargetingSystem;
+import frc.robot.lib.BLine.FlippingUtil;
 import frc.robot.lib.BLine.Path;
 
 
@@ -111,29 +116,25 @@ public class Autos {
         autoChooser.addOption("VV UNTESTED VV",()->new InstantCommand());
 
         //ACTUAL OPTIONS BELOW HERE
-        autoChooser.addOption("Basic Shoot 8 anywhere", this::basicShootInitial8);
-        autoChooser.addOption("Right Blue go center", this::centerShootRightBlue);
-        autoChooser.addOption("Right Red go center", this::centerShootRightBlue);
-        autoChooser.addOption("Left Blue go center", this::centerShootLeftBlue);
-        autoChooser.addOption("Left Red go center", this::centerShootLeftRed);
-        autoChooser.addOption("Left Blue go center not BLINE", this::notBlineCenterBlueLeftShoot);
-        autoChooser.addOption("Right Blue go center not BLINE", this::notBlineCenterBlueRightShoot);
-        autoChooser.addOption("Left Red go center not BLINE", this::notBlineCenterRedLeftShoot);
-        autoChooser.addOption("Right Red go center not BLINE", this::notBlineCenterRedRightShoot);
-        autoChooser.addOption("Blue Depot", this::depotAutoBlue);
-        autoChooser.addOption("Red Depot", this::depotAutoRed);
+        autoChooser.addOption("Blue Left Go Center", this::BlueLeftGoCenter);
+        autoChooser.addOption("Blue Right Go Center", this::BlueRightGoCenter);
+        autoChooser.addOption("Red Left Go Center", this::RedLeftGoCenter);
+        autoChooser.addOption("Red Right Go Center", this::RedRightGoCenter);
+        autoChooser.addOption("Red testing", this::redTesting);
+        autoChooser.addOption("Red Left Center Shoot Slow", this::slowTestinCenterShotAutoRedLeft);
+        // autoChooser.addOption("Blue Depot", this::depotAutoBlue);
+        // autoChooser.addOption("Red Depot", this::depotAutoRed);
     }
 
     //Get Auto Command
     public Command getAutonomousCommand(){
-        // try{
-        //      return selectedAutoFuture.get();
-        // }
-        // catch(Exception e){
-        //     System.err.println("Failed to build auto command ");
-        //     System.err.println(e);
-        // }
         return autoChooser.getSelected().get();
+    }
+
+    private Pose2d autoFlippedPose(double x, double y, double degrees){
+        var pose = new Pose2d(x,y,new Rotation2d(Degree.of(degrees)));
+        if(DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Red ) pose = FlippingUtil.flipFieldPose(pose);
+        return pose;
     }
 
     /////////////////////////
@@ -144,11 +145,7 @@ public class Autos {
             swerve.turnToHeading(()->{
                 return targeting.getHeadingToTarget(swerve.getSwervePose().getTranslation(), targeting.getHubTarget()).plus(Rotation2d.k180deg);
             }).until(()->swerve.isOnTargetAngle()).withTimeout(1.0),
-            new ParallelCommandGroup(
-                shooter.shootHubAuto(),
-                new WaitCommand(0.3)
-                .andThen(spindexer.feedToShooterForce())
-            ).withTimeout(1.5)
+            shootAuto().withTimeout(1.5)
         );
     }
     public Command basicShootToEmpty(){
@@ -156,229 +153,48 @@ public class Autos {
             swerve.turnToHeading(()->{
                 return targeting.getHeadingToTarget(swerve.getSwervePose().getTranslation(), targeting.getHubTarget()).plus(Rotation2d.k180deg);
             }).until(()->swerve.isOnTargetAngle()).withTimeout(1.0),
-            new ParallelCommandGroup(
-                shooter.shootHubAuto(),
-                new WaitCommand(0.3)
-                .andThen(spindexer.feedToShooterForce())
-            ).withTimeout(3)
+            shootAuto().withTimeout(3)
         );
     }
-    public Command centerShootRightBlue(){
-        Path.PathConstraints constraints = new Path.PathConstraints()
-            .setMaxVelocityMetersPerSec(4.0)
-            .setMaxAccelerationMetersPerSec2(4.0)
-            .setMaxVelocityDegPerSec(360.0)
-            .setMaxAccelerationDegPerSec2(580.0)
-            .setEndTranslationToleranceMeters(0.4)
-            .setEndRotationToleranceDeg(5.0);
-          Path pointStart = new Path(
-            constraints,
-            new Path.Waypoint(new Translation2d(4.0, 0.8), new Rotation2d(1.5707963267948966))
-        );
-        Path.PathConstraints constraints2 = new Path.PathConstraints()
-            .setMaxVelocityMetersPerSec(4.0)
-            .setMaxAccelerationMetersPerSec2(4.0)
-            .setMaxVelocityDegPerSec(360.0)
-            .setMaxAccelerationDegPerSec2(580.0)
-            .setEndTranslationToleranceMeters(0.4)
-            .setEndRotationToleranceDeg(5.0);
-        Path pathInt = new Path(
-            constraints,
-            new Path.Waypoint(new Translation2d(7.7, 0.8), new Rotation2d(1.5707963267948966)),
-            new Path.Waypoint(new Translation2d(7.7, 2.5), new Rotation2d(1.5707963267948966)),
-            new Path.Waypoint(new Translation2d(7.7, 0.8), new Rotation2d(1.5707963267948966))
-        );
-        Path pointPostInt = new Path(
-            constraints,
-            new Path.Waypoint(new Translation2d(7.7, 0.8), new Rotation2d(1.5707963267948966)),
-            new Path.Waypoint(new Translation2d(4.0, 0.8), new Rotation2d(1.5707963267948966))
-        );
-        return Commands.sequence(
-            Commands.print("1"),
-            basicShootInitial8(),
-            Commands.print("3"),
-            shooter.testSetHoodAngle(Degrees.of(0)).withTimeout(0.5),
-            Commands.print("4"),
-            new ParallelCommandGroup(
-                pathing.followPath(pathInt).withTimeout(15.0),
-                Commands.sequence(
-                    new WaitCommand(2.0),
-                    intake.intake())),
-            Commands.print("8"),
-            intake.stop().withTimeout(0.2),
-            Commands.print("9"),
-            pathing.followPath(pointPostInt).withTimeout(7.5),
-            Commands.print("10"),
-            basicShootInitial8()
-        );
-    }
-    public Command centerShootLeftBlue(){
-        Path.PathConstraints constraints = new Path.PathConstraints()
-            .setMaxVelocityMetersPerSec(4.0)
-            .setMaxAccelerationMetersPerSec2(4.0)
-            .setMaxVelocityDegPerSec(360.0)
-            .setMaxAccelerationDegPerSec2(580.0)
-            .setEndTranslationToleranceMeters(0.4)
-            .setEndRotationToleranceDeg(5.0);
-          Path pointStart = new Path(
-            constraints,
-            new Path.Waypoint(new Translation2d(4.0, 7.4), new Rotation2d(-1.5707963267948966))
-        );
-        Path pathInt = new Path(
-            constraints,
-            new Path.Waypoint(new Translation2d(7.7, 7.4), new Rotation2d(-1.5707963267948966)),
-            new Path.Waypoint(new Translation2d(7.7, 5.0), new Rotation2d(-1.5707963267948966)),
-            new Path.Waypoint(new Translation2d(7.7, 7.4), new Rotation2d(-1.5707963267948966))
-        );
-        Path pointPostInt = new Path(
-            constraints,
-            new Path.Waypoint(new Translation2d(7.7, 7.4), new Rotation2d(-1.5707963267948966)),
-            new Path.Waypoint(new Translation2d(4.0, 7.4), new Rotation2d(-1.5707963267948966))
-        );
-        return Commands.sequence(
-            Commands.print("1"),
-            basicShootInitial8(),
-            Commands.print("3"),
-            shooter.testSetHoodAngle(Degrees.of(0)).withTimeout(0.5),
-            Commands.print("4"),
-            new ParallelCommandGroup(
-                pathing.followPath(pathInt).withTimeout(15.0),
-                Commands.sequence(
-                    new WaitCommand(2.0),
-                    intake.intake())),
-            Commands.print("8"),
-            intake.stop().withTimeout(0.2),
-            Commands.print("9"),
-            pathing.followPath(pointPostInt).withTimeout(7.5),
-            Commands.print("10"),
-            basicShootInitial8()
-        );
-    }
-    public Command centerShootRightRed(){
-         Path.PathConstraints constraints = new Path.PathConstraints()
-            .setMaxVelocityMetersPerSec(4.0)
-            .setMaxAccelerationMetersPerSec2(4.0)
-            .setMaxVelocityDegPerSec(360.0)
-            .setMaxAccelerationDegPerSec2(580.0)
-            .setEndTranslationToleranceMeters(0.4)
-            .setEndRotationToleranceDeg(5.0);
-          Path pointStart = new Path(
-            constraints,
-            new Path.Waypoint(new Translation2d(4.0, 0.6), new Rotation2d(-1.5707963267948966))
-        );
-        Path pathInt = new Path(
-            constraints,
-            new Path.Waypoint(new Translation2d(7.7, 0.6), new Rotation2d(-1.5707963267948966)),
-            new Path.Waypoint(new Translation2d(7.7, 2.5), new Rotation2d(-1.5707963267948966)),
-            new Path.Waypoint(new Translation2d(7.7, 0.6), new Rotation2d(-1.5707963267948966))
-        );
-        Path pointPostInt = new Path(
-            constraints,
-            new Path.Waypoint(new Translation2d(7.7, 0.6), new Rotation2d(-1.5707963267948966)),
-            new Path.Waypoint(new Translation2d(4.0, 0.6), new Rotation2d(-1.5707963267948966))
-        );
-        return Commands.sequence(
-            Commands.print("1"),
-            basicShootInitial8(),
-            Commands.print("3"),
-            shooter.testSetHoodAngle(Degrees.of(0)).withTimeout(0.5),
-            Commands.print("4"),
-            new ParallelCommandGroup(
-                pathing.followPathTeamFlipped(pathInt).withTimeout(15.0),
-                Commands.sequence(
-                    new WaitCommand(2.0),
-                    intake.intake())),
-            Commands.print("8"),
-            intake.stop().withTimeout(0.2),
-            Commands.print("9"),
-            pathing.followPathTeamFlipped(pointPostInt).withTimeout(7.5),
-            Commands.print("10"),
-            basicShootInitial8()
-        );
-    }
-    public Command centerShootLeftRed(){
-        Path.PathConstraints constraints = new Path.PathConstraints()
-            .setMaxVelocityMetersPerSec(4.0)
-            .setMaxAccelerationMetersPerSec2(4.0)
-            .setMaxVelocityDegPerSec(360.0)
-            .setMaxAccelerationDegPerSec2(580.0)
-            .setEndTranslationToleranceMeters(0.4)
-            .setEndRotationToleranceDeg(5.0);
-          Path pointStart = new Path(
-            constraints,
-            new Path.Waypoint(new Translation2d(4.0, 7.4), new Rotation2d(-1.5707963267948966))
-        );
-        Path pathInt = new Path(
-            constraints,
-            new Path.Waypoint(new Translation2d(7.7, 7.4), new Rotation2d(-1.5707963267948966)),
-            new Path.Waypoint(new Translation2d(7.7, 5.0), new Rotation2d(-1.5707963267948966)),
-            new Path.Waypoint(new Translation2d(7.7, 7.4), new Rotation2d(-1.5707963267948966))
-        );
-        Path pointPostInt = new Path(
-            constraints,
-            new Path.Waypoint(new Translation2d(7.7, 7.4), new Rotation2d(-1.5707963267948966)),
-            new Path.Waypoint(new Translation2d(4.0, 7.4), new Rotation2d(-1.5707963267948966))
-        );
-        return Commands.sequence(
-            Commands.print("1"),
-            basicShootInitial8(),
-            Commands.print("3"),
-            shooter.testSetHoodAngle(Degrees.of(0)).withTimeout(0.5),
-            Commands.print("4"),
-            new ParallelCommandGroup(
-                pathing.followPathTeamFlipped(pathInt).withTimeout(15.0),
-                Commands.sequence(
-                    new WaitCommand(2.0),
-                    intake.intake())),
-            Commands.print("8"),
-            intake.stop().withTimeout(0.2),
-            Commands.print("9"),
-            pathing.followPathTeamFlipped(pointPostInt).withTimeout(7.5),
-            Commands.print("10"),
-            basicShootInitial8()
-        );
-    }
-
-
-    public Command notBlineCenterBlueLeftShoot(){
+    public Command BlueLeftGoCenter(){
         return Commands.sequence(
             basicShootInitial8(),
             shooter.testSetHoodAngle(Degrees.of(0)).withTimeout(0.5),
             swerve.pidToPose(()->preIntBL).until(()->swerve.isOnTargetTranslate()),
-            swerve.pidToPose(()->postIntBL).alongWith(intake.intake()).until(()->swerve.isOnTargetTranslate()),
+            swerve.pidToPose(()->postIntBL, 1.0, Inches.of(5)).alongWith(intake.intake()).until(()->swerve.isOnTargetTranslate()),
             swerve.pidToPose(()->preIntBL).alongWith(intake.stop()).until(()->swerve.isOnTargetTranslate()),
             swerve.pidToPose(()->shotPoseBL).until(()->swerve.isOnTargetTranslate()),
             basicShootToEmpty()
         );
     }
-    public Command notBlineCenterBlueRightShoot(){
+    public Command BlueRightGoCenter(){
         return Commands.sequence(
             basicShootInitial8(),
             shooter.testSetHoodAngle(Degrees.of(0)).withTimeout(0.5),
             swerve.pidToPose(()->preIntBR).until(()->swerve.isOnTargetTranslate()),
-            swerve.pidToPose(()->postIntBR).alongWith(intake.intake()).until(()->swerve.isOnTargetTranslate()),
+            swerve.pidToPose(()->postIntBR, 1.0, Inches.of(5)).alongWith(intake.intake()).until(()->swerve.isOnTargetTranslate()),
             swerve.pidToPose(()->preIntBR).alongWith(intake.stop()).until(()->swerve.isOnTargetTranslate()),
             swerve.pidToPose(()->shotPoseBR).until(()->swerve.isOnTargetTranslate()),
             basicShootToEmpty()
         );
     }
-    public Command notBlineCenterRedLeftShoot(){
+    public Command RedLeftGoCenter(){
         return Commands.sequence(
             basicShootInitial8(),
             shooter.testSetHoodAngle(Degrees.of(0)).withTimeout(0.5),
             swerve.pidToPose(()->preIntRL).until(()->swerve.isOnTargetTranslate()),
-            swerve.pidToPose(()->postIntRL).alongWith(intake.intake()).until(()->swerve.isOnTargetTranslate()),
+            swerve.pidToPose(()->postIntRL, 1.0, Inches.of(5)).alongWith(intake.intake()).until(()->swerve.isOnTargetTranslate()),
             swerve.pidToPose(()->preIntRL).alongWith(intake.stop()).until(()->swerve.isOnTargetTranslate()),
             swerve.pidToPose(()->shotPoseRL).until(()->swerve.isOnTargetTranslate()),
             basicShootToEmpty()
         );
     }
-    public Command notBlineCenterRedRightShoot(){
+    public Command RedRightGoCenter(){
         return Commands.sequence(
             basicShootInitial8(),
             shooter.testSetHoodAngle(Degrees.of(0)).withTimeout(0.5),
             swerve.pidToPose(()->preIntRR).until(()->swerve.isOnTargetTranslate()),
-            swerve.pidToPose(()->postIntRR).alongWith(intake.intake()).until(()->swerve.isOnTargetTranslate()),
+            swerve.pidToPose(()->postIntRR, 1.0, Inches.of(5)).alongWith(intake.intake()).until(()->swerve.isOnTargetTranslate()),
             swerve.pidToPose(()->preIntRR).alongWith(intake.stop()).until(()->swerve.isOnTargetTranslate()),
             swerve.pidToPose(()->shotPoseRR).until(()->swerve.isOnTargetTranslate()),
             basicShootToEmpty()
@@ -386,9 +202,6 @@ public class Autos {
     }
     public Command depotAutoBlue(){
         return Commands.sequence(
-            // questNav.wantToTrackCommand(false),
-            // questNav.setQuestPoseCommand(new Pose3d(new Pose2d(4.0, 5.88, new Rotation2d()))),
-            // questNav.wantToTrackCommand(true),
             basicShootInitial8(),
             swerve.pidToPose(()->preIntDepotBlue).alongWith(intake.intake()).until(()->swerve.isOnTargetTranslate()),
             new ParallelCommandGroup(
@@ -401,9 +214,7 @@ public class Autos {
     }
     public Command depotAutoRed(){
         return Commands.sequence(
-            // questNav.wantToTrackCommand(false),
-            // questNav.setQuestPoseCommand(new Pose3d(new Pose2d(4.0, 5.88, new Rotation2d()))),
-            // questNav.wantToTrackCommand(true),
+
             basicShootInitial8(),
             swerve.pidToPose(()->preIntDepotRed).alongWith(intake.intake()).until(()->swerve.isOnTargetTranslate()),
             new ParallelCommandGroup(
@@ -414,5 +225,60 @@ public class Autos {
             )
         );
     }
-   
+    public Command redTesting(){
+        Path pathAuto = new Path("testingStuffs");
+        return pathing.followPathTeamFlipped(pathAuto).finallyDo(
+            ()->swerve.stop()
+        );
+    }
+    public Command slowTestinCenterShotAutoBLUERIGHT(){
+        Pose2d first = new Pose2d(7.3, 0.6, new Rotation2d());
+        Pose2d second = new Pose2d(7.3, 3.0, new Rotation2d(Degrees.of(45)));
+        Pose2d third = new Pose2d(3.0, 0.6, new Rotation2d(Degrees.of(180)));
+        return Commands.sequence(
+            swerve.pidToPose(()->first).until(()->swerve.isOnTargetTranslate()),
+            swerve.pidToPose(()->second, 1.0, Inches.of(5)).alongWith(intake.intake()).until(()->swerve.isOnTargetTranslate()),
+            swerve.pidToPose(()->first).until(()->swerve.isOnTargetTranslate()),
+            swerve.pidToPose(()->third).until(()->swerve.isOnTargetTranslate()),
+            shootAuto()
+        );
+    }
+    public Command slowTestinCenterShotAutoRedLeft(){
+        Pose2d first = new Pose2d(9.25, 0.6, new Rotation2d());
+        Pose2d second = new Pose2d(9.25, 3.0, new Rotation2d(Degrees.of(135)));
+        Pose2d third = new Pose2d(14, 0.6, new Rotation2d());
+        return Commands.sequence(
+            swerve.pidToPose(()->first).until(()->swerve.isOnTargetTranslate()),
+            swerve.pidToPose(()->second, 1.0, Inches.of(5)).alongWith(intake.intake()).until(()->swerve.isOnTargetTranslate()),
+            swerve.pidToPose(()->first).until(()->swerve.isOnTargetTranslate()),
+            swerve.pidToPose(()->third).until(()->swerve.isOnTargetTranslate()),
+            shootAuto().withTimeout(10)
+        );
+    }
+    public Command pass(){
+        return new ParallelCommandGroup(
+            shooter.pass(),
+            spindexer.feedToShooterForce()
+        );
+    }
+    public Command shootAuto(){
+        return new ParallelCommandGroup(
+            shooter.shootHubNoTur(),
+            spindexer.feedToShooterForce()
+        );
+    }
+    public Command intakeWhilePassing(){
+        return new ParallelCommandGroup(
+            intake.intake(),
+            shooter.pass(),
+            spindexer.feedToShooterForce()
+        );
+    }
+    public Command intakeWhileShooting(){
+        return new ParallelCommandGroup(
+            intake.intake(),
+            shooter.shootHub(),
+            spindexer.feedToShooterForce()
+        );
+    }
 }
