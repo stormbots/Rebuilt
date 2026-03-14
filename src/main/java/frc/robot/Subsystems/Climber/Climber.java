@@ -109,7 +109,7 @@ public class Climber extends SubsystemBase {
         .withName("stow");
     }
 
-    public SwerveInputs generateInputs(Pose2d botpose){
+    public SwerveInputs generateSwerveInputs(Pose2d botpose){
         double facingAngleDegrees = botpose.getRotation().getDegrees();
         if(facingAngleDegrees < 180  &&  facingAngleDegrees > 0){ facingAngleDegrees = 90; }
         else{ facingAngleDegrees = -90;}

@@ -6,11 +6,6 @@ package frc.robot;
 
 import com.stormbots.CRTAbsoluteEncoder;
 
-import static edu.wpi.first.units.Units.Degree;
-import static edu.wpi.first.units.Units.Degrees;
-
-import java.io.SequenceInputStream;
-
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
@@ -143,7 +138,6 @@ public class RobotContainer {
     //  driver.y().whileTrue(shooter.testSetHoodAngle(Degrees.of(30)));
 
 
-
   }
 
   private void configureOperatorBindings() {
@@ -153,15 +147,24 @@ public class RobotContainer {
     // operator.leftBumper().whileTrue(climber.setStage1Voltage(12));
     // operator.leftTrigger().whileTrue(climber.setStage1Voltage(-12));
 
+    //Simple Climber Lineup
     operator.leftBumper()
       .whileTrue(climber.prepareForClimbL1())
       .onFalse(climber.climbL1())
     ;
 
-    // operator.rightBumper() stage2 hook up, lock out if not end of match  
-    // operator.rightBumper().whileTrue(climber.setStage2Voltage(12));
-    // // operator.rightTrigger() stage2 hook down, lock out if not end of match
-    // operator.rightTrigger().whileTrue(climber.setStage2Voltage(-12));
+    //Operator Climber Lineup command
+    //NOTE: Driver may want a swerve.turnToHeading() for this; 
+    //Omitted due to prior odometry issues proving to be a risk factor
+    // operator.rightBumper().whileTrue(Commands.parallel(
+    //   climber.prepareForClimbL1(),
+    //   swerve.addSecondaryInputsTrueFielcentric(()->climber.generateSwerveInputs(swerve.getSwervePose())),
+    //   Commands.none()
+    // ).until(climber::isLinedUpWithL1)
+    // .andThen(climber.climbL1())
+    // );
+
+
     operator.povUp().whileTrue(spindexer.unclog()); // shake dye rotor / unclog
 
     operator.povDown().whileTrue(intake.eject()); // intake.eject()
@@ -182,22 +185,6 @@ public class RobotContainer {
     .whileTrue(swerve.turnToHeading(()->new Rotation2d()));
 
     // operator.back() // re-home intake, hood, turret? hood? not doing this rn
-
-    // Align to the climb process/button
-    // align up/down swerve.setAngle()
-    // addRangeFinderOutputs
-    //once in place
-    //climb
-
-    operator.rightBumper().whileTrue(Commands.parallel(
-      climber.prepareForClimbL1(),
-      swerve.turnToHeading(()->new Rotation2d(Degree.of(90))),
-      swerve.addSecondaryInputsTrueFielcentric(()->climber.generateInputs(swerve.getSwervePose())),
-      Commands.none()
-    ).until(climber::isLinedUpWithL1)
-    .andThen(climber.climbL1())
-    );
-
 
   }
 
