@@ -363,7 +363,7 @@ public class LedSegment extends LedBase {
         }
         else return CustomColor.kBlue;
       }
-      else return CustomColor.kBlack;
+      else return CustomColor.kPurple;
     }
       
 

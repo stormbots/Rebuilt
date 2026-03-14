@@ -88,18 +88,20 @@ public class Signals extends SubsystemBase {
  }
 
  public Command showVisionOkay(){
-    return Commands.sequence(
+    Command command = Commands.sequence(
       seg.solidColor(CustomColor.kGreen),
       seg2.solidColor(CustomColor.kGreen),
       Commands.waitSeconds(0.5)
     );
+    return command.ignoringDisable(true);
   }
 
   public Command showVisionNotOkay(){
-    return Commands.sequence(
+    Command command = Commands.sequence(
       seg.solidColor(CustomColor.kYellow),
       seg2.solidColor(CustomColor.kYellow)
     );
+    return command.ignoringDisable(true);
   }
 
 }

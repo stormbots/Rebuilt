@@ -61,14 +61,17 @@ public class WLED extends SubsystemBase{
     if (DriverStation.getAlliance().isEmpty()){
       return numPatterns+2;
     }
+    else if(DriverStation.isAutonomousEnabled()){
+      return defaultPattern;
+    }
+    else if (DriverStation.isTeleopEnabled()){
+      return numPatterns+3;
+    }
     else if(indivualRoll == (chanceIndividual*2)-1){
       return numPatterns;
     }
     else if(indivualRoll == chanceIndividual*2){
       return numPatterns+1;
-    }
-    else if (DriverStation.isEnabled()){
-      return numPatterns+3;
     }
     else{
       return defaultPattern;

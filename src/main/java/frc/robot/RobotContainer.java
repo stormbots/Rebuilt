@@ -53,6 +53,7 @@ public class RobotContainer {
   Pathing pathing = new Pathing(swerve, shooter, intake, spindexer, targeting);
   Signals signals = new Signals();
   Autos autos = new Autos(swerve, shooter, intake, questnav, spindexer, pathing, targeting);
+  ShiftTracking shiftTracking = new ShiftTracking();
   // Bling bling = new Bling(); //TODO: Currently no bling lights on bot
   FieldBehaviour fieldBehaviour = new FieldBehaviour();
 
@@ -105,7 +106,10 @@ public class RobotContainer {
 
 
 
-    new Trigger(photonvision::doesNotHaveTarget).and(DriverStation::isDisabled)
+    // new Trigger(photonvision::doesNotHaveTarget).and(DriverStation::isDisabled).and(DriverStation.getAlliance()::isPresent)
+    // .whileTrue(signals.showVisionNotOkay()).onFalse(signals.showVisionOkay());
+
+     new Trigger(DriverStation::isDisabled).and(DriverStation.getAlliance()::isPresent)
     .whileTrue(signals.showVisionNotOkay().repeatedly()).onFalse(signals.showVisionOkay());
 
     ShiftTracking.canShoot.onTrue(signals.shiftStart()).onFalse(signals.shiftEnd());
