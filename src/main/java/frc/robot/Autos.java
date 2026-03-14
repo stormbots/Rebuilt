@@ -9,18 +9,10 @@ import static edu.wpi.first.units.Units.Degree;
 import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.Inches;
 
-import java.util.concurrent.CompletableFuture;
 import java.util.function.Supplier;
-import javax.sound.midi.Sequence;
-import org.opencv.core.Mat;
-import com.studica.frc.AHRS;
-
 
 import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Rotation3d;
-import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
@@ -29,8 +21,6 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
-import edu.wpi.first.wpilibj2.command.RunCommand;
-import edu.wpi.first.wpilibj2.command.WaitCommand;
 import frc.robot.Subsystems.Intake.Intake;
 import frc.robot.Subsystems.Questnav.QuestNavSubsystem;
 import frc.robot.Subsystems.Shooter.Shooter;
@@ -124,6 +114,8 @@ public class Autos {
         autoChooser.addOption("Red Left Center Shoot Slow", this::slowTestinCenterShotAutoRedLeft);
         // autoChooser.addOption("Blue Depot", this::depotAutoBlue);
         // autoChooser.addOption("Red Depot", this::depotAutoRed);
+        autoChooser.addOption("Evil Mentor Auto", this::evilMentorAuto);
+
     }
 
     //Get Auto Command
@@ -255,30 +247,92 @@ public class Autos {
             shootAuto().withTimeout(10)
         );
     }
+
+
+    public Command evilMentorAuto(){
+        return Commands.sequence(
+            driveToPose(4, 0.6, 0,stow()), //near trench
+            driveToPose(6, 0.6, 0,stow()), //far trench
+            //load up in the middle across center line
+            driveToPose(8.6, 0.6, 120,intakeWhilePassing()),
+            driveToPose(8.6, 1.2, 120,intakeWhilePassing()),
+            driveToPoseSlowly(8.6, 3.5, 120,intakeWhilePassing()),
+            //zoom back, pulling any fuel toward the trench
+            driveToPose(7.64, 0.88, 120,intakeWhilePassing()),
+            //Drive to and through trench
+            driveToPose(6, 0.6, 180,intakeWhilePassing()),
+            driveToPose(3.5, 0.6, 180,intakeOnly()),
+            //drive along the wall, satisfied with a job well done
+            driveToPoseSlowly(0.5, 0.5, 180,intakeWhileShooting()),
+            Commands.none()
+        )
+        .withTimeout(20)
+        ;
+    }
+
+
+    //////////////////////////////////////////
+    /// SuperStructure State Commands ///////
+    ////////////////////////////////////////
+
+    public Command driveToPose(double x, double y, double degrees, Command superState){
+        return swerve.pidToPose(()->autoFlippedPose(x, y, degrees))
+        .alongWith(superState)
+        .until(()->swerve.isOnTargetTranslate())
+        ;
+    }
+
+    public Command driveToPoseSlowly(double x, double y, double degrees, Command superState){
+        return swerve.pidToPose(()->autoFlippedPose(x, y, degrees), 0.5, Inches.of(5))
+        .alongWith(superState)
+        .until(()->swerve.isOnTargetTranslate())
+        ;
+    }
+    
+
+    public Command stow(){
+        return Commands.parallel(
+            shooter.stow(),
+            spindexer.stop(),
+            intake.stop()
+        );
+    }
+
     public Command pass(){
         return new ParallelCommandGroup(
             shooter.pass(),
-            spindexer.feedToShooterForce()
+            spindexer.feedToShooterForce(),
+            intake.stop()
         );
     }
     public Command shootAuto(){
         return new ParallelCommandGroup(
             shooter.shootHubNoTur(),
-            spindexer.feedToShooterForce()
+            spindexer.feedToShooterForce(),
+            intake.stop()
         );
     }
+
+    public Command intakeOnly(){
+        return new ParallelCommandGroup(
+            shooter.stow(),
+            spindexer.stop(),
+            intake.intake()
+        );
+    }
+
     public Command intakeWhilePassing(){
         return new ParallelCommandGroup(
-            intake.intake(),
             shooter.pass(),
-            spindexer.feedToShooterForce()
+            spindexer.feedToShooterForce(),
+            intake.intake()
         );
     }
     public Command intakeWhileShooting(){
         return new ParallelCommandGroup(
-            intake.intake(),
-            shooter.shootHub(),
-            spindexer.feedToShooterForce()
+            shooter.shootHubVelComp(),
+            spindexer.feedToShooterForce(),
+            intake.intake()
         );
     }
 }

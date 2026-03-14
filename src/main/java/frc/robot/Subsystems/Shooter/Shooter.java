@@ -2,10 +2,8 @@ package frc.robot.Subsystems.Shooter;
 
 import static edu.wpi.first.units.Units.Degrees;
 
-import java.lang.annotation.Target;
 import java.util.function.Supplier;
 
-import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -21,14 +19,17 @@ import frc.robot.Subsystems.Shooter.Turret.TurretVisual;
 import frc.robot.Subsystems.TargetingSystem.TargetingSystem;
 
 public class Shooter {
-Flywheel flywheel = new Flywheel();
+    Flywheel flywheel = new Flywheel();
     Turret turret = new Turret();
     Hood hood = new Hood();
 
     TargetingSystem targeting;
 
+    /** Represent the hood being suppressed for the trench, and block fuel in that case */
+    private boolean stowed=false;
+
     //TODO: Sync this method/concept with shooter code
-    public Trigger isReadyToAcceptFuel = new Trigger(()->flywheel.getOnTarget() && hood.getOnTarget() && turret.getOnTarget()).debounce(0.05);
+    public Trigger isReadyToAcceptFuel = new Trigger(()->flywheel.getOnTarget() && hood.getOnTarget() && turret.getOnTarget() && stowed==false).debounce(0.05);
 
 
     /** Just set up the mechanism2d so we can visualize the system all at once */
@@ -59,6 +60,7 @@ Flywheel flywheel = new Flywheel();
             turret.setAngle(targets)
         );
     }
+
     public Command shootNoTurret(Supplier<TargetingSystem.ShooterState> targets){
         return Commands.parallel(
             flywheel.setRPM(targets),
@@ -124,6 +126,18 @@ Flywheel flywheel = new Flywheel();
         return shoot(targeting::getPass);
     }
 
+    /** Bring the hood down for trench purposes */
+    public Command stow(){
+        return Commands.parallel(
+            // flywheel.setRPM(targets), //Leave uncommanded
+            hood.stow()
+            // turret.setAngle(targets) //Leave uncommanded
+        )
+        .beforeStarting(()->stowed=true)
+        .finallyDo(()->stowed=false)
+        ;
+    }
+
 
     // For tuning LUTs, read 
     public Command shootWithDashboardValues(){
@@ -135,17 +149,18 @@ Flywheel flywheel = new Flywheel();
     // );
     }
 
-    public Command doTheObviousThingDriversWant(){
-        Supplier<TargetingSystem.ShooterState> bestState = ()->{
+    //Not implimented
+    // public Command doTheObviousThingDriversWant(){
+    //     Supplier<TargetingSystem.ShooterState> bestState = ()->{
 
-            //some logic. not in.
-            var target = targeting.getBestTarget();
-            targeting.getHub();
-            return targeting.getPass();
+    //         //some logic. not in.
+    //         var target = targeting.getBestTarget();
+    //         targeting.getHub();
+    //         return targeting.getPass();
             
-        };
+    //     };
 
-        return shoot(bestState);
-    }
+    //     return shoot(bestState);
+    // }
     
 }
