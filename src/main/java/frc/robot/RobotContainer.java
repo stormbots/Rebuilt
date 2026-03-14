@@ -6,6 +6,7 @@
 package frc.robot;
 
 
+import static edu.wpi.first.units.Units.Degree;
 import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.Radians;
 
@@ -114,6 +115,9 @@ public class RobotContainer {
     // debug.y().whileTrue(swerve.pidToPose(()->new Pose2d(7.7, 7.4, new Rotation2d(Math.PI/2))));
     // debug.povRight().whileTrue(swerve.pidToPose(()->new Pose2d(12.5, 7.4, new Rotation2d())));
     // debug.povLeft().whileTrue(swerve.pidToPose(()->new Pose2d(12.5, 0.6, new Rotation2d())));
+    debug.x()
+    .whileTrue(shooter.testSetFlywheelRPM(SmartDashboard.getNumber("robotContainer/flywheelrpm", rpm)))
+    .whileTrue(shooter.testSetHoodAngle(Degree.of(SmartDashboard.getNumber("robotContainer/hoodAngle", hoodAngle))));
   }
 
 
