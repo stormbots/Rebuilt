@@ -6,8 +6,6 @@ package frc.robot.Subsystems.HopperSensors;
 
 import static edu.wpi.first.units.Units.Inches;
 
-import java.util.Optional;
-
 import com.stormbots.LaserCanWrapper;
 
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -17,21 +15,21 @@ import frc.robot.Robot;
 
 public class HopperSensors extends SubsystemBase {
   private static HopperSensors instance;
+  // Readings above these values indicate a new fuel state
+  public final int kMaxSensorDistance = 13; //inches
   public final int kEmpty = 4; 
   public final int kLowCapacity = 6;
   public final int kMaxCapacity = 10;
-  public int fuelInHopper = 8; // Initial fuel provided during autos
   private LaserCanWrapper[] laserCan = new LaserCanWrapper[]{new LaserCanWrapper(30), new LaserCanWrapper(31), new LaserCanWrapper(32), new LaserCanWrapper(33)};
   /** Most fuel capacity is spent, and we should consider doing something else */
-  public Trigger isLow = new Trigger(()->fuelInHopper<=kLowCapacity);
+  public Trigger isLow = new Trigger(this::isLow);
   /** At maximum capacity, and should not attempt to pull in more */
-  public Trigger isFull = new Trigger(()->fuelInHopper>=kMaxCapacity);
+  public Trigger isFull = new Trigger(this::isFull);
   /** Fuel has room to continue intaking */
-  public Trigger isNotFull = new Trigger(()->fuelInHopper<kMaxCapacity-4);
+  public Trigger isPartiallyLoaded = new Trigger(this::isPartiallyLoaded);
 
   /** Creates a new HopperSensors. */
   private HopperSensors(){
-    setupRealTriggers();
     setupSimulationTriggers();
   }
 
@@ -44,28 +42,32 @@ public class HopperSensors extends SubsystemBase {
   @Override
   public void periodic() {
     // This method will be called once per scheduler run
-    SmartDashboard.putNumber("hopper/fuel",fuelInHopper);
     SmartDashboard.putBoolean("hopper/isLow",isLow.getAsBoolean());
     SmartDashboard.putBoolean("hopper/isFull",isFull.getAsBoolean());
-    SmartDashboard.putBoolean("hopper/isNotFull",isNotFull.getAsBoolean());
+    SmartDashboard.putBoolean("hopper/isNotFull",isPartiallyLoaded.getAsBoolean());
+
+    // plotDetailedSensorInfo(); //For diagnostics
+    if(Robot.isSimulation()){
+      SmartDashboard.putNumber("hopper/fuel",simFuelInHopper);
+    }
   }  
 
   public Boolean isFull(){
     return getLayer(kMaxCapacity);
   }
 
-  public Boolean layer1(){
+  public Boolean isPartiallyLoaded(){
     return getLayer(kLowCapacity);
   }
 
-  public boolean isEmpty(){
+  public boolean isLow(){
     return getLayer(kEmpty);
   }
 
   private boolean getLayer(int layerHeight){
     int full = 0;
     for(int i = 0; i < laserCan.length; i++){
-      if(laserCan[i].getDistanceOptional().orElse(Inches.of(13)).in(Inches) > 13 - layerHeight){
+      if(laserCan[i].getDistanceOptional().orElse(Inches.of(kMaxSensorDistance)).in(Inches) >13 - layerHeight){
         full++;
       }
     }
@@ -74,23 +76,48 @@ public class HopperSensors extends SubsystemBase {
     } else {
       return false;
     }
+
+  }
+
+  private void plotDetailedSensorInfo(){
+    double min = kMaxSensorDistance;
+    double max = 0;
+    double sum = 0;
+
+    for(var lc : laserCan){
+      var reading = lc.getDistanceOptional().orElse(Inches.of(kMaxSensorDistance)).in(Inches);
+      min = reading<min ? reading : min;
+      max = reading>max ? reading : max;
+      sum += reading;
+    }
+
+    SmartDashboard.putNumber("hoppersensors/data/min",min);
+    SmartDashboard.putNumber("hoppersensors/data/max",max);
+    SmartDashboard.putNumber("hoppersensors/data/sum",sum);
+    SmartDashboard.putNumber("hoppersensors/data/mean",sum/4.0);
+
+    SmartDashboard.putBoolean("hoppersensors/data/low",isLow.getAsBoolean());
+    SmartDashboard.putBoolean("hoppersensors/data/low",isPartiallyLoaded.getAsBoolean());
+    SmartDashboard.putBoolean("hoppersensors/data/full",isFull.getAsBoolean());
+
   }
 
   private void setupRealTriggers(){
     if(Robot.isReal()==false) return;
-    //TODO: The real bot can use Lasercan to determine imprecise levels
-    // or approximate counts, but not exact ones. The triggers may differ
-    // Or we can just write approximate fuel state based off the scans
+    isLow = new Trigger(this::isLow);
+    isFull = new Trigger(this::isFull);
+    isPartiallyLoaded = new Trigger(this::isPartiallyLoaded);
   }
 
 
+  public int simFuelInHopper = 8; // Initial fuel provided during autos; Only useful for sim
   private void setupSimulationTriggers(){
     if(Robot.isSimulation()==false) return;
     //These interplay with the FuelSim and can have an exact fuel count,
     //But  we cannot effectively simulate lasercan/ imprecise levels
-    isLow = new Trigger(()->fuelInHopper<=kMaxCapacity);
-    isFull = new Trigger(()->fuelInHopper>=kMaxCapacity);
-    isNotFull = new Trigger(()->fuelInHopper<kMaxCapacity-4);
+    isLow = new Trigger(()->simFuelInHopper<=2);
+    isFull = new Trigger(()->simFuelInHopper>=10);
+    isPartiallyLoaded = new Trigger(()->simFuelInHopper<6);
   }
 
 }

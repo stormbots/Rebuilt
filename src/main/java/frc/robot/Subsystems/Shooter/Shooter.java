@@ -94,8 +94,8 @@ Flywheel flywheel = new Flywheel();
         double fuelPerSecond=8;
 
         var shot=Commands.runOnce(()->{
-            if (HopperSensors.getInstance().fuelInHopper <= 0) return;
-            HopperSensors.getInstance().fuelInHopper--;
+            if (HopperSensors.getInstance().simFuelInHopper <= 0) return;
+            HopperSensors.getInstance().simFuelInHopper--;
 
             var initialPosition = targeting.getTurretCenterpoint();
             var velocity=targeting.simGenerateIdealShot();

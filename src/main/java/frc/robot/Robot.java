@@ -151,7 +151,7 @@ public class Robot extends TimedRobot {
       Intake.width.div(-2.0).in(Meter), 
       Intake.width.div(2.0).in(Meter),
       robotContainer.intake.isDeployed, // (optional) BooleanSupplier for whether the intake should be active at a given moment
-      ()->HopperSensors.getInstance().fuelInHopper++ // (optional) Runnable called whenever a fuel is intaked
+      ()->HopperSensors.getInstance().simFuelInHopper++ // (optional) Runnable called whenever a fuel is intaked
     ); 
 
     FuelSim.getInstance().setSubticks(5); // sets the number of physics iterations to perform per 20ms loop. Default = 5
