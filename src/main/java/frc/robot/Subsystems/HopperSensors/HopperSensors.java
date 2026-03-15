@@ -4,18 +4,24 @@
 
 package frc.robot.Subsystems.HopperSensors;
 
+import static edu.wpi.first.units.Units.Inches;
+
+import java.util.Optional;
+
+import com.stormbots.LaserCanWrapper;
+
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Robot;
 
 public class HopperSensors extends SubsystemBase {
-  private static HopperSensors instance; 
-
-  public final int kLowCapacity = 4;
-  public final int kMaxCapacity = 25;
+  private static HopperSensors instance;
+  public final int kEmpty = 4; 
+  public final int kLowCapacity = 6;
+  public final int kMaxCapacity = 10;
   public int fuelInHopper = 8; // Initial fuel provided during autos
-
+  private LaserCanWrapper[] laserCan = new LaserCanWrapper[]{new LaserCanWrapper(30), new LaserCanWrapper(31), new LaserCanWrapper(32), new LaserCanWrapper(33)};
   /** Most fuel capacity is spent, and we should consider doing something else */
   public Trigger isLow = new Trigger(()->fuelInHopper<=kLowCapacity);
   /** At maximum capacity, and should not attempt to pull in more */
@@ -43,6 +49,32 @@ public class HopperSensors extends SubsystemBase {
     SmartDashboard.putBoolean("hopper/isFull",isFull.getAsBoolean());
     SmartDashboard.putBoolean("hopper/isNotFull",isNotFull.getAsBoolean());
   }  
+
+  public Boolean isFull(){
+    return getLayer(kMaxCapacity);
+  }
+
+  public Boolean layer1(){
+    return getLayer(kLowCapacity);
+  }
+
+  public boolean isEmpty(){
+    return getLayer(kEmpty);
+  }
+
+  private boolean getLayer(int layerHeight){
+    int full = 0;
+    for(int i = 0; i < laserCan.length; i++){
+      if(laserCan[i].getDistanceOptional().orElse(Inches.of(13)).in(Inches) > 13 - layerHeight){
+        full++;
+      }
+    }
+    if(full >= 3){
+      return true;
+    } else {
+      return false;
+    }
+  }
 
   private void setupRealTriggers(){
     if(Robot.isReal()==false) return;
