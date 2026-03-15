@@ -111,6 +111,11 @@ public class RobotContainer {
 
     ShiftTracking.canShoot.onTrue(signals.shiftStart()).onFalse(signals.shiftEnd());
 
+    new Trigger(DriverStation::isTeleopEnabled).onTrue(signals.showAllianceColor());
+
+    new Trigger(DriverStation::isAutonomousEnabled).onTrue(signals.showAllianceColorIntersingUnchecked());
+
+
 
     //while disabled
     //and see target

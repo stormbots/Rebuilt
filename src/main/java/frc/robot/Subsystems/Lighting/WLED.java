@@ -29,7 +29,7 @@ public class WLED extends SubsystemBase{
   private static int calls;
   private static int defaultPattern = -1;
   private static int indivualRoll = -1;
-  public static final int numPatterns = 24;
+  public static final int numPatterns = 23;
   private static int chanceIndividual = 10;
   public WLED(SerialPort serialPort) {
     if (chanceIndividual==0){
@@ -79,6 +79,9 @@ public class WLED extends SubsystemBase{
       
   }
   
+  public static int getDefaultPatternUnchecked(){
+    return defaultPattern;
+  }
 
   @Override
   public void periodic() {

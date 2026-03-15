@@ -356,6 +356,10 @@ public class LedSegment extends LedBase {
       return Commands.select(getPatternMap(), ()->WLED.getDefaultPattern());
     }
 
+    public Command showAllianceColorUnchecked(){
+      return Commands.select(getPatternMap(), ()->WLED.getDefaultPatternUnchecked());
+    }
+
     private CustomColor getAllianceColor(){
       if (DriverStation.getAlliance().isPresent()){
         if (DriverStation.getAlliance().get().equals(Alliance.Red)){

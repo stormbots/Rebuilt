@@ -19,16 +19,26 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 public class Signals extends SubsystemBase {
   double[] ownedSegments=new double[]{0,1,2,3};
   public WLED wled = new WLED(new SerialPort(115200, Port.kUSB1));
-  LedSegment seg = new LedSegment(0, 0, 60, false);
-  LedSegment seg2 = new LedSegment(1, 60, 120, false);
-  List<LedSegment> signalSegments = List.of(seg,seg2);
+  LedSegment right = new LedSegment(0, 2, 22, false);
+  LedSegment center = new LedSegment(1, 23, 40, false);
+  LedSegment left = new LedSegment(1, 40, 59, false);
+
+  List<LedSegment> signalSegments = List.of(right,center);
 
   
   public Signals(){
-    seg.setDefaultCommand(seg.showAllianceColorInteresting().ignoringDisable(true));
-    seg2.setDefaultCommand(seg2.showAllianceColorInteresting().ignoringDisable(true));
+    right.setDefaultCommand(right.showAllianceColorInteresting().ignoringDisable(true));
+    center.setDefaultCommand(center.showAllianceColorInteresting().ignoringDisable(true));
+    left.setDefaultCommand(left.showAllianceColorInteresting().ignoringDisable(true));
+  }
+
+  public Command showAllianceColor(){
+    return Commands.sequence(showAllianceColorBoring(right),showAllianceColorBoring(center));
   }
   
+  public Command showAllianceColorIntersingUnchecked(){
+    return Commands.sequence(right.showAllianceColorUnchecked(),center.showAllianceColorUnchecked());
+  }
 
   private Command showAllianceColorBoring(LedSegment segment){
     HashMap<Optional<Alliance>,Command> map = new HashMap<>();
@@ -40,40 +50,44 @@ public class Signals extends SubsystemBase {
 
  public Command hopperFull(){
   return Commands.sequence(
-    seg.solidColor(CustomColor.kYellow),
-    seg2.solidColor(CustomColor.kYellow),
+    right.solidColor(CustomColor.kYellow),
+    center.solidColor(CustomColor.kYellow),
+    left.solidColor(CustomColor.kYellow),
     Commands.waitSeconds(0.5)
   );
  }
 
  public Command hopperLow(){
   return Commands.sequence(
-    seg.blinkSmooth(128,CustomColor.kYellow),
-    seg2.blinkSmooth(128,CustomColor.kYellow),
+    right.blinkSmooth(128,CustomColor.kYellow),
+    center.blinkSmooth(128,CustomColor.kYellow),
+    left.blinkSmooth(128,CustomColor.kYellow),
     Commands.waitSeconds(1)
   );
  }
   
  public Command shotNotOk(){
   return Commands.sequence(
-    seg.solidColor(CustomColor.kOrange),
-    seg2.solidColor(CustomColor.kOrange),
+    right.solidColor(CustomColor.kOrange),
+    center.solidColor(CustomColor.kOrange),
+    left.solidColor(CustomColor.kOrange),
     Commands.waitSeconds(0.5)
   );
  }
 
  public Command shiftStart(){
   return Commands.sequence(
-    seg.solidColor(CustomColor.kWhite),
-    seg2.solidColor(CustomColor.kWhite),
+    right.solidColor(CustomColor.kWhite),
+    center.solidColor(CustomColor.kWhite),
+    left.solidColor(CustomColor.kWhite),
     Commands.waitSeconds(0.5)
   );
  }
 
  public Command shiftEnd(){
   return Commands.sequence(
-    seg.blinkSmooth(128,CustomColor.kWhite),
-    seg2.blinkSmooth(128,CustomColor.kWhite),
+    right.blinkSmooth(128,CustomColor.kWhite),
+    center.blinkSmooth(128,CustomColor.kWhite),
     Commands.waitSeconds(1)
   );
  }
@@ -81,16 +95,18 @@ public class Signals extends SubsystemBase {
 
  public Command climbOkay(){
   return Commands.sequence(
-    seg.solidColor(CustomColor.kPink),
-    seg2.solidColor(CustomColor.kPink),
+    right.solidColor(CustomColor.kPink),
+    center.solidColor(CustomColor.kPink),
+    left.solidColor(CustomColor.kPink),
     Commands.waitSeconds(0.5)
   );
  }
 
  public Command showVisionOkay(){
     Command command = Commands.sequence(
-      seg.solidColor(CustomColor.kGreen),
-      seg2.solidColor(CustomColor.kGreen),
+      right.solidColor(CustomColor.kGreen),
+      center.solidColor(CustomColor.kGreen),
+      left.solidColor(CustomColor.kGreen),
       Commands.waitSeconds(0.5)
     );
     return command.ignoringDisable(true);
@@ -98,8 +114,9 @@ public class Signals extends SubsystemBase {
 
   public Command showVisionNotOkay(){
     Command command = Commands.sequence(
-      seg.solidColor(CustomColor.kYellow),
-      seg2.solidColor(CustomColor.kYellow)
+      right.solidColor(CustomColor.kYellow),
+      center.solidColor(CustomColor.kYellow),
+      left.solidColor(CustomColor.kYellow)
     );
     return command.ignoringDisable(true);
   }
