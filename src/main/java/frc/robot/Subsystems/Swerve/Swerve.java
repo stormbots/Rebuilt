@@ -11,6 +11,8 @@ import static edu.wpi.first.units.Units.Meter;
 
 import java.io.File;
 import java.util.Optional;
+import java.util.function.BooleanSupplier;
+import java.util.function.Consumer;
 import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
 
@@ -19,6 +21,7 @@ import com.studica.frc.AHRS;
 import dev.doglog.DogLog;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.Matrix;
+import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
@@ -30,10 +33,12 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj.Preferences;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.FunctionalCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import swervelib.SwerveDrive;
 import swervelib.parser.SwerveParser;
@@ -423,6 +428,84 @@ public class Swerve extends SubsystemBase {
       secondaryInputs.ty = 0.0;
       secondaryInputs.r = 0.0;
     });
+}
+
+
+// These are all super gross things needed for the PID command, please ignore, and have to be set up
+//Can't be set as proper local commands, so it's a mess 
+
+// These are in percent output at X meters
+PIDController xpid = new PIDController(
+  1/0.5, 0, 0
+  // new Constraints(swerveDrive.getMaximumChassisVelocity(), 5)
+);
+PIDController ypid = new PIDController(
+  1/0.5, 0, 0
+  // new Constraints(swerveDrive.getMaximumChassisVelocity(), 5)
+);
+PIDController rotationPID = new PIDController(
+  1/90.0, 0, 0
+  // new Constraints(swerveDrive.getMaximumChassisAngularVelocity(), 1080)
+);
+
+double travelTime = 1;
+double distanceM = 1;
+Pose2d sourcePose = new Pose2d();
+double starttime = 0;
+Field2d pidfield = new Field2d();
+public Command pidToPoseInterpolated(Pose2d goalPose){
+  SmartDashboard.putData("pidfield",pidfield);
+  rotationPID.enableContinuousInput(-180, 180);
+
+  Runnable onInit = ()->{
+    sourcePose = swerveDrive.getPose();
+    distanceM = sourcePose.getTranslation().getDistance(goalPose.getTranslation());
+    travelTime = distanceM/swerveDrive.getMaximumChassisVelocity(); //doesn't handle accel
+    pidfield.getObject("source").setPose(sourcePose);
+    pidfield.getObject("goal").setPose(goalPose);
+    SmartDashboard.putNumber("pidtest/traveltime", travelTime);
+    xpid.reset();
+    ypid.reset();
+    rotationPID.reset();
+    starttime = Timer.getFPGATimestamp();
+  };
+  Runnable onExecute = ()->{
+
+    var ratio = (Timer.getFPGATimestamp()-starttime)/travelTime;
+    ratio = MathUtil.clamp(ratio, 0, 1);
+    SmartDashboard.putNumber("pidtest/ratio", ratio);
+
+    var setPointPose = sourcePose.interpolate(goalPose, ratio);
+    xpid.setSetpoint(setPointPose.getX());
+    ypid.setSetpoint(setPointPose.getY());
+    rotationPID.setSetpoint(setPointPose.getRotation().getDegrees());
+
+    //pid to pose math goes here
+    var botpose = swerveDrive.getPose();
+    double tx = xpid.calculate(botpose.getX());
+    double ty = ypid.calculate(botpose.getY());
+    double r = rotationPID.calculate(botpose.getRotation().getDegrees());
+
+    SmartDashboard.putNumber("pidtest/xout", ratio);
+
+    //set motor to use this
+    setPrimaryInputsVoid(()->tx, ()->ty, ()->r);
+
+    pidfield.getRobotObject().setPose(swerveDrive.getPose());
+    pidfield.getObject("target").setPose(setPointPose);
+  };
+  Consumer<Boolean> onEnd = (cancelled)->{
+    setPrimaryInputs(()->0.0, ()->0.0, ()->0.0);
+  };
+  BooleanSupplier isFinished = ()->{
+      var dist = swerveDrive.getPose().getTranslation().getDistance(goalPose.getTranslation());
+      var angle = rotationPID.getError();
+      return dist < 0.2 && angle < 10;
+      // return false;
+  };
+
+  // return new FunctionalCommand(onInit, onExecute, onEnd, isFinished, this);
+  return new FunctionalCommand(onInit, onExecute, onEnd, isFinished, this).withTimeout(travelTime*4);
 }
 
 
