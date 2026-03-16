@@ -112,6 +112,9 @@ public class Autos {
         autoChooser.addOption("Evil Mentor Auto", this::evilMentorAuto);
         autoChooser.addOption("Evil Auto", this::evilAuto);
         autoChooser.addOption("Evil AUTO NO PASSING", this::evilMentorNoPass);
+        autoChooser.addOption("Chopped AUTOS", this::choppedInterStuff);
+        autoChooser.addOption("stupidthingy", this::wtfauto);
+        autoChooser.addOption("RedDepot", this::redDepot);
         
 
     }
@@ -220,10 +223,30 @@ public class Autos {
         ;
     }
 
+    public Command choppedInterStuff(){
+        return Commands.sequence(
+            pathing.followPathTeamFlipped(new Path("CenterShootAuto"))
+        );
+    }
+
     public Command evilAuto(){
         return Commands.sequence(
             pathing.followPathTeamFlipped(new Path("CenterShootAuto"))
         ).withTimeout(21);
+    }
+
+
+    public Command wtfauto(){
+        return Commands.sequence(
+            swerve.pidToPoseInterpolated(()->new Pose2d(3,4,new Rotation2d(180))),
+            swerve.pidToPoseInterpolated(()->new Pose2d(7,4,new Rotation2d(90)))
+        ).withTimeout(21);
+    }
+
+    public Command redDepot(){
+        return Commands.sequence(
+            pathing.followPathTeamFlipped(new Path("depotAuto"))
+        );
     }
 
 
@@ -240,9 +263,9 @@ public class Autos {
     }
     
     public Command driveToPose(Pose2d targetPose, Command superState){
-        return swerve.pidToPose(()->autoTeamFlippedPose(targetPose.getX(), targetPose.getY(), targetPose.getRotation().getDegrees()))
+        return swerve.pidToPoseInterpolated(()->autoTeamFlippedPose(targetPose.getX(), targetPose.getY(), targetPose.getRotation().getDegrees()))
         .alongWith(superState)
-        .until(()->swerve.isOnTargetTranslate())
+        // .until(()->swerve.isOnTargetTranslate())
         ;
     }
 

@@ -48,10 +48,11 @@ public class Pathing extends SubsystemBase {
     swerve::getSwervePose, 
     swerve::getChassisSpeedsRobotRelative, 
     this::setAutoInputs, 
-    new PIDController(5.0, 0.0, 0.0),    // Translation PID
-    new PIDController(3.0, 0.0, 0.0),    // Rotation PID
-    new PIDController(2.0, 0.0, 0.0)     // Cross-track PID
-    ).withTRatioBasedTranslationHandoffs(true);
+    new PIDController(2.5, 0.0, 0.0),    // Translation PID
+    new PIDController(1.0, 0.0, 0.0),    // Rotation PID
+    new PIDController(0.75, 0.0, 0.0)     // Cross-track PID
+    ).withTRatioBasedTranslationHandoffs(true)
+    ;
     FollowPath.registerEventTrigger("intake", intake.intake());
     FollowPath.registerEventTrigger("shoot", shootAuto());
     FollowPath.registerEventTrigger("intakeWhileShooting", intakeWhileShooting());

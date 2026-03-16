@@ -453,16 +453,16 @@ double distanceM = 1;
 Pose2d sourcePose = new Pose2d();
 double starttime = 0;
 Field2d pidfield = new Field2d();
-public Command pidToPoseInterpolated(Pose2d goalPose){
+public Command pidToPoseInterpolated(Supplier<Pose2d> goalPose){
   SmartDashboard.putData("pidfield",pidfield);
   rotationPID.enableContinuousInput(-180, 180);
 
   Runnable onInit = ()->{
     sourcePose = swerveDrive.getPose();
-    distanceM = sourcePose.getTranslation().getDistance(goalPose.getTranslation());
+    distanceM = sourcePose.getTranslation().getDistance(goalPose.get().getTranslation());
     travelTime = distanceM/swerveDrive.getMaximumChassisVelocity(); //doesn't handle accel
     pidfield.getObject("source").setPose(sourcePose);
-    pidfield.getObject("goal").setPose(goalPose);
+    pidfield.getObject("goal").setPose(goalPose.get());
     SmartDashboard.putNumber("pidtest/traveltime", travelTime);
     xpid.reset();
     ypid.reset();
@@ -475,7 +475,7 @@ public Command pidToPoseInterpolated(Pose2d goalPose){
     ratio = MathUtil.clamp(ratio, 0, 1);
     SmartDashboard.putNumber("pidtest/ratio", ratio);
 
-    var setPointPose = sourcePose.interpolate(goalPose, ratio);
+    var setPointPose = sourcePose.interpolate(goalPose.get(), ratio);
     xpid.setSetpoint(setPointPose.getX());
     ypid.setSetpoint(setPointPose.getY());
     rotationPID.setSetpoint(setPointPose.getRotation().getDegrees());
@@ -498,7 +498,7 @@ public Command pidToPoseInterpolated(Pose2d goalPose){
     setPrimaryInputs(()->0.0, ()->0.0, ()->0.0);
   };
   BooleanSupplier isFinished = ()->{
-      var dist = swerveDrive.getPose().getTranslation().getDistance(goalPose.getTranslation());
+      var dist = swerveDrive.getPose().getTranslation().getDistance(goalPose.get().getTranslation());
       var angle = rotationPID.getError();
       return dist < 0.2 && angle < 10;
       // return false;
