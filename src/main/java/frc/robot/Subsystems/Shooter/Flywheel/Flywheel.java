@@ -70,7 +70,7 @@ public class Flywheel extends SubsystemBase {
     SmartDashboard.putNumber("shooter/flywheel/targetrpm", targetRPM);
     SmartDashboard.putNumber("shooter/flywheel/rpm", leaderMotor.getEncoder().getVelocity());
     SmartDashboard.putNumber("shooter/flywheel/rpmSetpoint", leaderMotor.getClosedLoopController().getSetpoint());
-    SmartDashboard.putNumber("shooter/flywheel/rotations", leaderMotor.getEncoder().getPosition());
+    // SmartDashboard.putNumber("shooter/flywheel/rotations", leaderMotor.getEncoder().getPosition());
     SmartDashboard.putNumber("shooter/flywheel/voltage", leaderMotor.getAppliedOutput()*leaderMotor.getBusVoltage());
   }
 
@@ -109,7 +109,7 @@ public class Flywheel extends SubsystemBase {
   // }
 
   public boolean getOnTarget(){
-    return MathUtil.isNear(targetRPM, leaderMotor.getEncoder().getVelocity(), tolerance);
+    return MathUtil.isNear(targetRPM, leaderMotor.getEncoder().getVelocity(), tolerance*5);
   }
 
   private SparkBaseConfig getMotorConfig(){
@@ -124,11 +124,11 @@ public class Flywheel extends SubsystemBase {
 
     config.closedLoop
       .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
-      .p(0.0025)
-      .i(0.0000002)
+      .p(0/150.0)
+      .i(0.000000)
       .d(0.0)
     .feedForward
-      .kV(0.0024309 * 4000 / 5174.083984)
+      .kV(0.0024309 * 4000 / 5174.083984 * 2725 / 2516.0)
       // .kV(0.0024309/12.0)
     ;
 

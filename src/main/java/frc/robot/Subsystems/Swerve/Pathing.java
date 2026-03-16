@@ -51,7 +51,7 @@ public class Pathing extends SubsystemBase {
     new PIDController(5.0, 0.0, 0.0),    // Translation PID
     new PIDController(3.0, 0.0, 0.0),    // Rotation PID
     new PIDController(2.0, 0.0, 0.0)     // Cross-track PID
-    );
+    ).withTRatioBasedTranslationHandoffs(true);
     FollowPath.registerEventTrigger("intake", intake.intake());
     FollowPath.registerEventTrigger("shoot", shootAuto());
     FollowPath.registerEventTrigger("intakeWhileShooting", intakeWhileShooting());
@@ -59,6 +59,7 @@ public class Pathing extends SubsystemBase {
     FollowPath.registerEventTrigger("pass", pass());
     FollowPath.registerEventTrigger("intakeStop", intake.stop());
     FollowPath.registerEventTrigger("hoodDown", shooter.testSetHoodAngle(Degrees.of(0)));
+    
     
 
 

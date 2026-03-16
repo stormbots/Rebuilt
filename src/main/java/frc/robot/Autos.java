@@ -110,6 +110,8 @@ public class Autos {
         autoChooser.addOption("Blue Depot", this::depotAutoBlue);
         autoChooser.addOption("Red Depot", this::depotAutoRed);
         autoChooser.addOption("Evil Mentor Auto", this::evilMentorAuto);
+        autoChooser.addOption("Evil Auto", this::evilAuto);
+        autoChooser.addOption("Evil AUTO NO PASSING", this::evilMentorNoPass);
         
 
     }
@@ -130,7 +132,7 @@ public class Autos {
     /////////////////////////
     public Command basicShootInitial8(){
         return Commands.sequence(
-            swerve.turnToHeading(()->{
+            swerve.turnToHeadingWithinTurretRange(()->{
                 return targeting.getHeadingToTarget(swerve.getSwervePose().getTranslation(), targeting.getHubTarget()).plus(Rotation2d.k180deg);
             }).until(()->swerve.isOnTargetAngle()).withTimeout(1.0),
             shootAuto().withTimeout(1.5)
@@ -183,14 +185,35 @@ public class Autos {
             //load up in the middle across center line
             driveToPose(neutralHalfWayRight, intakeWhilePassing()),
             driveToPose(neutralPreIntRight, intakeWhilePassing()),
-            driveToPoseSlowly(neutralIntRight, intakeWhilePassing()),
+            driveToPoseSlowly(neutralIntRight, intakeWhilePassing(), 0.5),
             //zoom back, pulling any fuel toward the trench
             driveToPose(scoopFuel, intakeWhilePassing()),
             //Drive to and through trench
             driveToPose(preTrenchOutBlueRight, intakeWhilePassing()),
             driveToPose(shotPoseRight, intakeOnly()),
             //drive along the wall, satisfied with a job well done
-            driveToPoseSlowly(0.5, 0.5, 180, intakeWhileShooting()),
+            driveToPoseSlowly(0.5, 0.5, 180, intakeWhileShooting(), 0.5),
+            Commands.none()
+        )
+        .withTimeout(20)
+        ;
+    }
+
+    public Command evilMentorNoPass(){
+        return Commands.sequence(
+            driveToPose(preTrenchInBlueRight, stow()), //near trench
+            driveToPose(preTrenchOutBlueRight, stow()), //far trench
+            //load up in the middle across center line
+            driveToPose(neutralHalfWayRight, intakeOnly()),
+            driveToPose(neutralPreIntRight, intakeOnly()),
+            driveToPoseSlowly(neutralIntRight, intakeOnly(), 0.5),
+            //zoom back, pulling any fuel toward the trench
+            driveToPose(scoopFuel, intakeOnly()),
+            //Drive to and through trench
+            driveToPoseSlowly(preTrenchOutBlueRight, stow(), 1.0),
+            driveToPose(shotPoseRight, shootAuto()),
+            //drive along the wall, satisfied with a job well done
+            driveToPoseSlowly(0.5, 0.5, 180, intakeWhileShooting(), 0.5),
             Commands.none()
         )
         .withTimeout(20)
@@ -199,8 +222,7 @@ public class Autos {
 
     public Command evilAuto(){
         return Commands.sequence(
-
-
+            pathing.followPathTeamFlipped(new Path("CenterShootAuto"))
         ).withTimeout(21);
     }
 
@@ -213,8 +235,8 @@ public class Autos {
         return driveToPose(new Pose2d(x, y, new Rotation2d(Degrees.of(degrees))), superState);
     }
 
-    public Command driveToPoseSlowly(double x, double y, double degrees, Command superState){
-        return driveToPoseSlowly(new Pose2d(x, y, new Rotation2d(Degrees.of(degrees))), superState);
+    public Command driveToPoseSlowly(double x, double y, double degrees, Command superState, double maxVelocityMPS){
+        return driveToPoseSlowly(new Pose2d(x, y, new Rotation2d(Degrees.of(degrees))), superState, maxVelocityMPS);
     }
     
     public Command driveToPose(Pose2d targetPose, Command superState){
@@ -224,8 +246,8 @@ public class Autos {
         ;
     }
 
-    public Command driveToPoseSlowly(Pose2d targetPose, Command superState){
-        return swerve.pidToPose(()->autoTeamFlippedPose(targetPose.getX(), targetPose.getY(), targetPose.getRotation().getDegrees()), 0.5, Inches.of(5))
+    public Command driveToPoseSlowly(Pose2d targetPose, Command superState, double maxVelocityMPS){
+        return swerve.pidToPose(()->autoTeamFlippedPose(targetPose.getX(), targetPose.getY(), targetPose.getRotation().getDegrees()), maxVelocityMPS, Inches.of(5))
         .alongWith(superState)
         .until(()->swerve.isOnTargetTranslate())
         ;

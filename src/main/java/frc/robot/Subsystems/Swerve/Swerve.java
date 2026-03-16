@@ -361,7 +361,7 @@ public class Swerve extends SubsystemBase {
       double kp = 2.0 / 120.0; //90 degrees is 1 output
       double output = error.getDegrees()*kp;
       output = MathUtil.clamp(output, -2.0, 2.0);
-      if(Math.abs(error.getDegrees()) > 85.0){
+      if(Math.abs(error.getDegrees()) > 5.0){
         secondaryInputs.r = output;
       }
       else{
@@ -384,7 +384,6 @@ public class Swerve extends SubsystemBase {
       isOnTargetTranslate = false;
       isOnTargetAngle = false;
 
-
       Pose2d currentPose = swerveDrive.getPose();
       Pose2d targetPose = targetPoseSupplier.get();
       double errorX = targetPose.getX() - currentPose.getX();
@@ -395,16 +394,17 @@ public class Swerve extends SubsystemBase {
 
 
       double kPTranslation = 1.2;
-      double kPRotation = 1.0 / 90.0 * 2.0; // 90 deg -> about 2 output before clamp
+      double kPRotation = 1.0 / 90.0 * 2.0 * 0.5; // 90 deg -> about 2 output before clamp
 
 
-      double xOutput = MathUtil.clamp(errorX * kPTranslation, -1.0, 1.0);
-      double yOutput = MathUtil.clamp(errorY * kPTranslation, -1.0, 1.0);
-      double rOutput = MathUtil.clamp(angleError.getDegrees() * kPRotation, -1.0, 1.0);
+      double xOutput = errorX * kPTranslation;
+      double yOutput = errorY * kPTranslation;
+      double rOutput = angleError.getDegrees() * kPRotation;
 
-
-      secondaryInputs.tx = xOutput*maxVelocityMPS/maximumSpeed;
-      secondaryInputs.ty = yOutput*maxVelocityMPS/maximumSpeed;
+      // double maxMagnitude = Math.hypot(xOutput, yOutput) * maxVelocityMPS/maximumSpeed; 
+      swerveDrive.setMaximumAllowableSpeeds(maxVelocityMPS, 720);
+      secondaryInputs.tx = xOutput;
+      secondaryInputs.ty = yOutput;
       secondaryInputs.r = rOutput;
 
       
@@ -412,11 +412,11 @@ public class Swerve extends SubsystemBase {
         isOnTargetTranslate = true;
       }
 
-
       if (Math.abs(angleError.getDegrees()) < 5.0) {
         isOnTargetAngle = true;
       }
     }).finallyDo(() -> {
+      swerveDrive.setMaximumAllowableSpeeds(4.0, 720);
       isOnTargetAngle = false;
       isOnTargetTranslate = false;
       secondaryInputs.tx = 0.0;

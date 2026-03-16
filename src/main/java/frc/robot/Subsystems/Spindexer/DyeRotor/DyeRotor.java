@@ -23,7 +23,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 public class DyeRotor extends SubsystemBase{
     SparkFlex motor = new SparkFlex(12, MotorType.kBrushless);
     DyeRotorSim sim = new DyeRotorSim(motor);
-    int maxCurrent = 40;
+    int maxCurrent = 30;
     int lowCurrentLimit = 25;
     
     public DyeRotor(){
@@ -55,8 +55,8 @@ public class DyeRotor extends SubsystemBase{
     @Override
     public void periodic(){
         SmartDashboard.putNumber("DyeRotor/Output", motor.getAppliedOutput());
-        SmartDashboard.putNumber("DyeRotor/Position",motor.getEncoder().getPosition());
-        SmartDashboard.putNumber("DyeRotor/Velocity",motor.getEncoder().getVelocity());
+        // SmartDashboard.putNumber("DyeRotor/Position",motor.getEncoder().getPosition());
+        // SmartDashboard.putNumber("DyeRotor/Velocity",motor.getEncoder().getVelocity());
         SmartDashboard.putNumber("DyeRotor/Current",motor.getOutputCurrent());
     }
 
@@ -83,7 +83,7 @@ public class DyeRotor extends SubsystemBase{
 
     public Command feed(){
         //return setVelocity(2);
-        return setVoltage(5);
+        return setVoltage(7);
     }
 
     public Command intake(){

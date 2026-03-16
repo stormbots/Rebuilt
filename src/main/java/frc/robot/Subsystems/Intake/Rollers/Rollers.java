@@ -64,8 +64,8 @@ public class Rollers extends SubsystemBase {
   public void periodic() {
     SmartDashboard.putNumber("Intake/Rollers/DutyCycle", motor.getAppliedOutput());
     SmartDashboard.putNumber("Intake/Rollers/OutputCurrent", motor.getOutputCurrent());
-    SmartDashboard.putNumber("Intake/Rollers/Position", getPosition().in(Units.Degrees));
-    SmartDashboard.putNumber("Intake/Rollers/Velocity", getVelocity().in(Units.DegreesPerSecond));
+    // SmartDashboard.putNumber("Intake/Rollers/Position", getPosition().in(Units.Degrees));
+    // SmartDashboard.putNumber("Intake/Rollers/Velocity", getVelocity().in(Units.DegreesPerSecond));
     SmartDashboard.putString("Intake/Rollers/Command", getCurrentCommand()==null ? "None" : getCurrentCommand().getName() );
   }
 

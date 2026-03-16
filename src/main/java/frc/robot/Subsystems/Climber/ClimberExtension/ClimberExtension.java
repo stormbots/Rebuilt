@@ -114,7 +114,7 @@ public class ClimberExtension extends SubsystemBase {
   @Override
   public void periodic() {
     SmartDashboard.putNumber("Climber/"+name+"/height", motor.getEncoder().getPosition());
-    SmartDashboard.putNumber("Climber/"+name+"/velocity", motor.getEncoder().getVelocity());
+    // SmartDashboard.putNumber("Climber/"+name+"/velocity", motor.getEncoder().getVelocity());
     SmartDashboard.putNumber("Climber/"+name+"/current", motor.getOutputCurrent());
     SmartDashboard.putNumber("Climber/"+name+"/output", motor.getAppliedOutput());
     SmartDashboard.putBoolean("Climber/"+name+"/homed", isHomed);

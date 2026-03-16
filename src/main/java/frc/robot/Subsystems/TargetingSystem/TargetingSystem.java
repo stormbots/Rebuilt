@@ -85,29 +85,42 @@ public class TargetingSystem extends SubsystemBase {
     // {168+22, 30, 2500},
     // {180+22, 30, 2550},
     // {192+22, 30, 2625}
-    {22+14, 5, 2050, 0.8},
-    {32+22, 10, 2050, 0.8},
-    {48+22, 10, 2100, 0.8},
-    {60+22, 13, 2100, 0.8},
-    {72+22, 23, 2100, 0.8},
-    {84+22, 26, 2100, 0.8},
-    {96+22, 30, 2150, 0.5763},
-    {108+22, 30, 2200, 0.6094},
-    {120+22, 30, 2300, 0.64250},
-    {132+22, 30, 2350, 0.67559},
-    {144+22, 30, 2400, 0.70869},
-    {156+22, 30, 2450, 0.74179},
-    {168+22, 30, 2500, 0.77489},
-    {180+22, 30, 2550, 0.80798},
-    {192+22, 30, 2625, 0.84108}
+    // {22+14, 5, 2050, 0.8},
+    // {32+22, 10, 2050, 0.8},
+    // {48+22, 10, 2100, 0.8},
+    // {60+22, 13, 2100, 0.8},
+    // {72+22, 23, 2100, 0.8},
+    // {84+22, 26, 2100, 0.8},
+    // {96+22, 30, 2150, 0.5763},
+    // {108+22, 30, 2200, 0.6094},
+    // {120+22, 30, 2300, 0.64250},
+    // {132+22, 30, 2350, 0.67559},
+    // {144+22, 30, 2400, 0.70869},
+    // {156+22, 30, 2450, 0.74179},
+    // {168+22, 30, 2500, 0.77489},
+    // {180+22, 30, 2550, 0.80798},
+    // {192+22, 30, 2625, 0.84108},
+    {3*12+24, 12, 2245, 0.5},
+    {4*12+24, 12, 2255, 0.5},
+    {5*12+24, 13.5, 2250, 0.5},
+    {6*12+24, 17, 2270, 0.5},
+    {7*12+24, 20, 2355, 0.5},
+    {8*12+24, 23, 2425, 0.5763},
+    {9*12+24, 23, 2475, 0.6094},
+    {10*12+24, 23, 2510, 0.64250},
+    {11*12+24, 23, 2550, 0.67559},
+    {12*12+24, 23, 2600, 0.70869},
+    {13*12+24, 23, 2625, 0.74179},
+    {14*12+24, 23, 2712.5, 0.77489},
+    {15*12+24, 23, 2775, 0.80798},
+    {16*12+24, 23, 2825, 0.84108} 
+
   });
   
 
   //distance, hoodangle, flywheel rpm
   public LUT passLUT = new LUT(new double[][]{
     {192+22, 45, 3200},
-
-    {192+22+(7.5*12), 25, 4000},
 
     //min from center
     //max from midfield
@@ -188,7 +201,7 @@ public class TargetingSystem extends SubsystemBase {
     SmartDashboard.putNumber("shooter/lut/distance", magnitude.in(Inches));
     var entry = lut.get(magnitude.in(Inches));   
     var angle = entry[1];
-    var rpm = entry[2]+100;
+    var rpm = entry[2]+50;
     SmartDashboard.putNumber("shooter/lut/rpm", rpm);
     SmartDashboard.putNumber("shooter/lut/hoodangle", angle);
     
@@ -212,8 +225,9 @@ public class TargetingSystem extends SubsystemBase {
 
     //Bot velocity * Time of Flight = how much impact in the unit of distance the bots velocity will have on the shot
     //Since we want to compensate for this, find the inverse of this vector and apply to our target
-    Translation2d distanceCompensation = botVelocityTranslation.times(tof).unaryMinus(); 
-
+    Translation2d distanceCompensation = botVelocityTranslation.times(tof)
+    .unaryMinus();
+    
     //This is where we would have to aim, assuming we are static, to compensate
     //Hence, call it virtual target, as it is not our "true" target, but is effectively what is known to the shooter
     Translation2d virtualTarget = target.get().plus(distanceCompensation);
@@ -230,6 +244,7 @@ public class TargetingSystem extends SubsystemBase {
       tof = entry[3]; 
 
       distanceCompensation = botVelocityTranslation.times(tof).unaryMinus(); 
+
       //new distance compensation is always applied to TARGET not VIRTUALTARGET
       //This is since the goal of each iteration is to get a tof that approaches the tof of ideal shot
       virtualTarget = target.get().plus(distanceCompensation);

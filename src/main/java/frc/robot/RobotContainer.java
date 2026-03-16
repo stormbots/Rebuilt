@@ -65,7 +65,7 @@ public class RobotContainer {
 
   CommandXboxController driver = new CommandXboxController(0);
   CommandXboxController operator = new CommandXboxController(1);
-  CommandXboxController debug = new CommandXboxController(3);
+  // CommandXboxController debug = new CommandXboxController(3);
   Path testingPath = new Path("goCollect");
   Double rpm = 2600.0;
   Double hoodAngle = 25.0;
@@ -115,13 +115,13 @@ public class RobotContainer {
     // debug.y().whileTrue(swerve.pidToPose(()->new Pose2d(7.7, 7.4, new Rotation2d(Math.PI/2))));
     // debug.povRight().whileTrue(swerve.pidToPose(()->new Pose2d(12.5, 7.4, new Rotation2d())));
     // debug.povLeft().whileTrue(swerve.pidToPose(()->new Pose2d(12.5, 0.6, new Rotation2d())));
-    debug.x()
-    .whileTrue(shooter.shootWithDashboardValues())
-    .whileTrue(Commands.waitSeconds(1).andThen(spindexer.feedToShooterForce()))
-    ;
+    // debug.x()
+    // .whileTrue(shooter.shootWithDashboardValues())
+    // .whileTrue(Commands.waitSeconds(1).andThen(spindexer.feedToShooter()))
+    // ;
 
-    debug.a()
-    .whileTrue(shooter.testTurretVoltage(()->debug.getLeftY()*8));
+    // debug.a()
+    // .whileTrue(shooter.testTurretVoltage(()->debug.getLeftY()*8));
   }
 
 
@@ -143,7 +143,9 @@ public class RobotContainer {
         new InstantCommand(()->questnav.wantToTrack(false)),
         swerve.zeroGyro(),
         //    IFFFF QUEST IS GOOD BUT CAMS AREN'T, UNCOMMENT THIS AND HAVE JACOB GO TO CORNER FOR ZERO
-        // new InstantCommand(()->questnav.setQuestPose(new Pose3d(swerve.getSwervePose().getX(), swerve.getSwervePose().getY(), 0.0, new Rotation3d(0.0, 0.0, 0.0))))
+        // new InstantCommand(()->questnav.setQuestPose(new Pose3d(1.0, 1.0, 0.0, new Rotation3d(0.0, 0.0, 0.0)))),
+        // new WaitCommand(0.5),
+        // new InstantCommand(()->questnav.wantToTrack(true)),
         Commands.none()
       ).withTimeout(0.1)
     );
@@ -207,6 +209,7 @@ public class RobotContainer {
     operator.b()
     .whileTrue(climber.prepareForClimbL1())
     .onFalse(climber.climbL1());
+
     //MAN GRABBER DO TS
     // operator.y()
     // .whileTrue(grabberstuffs);
@@ -233,9 +236,14 @@ public class RobotContainer {
 
     // operator.povDown().whileTrue(intake.eject()); // intake.eject()
 
-    // operator.x() // shoot + hopper feed
-    // .whileTrue(shootHub())
-    // ;
+    operator.povRight()
+    .whileTrue(shootHub())
+    ;
+
+    // operator.povRight()
+    // .whileTrue(pathing.followPathTeamFlipped(new Path("CenterShootAuto")));
+    // operator.povLeft()
+    // .whileTrue(swerve.pidToPose(()->new Pose2d(2.0, 2.6, new Rotation2d(Degrees.of(180)))));
 
     // //TALK TO ABBY MAKE THIS A DIFFERENT BUTTON
     // operator.povRight()
@@ -268,8 +276,8 @@ public class RobotContainer {
         swerve.turnToHeadingWithinTurretRange(()->{
           return targeting.getHeadingToTarget(swerve.getSwervePose().getTranslation(), targeting.getHubTarget()).plus(Rotation2d.k180deg);
         }),
-        shooter.shootHub(),
-        spindexer.feedToShooter()
+        shooter.shootHubVelComp(),
+        new WaitCommand(0.5).andThen(spindexer.feedToShooterForce())
         );
     }
     public Command fixedShot(){
