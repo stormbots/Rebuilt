@@ -21,7 +21,7 @@ public class Signals extends SubsystemBase {
   public WLED wled = new WLED(new SerialPort(115200, Port.kUSB1));
   LedSegment right = new LedSegment(0, 2, 22, false);
   LedSegment center = new LedSegment(1, 23, 40, false);
-  LedSegment left = new LedSegment(1, 40, 59, false);
+  LedSegment left = new LedSegment(2, 40, 59, false);
 
   List<LedSegment> signalSegments = List.of(right,center);
 
@@ -107,7 +107,7 @@ public class Signals extends SubsystemBase {
       right.solidColor(CustomColor.kGreen),
       center.solidColor(CustomColor.kGreen),
       left.solidColor(CustomColor.kGreen),
-      Commands.waitSeconds(0.5)
+      Commands.waitSeconds(1)
     );
     return command.ignoringDisable(true);
   }

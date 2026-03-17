@@ -107,7 +107,7 @@ public class RobotContainer {
 
 
     new Trigger(photonvision::doesNotHaveTarget).and(DriverStation::isDisabled).and(DriverStation.getAlliance()::isPresent)
-    .whileTrue(signals.showVisionNotOkay()).onFalse(signals.showVisionOkay());
+    .whileTrue(signals.showVisionNotOkay().repeatedly()).onFalse(signals.showVisionOkay());
 
     ShiftTracking.canShoot.onTrue(signals.shiftStart()).onFalse(signals.shiftEnd());
 
