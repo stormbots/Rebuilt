@@ -46,8 +46,6 @@ import swervelib.parser.SwerveParser;
 import swervelib.telemetry.SwerveDriveTelemetry;
 import swervelib.telemetry.SwerveDriveTelemetry.TelemetryVerbosity;
 
-import com.studica.frc.Navx;
-
 public class Swerve extends SubsystemBase {
 
 
@@ -58,7 +56,7 @@ public class Swerve extends SubsystemBase {
   private boolean isOnTargetTranslate = true;
 
 
-  private Navx navx;
+  private AHRS navx;
 
 
   /** Creates a new SwerveSubsystem. */
@@ -76,7 +74,7 @@ public class Swerve extends SubsystemBase {
     }  
 
 
-    this.navx = (Navx) swerveDrive.getGyro().getIMU();
+    navx = (AHRS) swerveDrive.getGyro().getIMU();
     swerveDrive.setMotorIdleMode(true);
     swerveDrive.setModuleStateOptimization(true);
     swerveDrive.setCosineCompensator(false);
