@@ -89,6 +89,7 @@ public class CustomColor {
   public static final CustomColor kPurple = new CustomColor(255, 0, 255);
   public static final CustomColor kBlack = new CustomColor(0, 0, 0);
   public static final CustomColor kGrey = new CustomColor(119, 119, 119);
+  public static final CustomColor kDarkGrey = new CustomColor(75, 75, 75);
   public static final CustomColor kMagenta = new CustomColor(255, 0, 111);
   public static final CustomColor kLightGreen = new CustomColor(159, 255, 133);
 

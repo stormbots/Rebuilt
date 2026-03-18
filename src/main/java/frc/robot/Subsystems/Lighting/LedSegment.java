@@ -553,38 +553,16 @@ public class LedSegment extends LedBase {
 
       patternMap.put(WLED.numPatterns+2, solidColor(CustomColor.kBlack));
 
-      patternMap.put(WLED.numPatterns+3, solidColor(colorSupplier.get()));
+      patternMap.put(WLED.numPatterns+3, Commands.runOnce(()->{
+        setEffect(0);
+        setColor(colorSupplier.get());
+      }, this));
+
+      patternMap.put(WLED.numPatterns+4, solidColor(CustomColor.kDarkGrey));
 
       return patternMap;
 
     }
-
-    public Command debugStrips(){
-      SmartDashboard.putNumber("leds/Strip1Start", 1);
-      SmartDashboard.putNumber("leds/Strip1end", 16);
-      SmartDashboard.putNumber("leds/Strip2Start", 18);
-      SmartDashboard.putNumber("leds/Strip2end", 26);
-      SmartDashboard.putNumber("leds/Strip3Start", 28);
-      SmartDashboard.putNumber("leds/Strip3end", 36);
-
-      Supplier<Integer> start1 = ()->(int)SmartDashboard.getNumber("leds/Strip1Start", 1);
-      Supplier<Integer> stop1 = ()->(int)SmartDashboard.getNumber("leds/Strip1end", 16);
-      Supplier<Integer> start2 = ()->(int)SmartDashboard.getNumber("leds/Strip2Start", 18);
-      Supplier<Integer> stop2 = ()->(int)SmartDashboard.getNumber("leds/Strip2end", 26);
-      Supplier<Integer> start3 = ()->(int)SmartDashboard.getNumber("leds/Strip3Start", 28);
-      Supplier<Integer> stop3 = ()->(int)SmartDashboard.getNumber("leds/Strip3end", 36);
-      LedMultiRange debug = new LedMultiRange(new LedRange(CustomColor.kBlack), 
-      new LedRange(start1.get(), stop1.get(), CustomColor.kRed),
-      new LedRange(CustomColor.kBlack),
-      new LedRange(start2.get(), stop2.get(), CustomColor.kGreen),
-      new LedRange(CustomColor.kBlack),
-      new LedRange(start3.get(), stop3.get(), CustomColor.kBlue),
-      new LedRange(CustomColor.kBlack));
-
-      return stripes(debug);
-    }
-
-    
 
     public Command pride(){
       double duration = 2.5;

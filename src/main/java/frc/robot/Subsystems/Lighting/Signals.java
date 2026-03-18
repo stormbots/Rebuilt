@@ -12,13 +12,15 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.SerialPort;
 import edu.wpi.first.wpilibj.SerialPort.Port;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
 /** Add your docs here. */
 public class Signals extends SubsystemBase {
   double[] ownedSegments=new double[]{0,1,2,3};
-  public WLED wled = new WLED(new SerialPort(115200, Port.kUSB1));
   LedSegment right = new LedSegment(0, 2, 22, false);
   LedSegment center = new LedSegment(1, 23, 40, false);
   LedSegment left = new LedSegment(2, 40, 59, false);
@@ -88,6 +90,7 @@ public class Signals extends SubsystemBase {
   return Commands.sequence(
     right.blinkSmooth(128,CustomColor.kWhite),
     center.blinkSmooth(128,CustomColor.kWhite),
+    left.blinkSmooth(128,CustomColor.kWhite),
     Commands.waitSeconds(1)
   );
  }
@@ -112,11 +115,23 @@ public class Signals extends SubsystemBase {
     return command.ignoringDisable(true);
   }
 
-  public Command showVisionNotOkay(){
+  public Command Cancel(){
     Command command = Commands.sequence(
-      right.solidColor(CustomColor.kYellow),
-      center.solidColor(CustomColor.kYellow),
-      left.solidColor(CustomColor.kYellow)
+      new InstantCommand(()->{
+        if(right.getCurrentCommand()!=null){
+          right.getCurrentCommand().cancel();
+        }
+      }),
+      new InstantCommand(()->{
+        if(center.getCurrentCommand()!=null){
+          center.getCurrentCommand().cancel();
+        }
+      }),
+      new InstantCommand(()->{
+        if(left.getCurrentCommand()!=null){
+          left.getCurrentCommand().cancel();
+        }
+      })
     );
     return command.ignoringDisable(true);
   }

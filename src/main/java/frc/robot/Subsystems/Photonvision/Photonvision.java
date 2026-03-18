@@ -31,8 +31,8 @@ import frc.robot.Subsystems.Swerve.Swerve;
 
 public class Photonvision extends SubsystemBase {
   private Swerve swerve;
-  private boolean leftHasTarget;
-  private boolean rightHasTarget;
+  private boolean leftHasTarget = false;
+  private boolean rightHasTarget = false;
 
   private AprilTagFieldLayout aprilTagFieldLayout = AprilTagFieldLayout.loadField(AprilTagFields.k2026RebuiltWelded);
 
@@ -183,5 +183,13 @@ public class Photonvision extends SubsystemBase {
 
     SmartDashboard.putBoolean("vision/rightCameraPresent", rightCamera.isPresent());
     SmartDashboard.putBoolean("vision/leftCameraPresent", leftCamera.isPresent());
+
+    SmartDashboard.putBoolean("vision/hasTarget", hasTarget());
+    SmartDashboard.putBoolean("vision/doesNotHaveTarget", doesNotHaveTarget());
   }
 }
+
+
+
+
+
