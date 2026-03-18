@@ -6,6 +6,8 @@ package frc.robot.Subsystems.Climber;
 
 import static edu.wpi.first.units.Units.Inches;
 
+import com.stormbots.CRTAbsoluteEncoder;
+
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -31,7 +33,6 @@ public class Climber extends SubsystemBase {
     public ClimberVisual visual = new ClimberVisual();
 
     public Climber(){
-
 
         // new Trigger(()->stage1.isHomed() && stage2.isHomed())
         // .whileTrue(

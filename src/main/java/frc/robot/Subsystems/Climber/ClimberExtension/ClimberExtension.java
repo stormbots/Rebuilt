@@ -9,6 +9,7 @@ import static edu.wpi.first.units.Units.Seconds;
 
 import com.revrobotics.PersistMode;
 import com.revrobotics.ResetMode;
+import com.revrobotics.spark.SparkAbsoluteEncoder;
 import com.revrobotics.spark.SparkBase.ControlType;
 import com.revrobotics.spark.SparkFlex;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
@@ -83,6 +84,10 @@ public class ClimberExtension extends SubsystemBase {
     // new Trigger(DriverStation::isEnabled)
 		// .and(()->isHomed==false)
 		// .whileTrue(goHome());
+  }
+
+  public SparkAbsoluteEncoder getAbsoluteEncoder(){
+    return motor.getAbsoluteEncoder();
   }
 
   public Command goHome(){

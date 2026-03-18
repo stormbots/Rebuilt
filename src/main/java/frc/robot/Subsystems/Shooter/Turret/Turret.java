@@ -4,7 +4,6 @@
 
 package frc.robot.Subsystems.Shooter.Turret;
 
-import static edu.wpi.first.units.Units.Degree;
 import static edu.wpi.first.units.Units.Degrees;
 
 import java.util.function.DoubleSupplier;
@@ -37,8 +36,9 @@ public class Turret extends SubsystemBase {
   public static final double kGearing = (1.0 / 3.0) * (10.0 / 132.0) * (177.0/198.0);
 
   //How much in ONE direction, hence max range divided by 2
-  public static final double kMinRotation = 160.0;
-  public static final double kMaxRotation = 190.0;
+  public static final double kMinRotation = -287.0;
+  public static final double kMaxRotation = -15.0;
+  private double outPut = 0.0;
 
   Angle targetPosition = Degrees.of(0);
   Angle tolerance = Degrees.of(3);
@@ -54,6 +54,7 @@ public class Turret extends SubsystemBase {
     CRTAbsoluteEncoder.getInstance().setParams(kTurretGearToothCount, kGear1ToothCount, kGear2ToothCount, true);
     CRTAbsoluteEncoder.getInstance().setRelativeEncoder(motor.getEncoder());
     CRTAbsoluteEncoder.getInstance().setEncoder1(motor.getAbsoluteEncoder());
+    // CRTAbsoluteEncoder.getInstance().setEncoder2();
 
     // setDefaultCommand(run(()->motor.stopMotor()));
   }
@@ -81,7 +82,7 @@ public class Turret extends SubsystemBase {
   public Command setAngle(Supplier<Angle> position, Supplier<Angle> tolerance){
     return run(()->{
       SmartDashboard.putNumber("shooter/turret/preClampedTarget", position.get().in(Degrees));
-      double normalizedPosition = position.get().in(Degrees) < 0 ? position.get().in(Degrees) + 360.0 : position.get().in(Degrees);
+      double normalizedPosition = position.get().in(Degrees) > 0 ? position.get().in(Degrees) - 360.0 : position.get().in(Degrees);
       this.targetPosition = Degrees.of(MathUtil.clamp(normalizedPosition, kMinRotation, kMaxRotation));
       this.tolerance = tolerance.get();
       motor.getClosedLoopController().setSetpoint(
@@ -90,6 +91,8 @@ public class Turret extends SubsystemBase {
       );
     });
   }
+
+
 
   public Command setVoltage(DoubleSupplier voltage){
     return run(()-> {
@@ -123,6 +126,9 @@ public class Turret extends SubsystemBase {
     config.closedLoop
       .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
       .p(0.3 * 12 * 2.5 / 90.0)
+      .positionWrappingEnabled(false)
+      .maxOutput(outPut)
+      .minOutput(-outPut)
     ;
 
     config.softLimit

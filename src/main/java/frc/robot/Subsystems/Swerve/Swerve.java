@@ -66,7 +66,7 @@ public class Swerve extends SubsystemBase {
     try
     {
       swerveDrive = new SwerveParser(swerveJsonDirectory)
-      .createSwerveDrive(maximumSpeed, new Pose2d(1,1,new Rotation2d()));
+      .createSwerveDrive(maximumSpeed, new Pose2d(15,7,new Rotation2d()));
     } catch (Exception e)
     {
       System.err.println("Could not find robot config for " + botname);
@@ -342,7 +342,7 @@ public class Swerve extends SubsystemBase {
       isOnTargetAngle = false;
       var error = bearing.get().minus(swerveDrive.getPose().getRotation());
 
-      if(Math.abs(error.getDegrees()) < 85.0){
+      if(Math.abs(error.getDegrees()) < 220.0){
         isOnTargetAngle = true;
       }
     }).finallyDo(()->{
@@ -366,7 +366,7 @@ public class Swerve extends SubsystemBase {
       double kp = 2.0 / 120.0; //90 degrees is 1 output
       double output = error.getDegrees()*kp;
       output = MathUtil.clamp(output, -2.0, 2.0);
-      if(Math.abs(error.getDegrees()) > 5.0){
+      if(Math.abs(error.getDegrees()) > 220.0){
         secondaryInputs.r = output;
       }
       else{

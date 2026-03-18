@@ -188,6 +188,9 @@ public class RobotContainer {
 
   private void configureOperatorBindings() {
 
+    operator.a()
+    .whileTrue(shooter.testTurretVoltage(()->operator.getLeftY()*5));
+
     operator.rightTrigger()
     .whileTrue(shootHub());
 
@@ -268,7 +271,7 @@ public class RobotContainer {
         return targeting.getHeadingToTarget(swerve.getSwervePose().getTranslation(), targeting.getPassTarget()).plus(Rotation2d.k180deg);
       }),
       shooter.pass(),
-      spindexer.feedToShooter()
+      new WaitCommand(0.5).andThen(spindexer.feedToShooterForce())
     );
     }
     public Command shootHub(){
@@ -283,13 +286,13 @@ public class RobotContainer {
     public Command fixedShot(){
       return new ParallelCommandGroup(
         shooter.shoot(()->targeting.fixedShot()),
-        spindexer.feedToShooter()
+        new WaitCommand(0.5).andThen(spindexer.feedToShooterForce())
       );
     }
     public Command fixedPass(){
       return new ParallelCommandGroup(
         shooter.shoot(()->targeting.fixedPassNeutral()),
-        spindexer.feedToShooter()
+        new WaitCommand(0.5).andThen(spindexer.feedToShooterForce())
       );
     }
     public Command fixedPassOpp(){

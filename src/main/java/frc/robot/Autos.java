@@ -135,7 +135,7 @@ public class Autos {
     /////////////////////////
     public Command basicShootInitial8(){
         return Commands.sequence(
-            swerve.turnToHeadingWithinTurretRange(()->{
+            swerve.turnToHeading(()->{
                 return targeting.getHeadingToTarget(swerve.getSwervePose().getTranslation(), targeting.getHubTarget()).plus(Rotation2d.k180deg);
             }).until(()->swerve.isOnTargetAngle()).withTimeout(1.0),
             shootAuto().withTimeout(1.5)
@@ -225,7 +225,9 @@ public class Autos {
 
     public Command choppedInterStuff(){
         return Commands.sequence(
-            pathing.followPathTeamFlipped(new Path("CenterShootAuto"))
+            // basicShootInitial8(),
+            pathing.followPathTeamFlipped(new Path("CenterShootAuto")),
+            basicShootToEmpty()
         );
     }
 

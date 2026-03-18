@@ -58,8 +58,8 @@ public class Shooter {
     public Command shoot(Supplier<TargetingSystem.ShooterState> targets){
         // return Commands.parallel(
         //     flywheel.setRPM(targets),
-        //     hood.setAngle(targets)
-            // turret.setAngle(targets)
+        //     hood.setAngle(targets),
+        //     turret.setAngle(targets)
         // );
         return shootNoTurret(targets);
     }
@@ -68,7 +68,7 @@ public class Shooter {
         return Commands.parallel(
             flywheel.setRPM(targets),
             hood.setAngle(targets),
-            turret.setAngle(()->Degrees.of(180.0), ()->Degrees.of(5.0))
+            turret.setAngle(()->Degrees.of(-180.0), ()->Degrees.of(5.0))
         );
     }
 
@@ -126,7 +126,7 @@ public class Shooter {
     }
 
     public Command pass(){
-        return shoot(targeting::getPass);
+        return shoot(targeting::getPassBotVelCompensated);
     }
 
     /** Bring the hood down for trench purposes */
