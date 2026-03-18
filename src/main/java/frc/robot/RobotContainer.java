@@ -110,7 +110,7 @@ public class RobotContainer {
 
 
     new Trigger(photonvision::doesNotHaveTarget).and(DriverStation::isDisabled).and(()->DriverStation.getAlliance().isPresent())
-    .onFalse(wled.signals.showVisionOkay());
+    .onFalse(wled.signals.showVisionOkay()).onTrue(wled.signals.Cancel());
 
     ShiftTracking.canShoot.onTrue(wled.signals.shiftStart()).onFalse(wled.signals.shiftEnd());
 
