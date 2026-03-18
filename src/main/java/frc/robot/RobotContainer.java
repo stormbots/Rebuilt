@@ -143,9 +143,9 @@ public class RobotContainer {
         new InstantCommand(()->questnav.wantToTrack(false)),
         swerve.zeroGyro(),
         //    IFFFF QUEST IS GOOD BUT CAMS AREN'T, UNCOMMENT THIS AND HAVE JACOB GO TO CORNER FOR ZERO
-        // new InstantCommand(()->questnav.setQuestPose(new Pose3d(1.0, 1.0, 0.0, new Rotation3d(0.0, 0.0, 0.0)))),
-        // new WaitCommand(0.5),
-        // new InstantCommand(()->questnav.wantToTrack(true)),
+        new InstantCommand(()->questnav.setQuestPose(new Pose3d(swerve.getSwervePose()))),
+        new WaitCommand(0.5),
+        new InstantCommand(()->questnav.wantToTrack(true)),
         Commands.none()
       ).withTimeout(0.1)
     );
