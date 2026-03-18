@@ -135,7 +135,11 @@ public class TargetingSystem extends SubsystemBase {
 
   //distance, hoodangle, flywheel rpm
   public LUT passLUT = new LUT(new double[][]{
-    {16*12+24, 30, 3025, 1.0}
+    {169, 25, 2000, 1.2},
+    {225, 35, 2500, 1.2},
+    {32*12, 35, 3000, 1.2},
+    {40*12, 40, 3500, 1.5},
+    {47*12, 40, 3600, 1.5}
 
     //min from center
     //max from midfield

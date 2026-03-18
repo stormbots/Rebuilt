@@ -189,7 +189,7 @@ public class RobotContainer {
   private void configureOperatorBindings() {
 
     operator.a()
-    .whileTrue(shooter.testTurretVoltage(()->operator.getLeftY()*5));
+    .whileTrue(shooter.testTurretVoltage(()->operator.getLeftY()*3));
 
     operator.rightTrigger()
     .whileTrue(shootHub());
@@ -212,6 +212,11 @@ public class RobotContainer {
     operator.b()
     .whileTrue(climber.prepareForClimbL1())
     .onFalse(climber.climbL1());
+
+    operator.x()
+    .whileTrue(shooter.shootWithDashboardValues())
+    .whileTrue(Commands.waitSeconds(1).andThen(spindexer.feedToShooterForce()))
+    ;
 
     //MAN GRABBER DO TS
     // operator.y()
@@ -271,7 +276,7 @@ public class RobotContainer {
         return targeting.getHeadingToTarget(swerve.getSwervePose().getTranslation(), targeting.getPassTarget()).plus(Rotation2d.k180deg);
       }),
       shooter.pass(),
-      new WaitCommand(0.5).andThen(spindexer.feedToShooterForce())
+      spindexer.feedToShooter()
     );
     }
     public Command shootHub(){
@@ -280,7 +285,7 @@ public class RobotContainer {
           return targeting.getHeadingToTarget(swerve.getSwervePose().getTranslation(), targeting.getHubTarget()).plus(Rotation2d.k180deg);
         }),
         shooter.shootHubVelComp(),
-        new WaitCommand(0.5).andThen(spindexer.feedToShooterForce())
+        spindexer.feedToShooter()
         );
     }
     public Command fixedShot(){

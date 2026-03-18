@@ -56,12 +56,12 @@ public class Shooter {
     // }
 
     public Command shoot(Supplier<TargetingSystem.ShooterState> targets){
-        // return Commands.parallel(
-        //     flywheel.setRPM(targets),
-        //     hood.setAngle(targets),
-        //     turret.setAngle(targets)
-        // );
-        return shootNoTurret(targets);
+        return Commands.parallel(
+            flywheel.setRPM(targets),
+            hood.setAngle(targets),
+            turret.setAngle(targets)
+        );
+        // return shootNoTurret(targets);
     }
 
     public Command shootNoTurret(Supplier<TargetingSystem.ShooterState> targets){
@@ -152,7 +152,7 @@ public class Shooter {
     // SmartDashboard.putNumber("robotContainer/hoodAngle", 0);
     // SmartDashboard.putNumber("robotContainer/flywheelrpm", 0);
     return this.shoot(()->new TargetingSystem.ShooterState(
-      Degrees.of(180), 
+      Degrees.of(-180), 
       Degrees.of(SmartDashboard.getNumber("robotContainer/hoodAngle", hood.getAngle().in(Degrees))), 
       SmartDashboard.getNumber("robotContainer/flywheelrpm", flywheel.getRPM())));
     }

@@ -90,7 +90,8 @@ public class CRTAbsoluteEncoder {
     }
 
     public void sync(){
-        relativeEncoder.setPosition(getPosition().in(Degrees));
+        // relativeEncoder.setPosition(getPosition().in(Degrees));
+        relativeEncoder.setPosition(-180);
     }
 
 }
