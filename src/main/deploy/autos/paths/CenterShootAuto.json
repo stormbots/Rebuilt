@@ -105,5 +105,24 @@
       "y_meters": 0.5942935680370383,
       "intermediate_handoff_radius_meters": 0.4
     }
-  ]
+  ],
+  "constraints": {
+    "max_velocity_meters_per_sec": [
+      {
+        "value": 0.25,
+        "start_ordinal": 8,
+        "end_ordinal": 9
+      },
+      {
+        "value": 0.25,
+        "start_ordinal": 6,
+        "end_ordinal": 7
+      },
+      {
+        "value": 0.25,
+        "start_ordinal": 1,
+        "end_ordinal": 4
+      }
+    ]
+  }
 }
