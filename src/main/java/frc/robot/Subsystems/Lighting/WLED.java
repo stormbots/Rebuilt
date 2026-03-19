@@ -16,35 +16,92 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonSerializationContext;
 import com.google.gson.JsonSerializer;
 
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.SerialPort;
-import edu.wpi.first.wpilibj.SerialPort.Port;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.RobotContainer;
 import frc.robot.Subsystems.Lighting.LedSegment.LedMultiRange;
+import frc.robot.Subsystems.Photonvision.Photonvision;
 
 public class WLED extends SubsystemBase{
   private static SerialPort serialport;
+  public Signals signals = new Signals();
+  private static Photonvision vision;
   private static ArrayList<LedSegment> segments = new ArrayList<LedSegment>();
   private static ArrayList<Boolean> updated = new ArrayList<Boolean>();
   private static int calls;
-  public WLED(SerialPort serialPort) {
+  private static int defaultPattern = -1;
+  private static int indivualRoll = -1;
+  public static final int numPatterns = 23;
+  private static int chanceIndividual = 10;
+  public WLED(SerialPort serialPort, Photonvision vision) {
+    if (chanceIndividual==0){
+      chanceIndividual = 2;
+    }
     try{
       serialport.toString();
     }
     catch (NullPointerException n){
-      this.serialport = serialPort;
+      WLED.serialport = serialPort;
+    }
+
+    if (defaultPattern == -1){
+      defaultPattern = (int)(Math.random()*(numPatterns));
+    }
+
+    if (indivualRoll == -1){
+      indivualRoll = (int)(Math.random()*(chanceIndividual*2)+1);
     }
     calls = 0; 
-  }
+    
+    try{
+      WLED.vision.hasTarget();
+    }
+    catch (NullPointerException n){
+      WLED.vision = vision;
+    }
+     
+}
 
   public LedSegment getLedSegment(int id, int start, int stop, boolean reverse){
     return new LedSegment(id, start, stop, reverse);
   }
 
+
+  public static int getDefaultPattern(){
+    if (DriverStation.getAlliance().isEmpty()){
+      return numPatterns+2;
+    }
+    else if(DriverStation.isAutonomousEnabled()){
+      return defaultPattern;
+    }
+    else if (DriverStation.isTeleopEnabled()){
+      return numPatterns+3;
+    }
+    else if (vision.doesNotHaveTarget()){
+      return numPatterns+4;
+    }
+    else if(indivualRoll == (chanceIndividual*2)-1){
+      return numPatterns;
+    }
+    else if(indivualRoll == chanceIndividual*2){
+      return numPatterns+1;
+    }
+    else{
+      return defaultPattern;
+    }
+      
+  }
+  
+  public static int getDefaultPatternUnchecked(){
+    return defaultPattern;
+  }
+
   @Override
   public void periodic() {
     serializeSegments();
-    SmartDashboard.putString("updated",updated.toString());
+    SmartDashboard.putNumber("leds/defaultPattern", getDefaultPattern());
   }
 
   private static String gsonSerialize(LedSegment segment){

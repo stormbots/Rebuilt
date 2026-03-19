@@ -9,28 +9,38 @@ import java.util.List;
 import java.util.Optional;
 
 import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.SerialPort;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
+import edu.wpi.first.wpilibj.SerialPort;
 import edu.wpi.first.wpilibj.SerialPort.Port;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import edu.wpi.first.wpilibj2.command.WaitCommand;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
 /** Add your docs here. */
 public class Signals extends SubsystemBase {
   double[] ownedSegments=new double[]{0,1,2,3};
-  public WLED wled = new WLED(new SerialPort(115200, Port.kUSB1));
-  LedSegment seg = new LedSegment(0, 0, 60, false);
-  LedSegment seg2 = new LedSegment(1, 60, 120, false);
-  List<LedSegment> signalSegments = List.of(seg,seg2);
+  LedSegment right = new LedSegment(0, 2, 22, false);
+  LedSegment center = new LedSegment(1, 23, 40, false);
+  LedSegment left = new LedSegment(2, 40, 59, false);
+
+  List<LedSegment> signalSegments = List.of(right,center);
 
   
   public Signals(){
-    seg.setDefaultCommand(showAllianceColorBoring(seg).ignoringDisable(true));
-    seg2.setDefaultCommand(showAllianceColorBoring(seg2).ignoringDisable(true));
+    right.setDefaultCommand(right.showAllianceColorInteresting().ignoringDisable(true));
+    center.setDefaultCommand(center.showAllianceColorInteresting().ignoringDisable(true));
+    left.setDefaultCommand(left.showAllianceColorInteresting().ignoringDisable(true));
+  }
+
+  public Command showAllianceColor(){
+    return Commands.sequence(showAllianceColorBoring(right),showAllianceColorBoring(center));
   }
   
+  public Command showAllianceColorIntersingUnchecked(){
+    return Commands.sequence(right.showAllianceColorUnchecked(),center.showAllianceColorUnchecked());
+  }
 
   private Command showAllianceColorBoring(LedSegment segment){
     HashMap<Optional<Alliance>,Command> map = new HashMap<>();
@@ -42,50 +52,76 @@ public class Signals extends SubsystemBase {
 
  public Command hopperFull(){
   return Commands.sequence(
-    seg.solidColor(CustomColor.kYellow),
-    seg2.solidColor(CustomColor.kYellow),
+    right.solidColor(CustomColor.kYellow),
+    center.solidColor(CustomColor.kYellow),
+    left.solidColor(CustomColor.kYellow),
     Commands.waitSeconds(0.5)
   );
  }
 
  public Command hopperLow(){
   return Commands.sequence(
-    seg.blink(CustomColor.kYellow,230),
-    seg2.blink(CustomColor.kYellow,230),
-    Commands.waitSeconds(1)
+    right.blinkSmooth(128,CustomColor.kYellow),
+    center.blinkSmooth(128,CustomColor.kYellow),
+    left.blinkSmooth(128,CustomColor.kYellow),
+    Commands.waitSeconds(0.5)
   );
  }
   
  public Command shotNotOk(){
   return Commands.sequence(
-    seg.solidColor(CustomColor.kOrange),
-    seg2.solidColor(CustomColor.kOrange),
+    right.solidColor(CustomColor.kOrange),
+    center.solidColor(CustomColor.kOrange),
+    left.solidColor(CustomColor.kOrange),
     Commands.waitSeconds(0.5)
   );
  }
 
- public Command shiftChange(){
+ public Command shiftStart(){
   return Commands.sequence(
-    seg.solidColor(CustomColor.kWhite),
-    seg2.solidColor(CustomColor.kWhite),
+    right.solidColor(CustomColor.kWhite),
+    center.solidColor(CustomColor.kWhite),
+    left.solidColor(CustomColor.kWhite),
     Commands.waitSeconds(0.5)
   );
  }
+
+ public Command shiftEnd(){
+  return Commands.sequence(
+    right.blinkSmooth(128,CustomColor.kWhite),
+    center.blinkSmooth(128,CustomColor.kWhite),
+    left.blinkSmooth(128,CustomColor.kWhite),
+    Commands.waitSeconds(0.5)
+  );
+ }
+
 
  public Command climbOkay(){
   return Commands.sequence(
-    seg.solidColor(CustomColor.kPink),
-    seg2.solidColor(CustomColor.kPink),
+    right.solidColor(CustomColor.kPink),
+    center.solidColor(CustomColor.kPink),
+    left.solidColor(CustomColor.kPink),
     Commands.waitSeconds(0.5)
   );
  }
 
  public Command showVisionOkay(){
-    return Commands.sequence(
-      seg.solidColor(CustomColor.kGreen),
-      seg2.solidColor(CustomColor.kGreen),
-      Commands.waitSeconds(0.5)
+    Command command = Commands.sequence(
+      right.solidColor(CustomColor.kGreen),
+      center.solidColor(CustomColor.kGreen),
+      left.solidColor(CustomColor.kGreen),
+      Commands.waitSeconds(1)
     );
+    return command.ignoringDisable(true);
+  }
+
+  public Command reboot(){
+    Command command = Commands.sequence(
+      Commands.runOnce(()->{}, right),
+      Commands.runOnce(()->{}, center),
+      Commands.runOnce(()->{}, left)
+    );
+    return command.ignoringDisable(true);
   }
 
 }

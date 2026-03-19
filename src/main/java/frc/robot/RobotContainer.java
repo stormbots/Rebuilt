@@ -8,17 +8,16 @@ package frc.robot;
 
 import static edu.wpi.first.units.Units.Degree;
 import static edu.wpi.first.units.Units.Degrees;
-import static edu.wpi.first.units.Units.Radians;
 
 import com.stormbots.CRTAbsoluteEncoder;
-
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj.SerialPort;
+import edu.wpi.first.wpilibj.SerialPort.Port;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
@@ -33,6 +32,7 @@ import frc.robot.Subsystems.Climber.Climber;
 import frc.robot.Subsystems.HopperSensors.HopperSensors;
 import frc.robot.Subsystems.Intake.Intake;
 import frc.robot.Subsystems.Lighting.Signals;
+import frc.robot.Subsystems.Lighting.WLED;
 import frc.robot.Subsystems.Photonvision.Photonvision;
 import frc.robot.Subsystems.Questnav.QuestNavSubsystem;
 import frc.robot.Subsystems.Shooter.Shooter;
@@ -55,8 +55,9 @@ public class RobotContainer {
   Spindexer spindexer = new Spindexer(shooter.isReadyToAcceptFuel.and(swerve::isOnTargetAngle));
   QuestNavSubsystem questnav = new QuestNavSubsystem(swerve);
   Pathing pathing = new Pathing(swerve, shooter, intake, spindexer, targeting);
-  Signals signals = new Signals();
+  WLED wled = new WLED(new SerialPort(115200, Port.kUSB1),photonvision);
   Autos autos = new Autos(swerve, shooter, intake, questnav, spindexer, pathing, targeting);
+  ShiftTracking shiftTracking = new ShiftTracking();
   // Bling bling = new Bling(); //TODO: Currently no bling lights on bot
   FieldBehaviour fieldBehaviour = new FieldBehaviour();
 
@@ -99,10 +100,34 @@ public class RobotContainer {
     // );
 
 
+    // syncQuestPose.runsWhenDisabled();
 
 
-    new Trigger(photonvision::hasTarget).and(DriverStation::isDisabled)
-    .whileTrue(signals.showVisionOkay());
+    // new Trigger(()->Timer.getFPGATimestamp() > 1)
+    // .and(DriverStation::isDisabled)
+    // .whileTrue(syncQuestPose);
+
+
+
+
+    new Trigger(photonvision::doesNotHaveTarget)
+    .and(DriverStation::isDisabled)
+    .and(()->DriverStation.getAlliance().isPresent())
+    .onFalse(wled.signals.showVisionOkay())
+    .onTrue(wled.signals.reboot());
+
+    ShiftTracking.canShoot.onTrue(wled.signals.shiftStart()).onFalse(wled.signals.shiftEnd());
+
+    new Trigger(DriverStation::isTeleopEnabled).onTrue(wled.signals.reboot());
+
+    new Trigger(DriverStation::isAutonomousEnabled).onTrue(wled.signals.reboot());
+
+
+
+    //while disabled
+    //and see target
+    //update quest pose
+    //onEnable
 
 
   }
