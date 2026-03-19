@@ -225,12 +225,13 @@ public class LedSegment extends LedBase {
       }
 
       public LedRange(CustomColor color, double fraction, double index){
-        int pixels = (int) Math.round(length/fraction);
+        double exactPixels =  length/fraction;
+        int pixels = (int) Math.round(exactPixels);
         if (pixels == 0){
           pixels = 1;
         }
-        start = (int) Math.round(pixels*(index-1));
-        stop = (int)Math.round(pixels*index);
+        start = (int) Math.round(exactPixels*(index-1));
+        stop = (int)Math.round(exactPixels*index);
         this.color = color;
       }
       

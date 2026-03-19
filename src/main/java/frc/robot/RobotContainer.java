@@ -109,14 +109,17 @@ public class RobotContainer {
 
 
 
-    new Trigger(photonvision::doesNotHaveTarget).and(DriverStation::isDisabled).and(()->DriverStation.getAlliance().isPresent())
-    .onFalse(wled.signals.showVisionOkay()).onTrue(wled.signals.Cancel());
+    new Trigger(photonvision::doesNotHaveTarget)
+    .and(DriverStation::isDisabled)
+    .and(()->DriverStation.getAlliance().isPresent())
+    .onFalse(wled.signals.showVisionOkay())
+    .onTrue(wled.signals.reboot());
 
     ShiftTracking.canShoot.onTrue(wled.signals.shiftStart()).onFalse(wled.signals.shiftEnd());
 
-    new Trigger(DriverStation::isTeleopEnabled).onTrue(wled.signals.Cancel());
+    new Trigger(DriverStation::isTeleopEnabled).onTrue(wled.signals.reboot());
 
-    new Trigger(DriverStation::isAutonomousEnabled).onTrue(wled.signals.Cancel());
+    new Trigger(DriverStation::isAutonomousEnabled).onTrue(wled.signals.reboot());
 
 
 

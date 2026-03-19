@@ -64,7 +64,7 @@ public class Signals extends SubsystemBase {
     right.blinkSmooth(128,CustomColor.kYellow),
     center.blinkSmooth(128,CustomColor.kYellow),
     left.blinkSmooth(128,CustomColor.kYellow),
-    Commands.waitSeconds(1)
+    Commands.waitSeconds(0.5)
   );
  }
   
@@ -91,7 +91,7 @@ public class Signals extends SubsystemBase {
     right.blinkSmooth(128,CustomColor.kWhite),
     center.blinkSmooth(128,CustomColor.kWhite),
     left.blinkSmooth(128,CustomColor.kWhite),
-    Commands.waitSeconds(1)
+    Commands.waitSeconds(0.5)
   );
  }
 
@@ -115,23 +115,11 @@ public class Signals extends SubsystemBase {
     return command.ignoringDisable(true);
   }
 
-  public Command Cancel(){
+  public Command reboot(){
     Command command = Commands.sequence(
-      new InstantCommand(()->{
-        if(right.getCurrentCommand()!=null){
-          right.getCurrentCommand().cancel();
-        }
-      }),
-      new InstantCommand(()->{
-        if(center.getCurrentCommand()!=null){
-          center.getCurrentCommand().cancel();
-        }
-      }),
-      new InstantCommand(()->{
-        if(left.getCurrentCommand()!=null){
-          left.getCurrentCommand().cancel();
-        }
-      })
+      Commands.runOnce(()->{}, right),
+      Commands.runOnce(()->{}, center),
+      Commands.runOnce(()->{}, left)
     );
     return command.ignoringDisable(true);
   }
