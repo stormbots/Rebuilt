@@ -17,7 +17,7 @@ import java.util.function.Consumer;
 import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
 
-import com.studica.frc.AHRS;
+import com.studica.frc.Navx;
 
 import dev.doglog.DogLog;
 import edu.wpi.first.math.MathUtil;
@@ -46,6 +46,7 @@ import swervelib.parser.SwerveParser;
 import swervelib.telemetry.SwerveDriveTelemetry;
 import swervelib.telemetry.SwerveDriveTelemetry.TelemetryVerbosity;
 
+
 public class Swerve extends SubsystemBase {
 
 
@@ -54,10 +55,9 @@ public class Swerve extends SubsystemBase {
   Field2d odometryField = new Field2d();
   private boolean isOnTargetAngle = true;
   private boolean isOnTargetTranslate = true;
+  Navx navx;
 
-
-  private AHRS navx;
-
+  //Grab the constructed navx in case we need it
 
   /** Creates a new SwerveSubsystem. */
   public Swerve() {
@@ -74,7 +74,7 @@ public class Swerve extends SubsystemBase {
     }  
 
 
-    navx = (AHRS) swerveDrive.getGyro().getIMU();
+    navx = (Navx) swerveDrive.getGyro().getIMU();
     swerveDrive.setMotorIdleMode(true);
     swerveDrive.setModuleStateOptimization(true);
     swerveDrive.setCosineCompensator(false);
@@ -247,7 +247,7 @@ public class Swerve extends SubsystemBase {
 
  
   public Command isCalibrating(){
-    return Commands.idle().until(()->(navx.isCalibrating()== false));
+    return Commands.idle().until(()->(navx.getRotation3d().getY() != 0.0));
   }  
 
 
