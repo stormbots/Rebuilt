@@ -102,7 +102,7 @@ public class Pathing extends SubsystemBase {
         swerve.turnToHeadingWithinTurretRange(()->{
           return targeting.getHeadingToTarget(swerve.getSwervePose().getTranslation(), targeting.getHubTarget()).plus(Rotation2d.k180deg);
         }),
-        shooter.shootHubNoTur(),
+        shooter.shootHubVelComp(),
         spindexer.feedToShooter()
         );
     }
@@ -118,7 +118,7 @@ public class Pathing extends SubsystemBase {
   public Command intakeWhileShooting(){
       return new ParallelCommandGroup(
           intake.intake(),
-          shooter.shootHub(),
+          shooter.shootHubVelComp(),
           spindexer.feedToShooterForce()
       );
   }

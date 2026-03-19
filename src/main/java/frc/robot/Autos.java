@@ -106,6 +106,7 @@ public class Autos {
         // autoChooser.addOption("Blue Right Go Center", this::BlueRightGoCenter);
         // autoChooser.addOption("Red Left Go Center", this::RedLeftGoCenter);
         // autoChooser.addOption("Red Right Go Center", this::RedRightGoCenter);
+        autoChooser.addOption("Testing Straight", this::testingStraightUnder);
         autoChooser.addOption("Red Left Center Shoot Slow", this::slowTestinCenterShotAutoRedLeft);
         autoChooser.addOption("Blue Depot", this::depotAutoBlue);
         autoChooser.addOption("Red Depot", this::depotAutoRed);
@@ -243,6 +244,12 @@ public class Autos {
             swerve.pidToPoseInterpolated(()->new Pose2d(3,4,new Rotation2d(180))),
             swerve.pidToPoseInterpolated(()->new Pose2d(7,4,new Rotation2d(90)))
         ).withTimeout(21);
+    }
+
+    public Command testingStraightUnder(){
+        return Commands.sequence(
+            pathing.followPathTeamFlipped(new Path("testingStraightUnder"))
+        );
     }
 
     public Command redDepot(){

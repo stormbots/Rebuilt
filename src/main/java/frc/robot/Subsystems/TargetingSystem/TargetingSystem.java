@@ -42,7 +42,7 @@ public class TargetingSystem extends SubsystemBase {
     public Angle hoodAngle;
     public double flywheelRPM;
 
-    public Angle turretTolerance = Degrees.of(3);
+    public Angle turretTolerance = Degrees.of(1.5);
     public Angle hoodTolerance = Degrees.of(0.5);
     public double flywheelTolerance = 75;
 
@@ -69,7 +69,7 @@ public class TargetingSystem extends SubsystemBase {
   }
 
   double timescalar = 1.2;
-  double distanceoffset = 12;
+  double distanceoffset = 12.0;
   // distance, hoodangle, flywheel rpm
   LUT hubLUT = new LUT(new double[][]{
     // {22+14, 5, 2050},
