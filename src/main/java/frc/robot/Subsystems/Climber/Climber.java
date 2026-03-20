@@ -19,7 +19,7 @@ import frc.robot.Subsystems.Climber.Grabber.Grabber;
 
 /** Add your docs here. */
 public class Climber extends SubsystemBase {
-    public static Distance kStage1Range = Inches.of(8.05);
+    public static Distance kStage1Range = Inches.of(8.25);
     public static Distance kStage2Range = Inches.of(20);
 
     ClimberExtension stage1 = new ClimberExtension(
@@ -68,7 +68,7 @@ public class Climber extends SubsystemBase {
 
     public Command prepareForClimbL1(){
         return Commands.parallel(
-            stage1.setHeight(Inches.of(8.35)),
+            stage1.setHeight(Inches.of(8.25)),
             grabber.retractPartial()
         )
         // .until(grabber.isRetracted.and(stage1.isAtTargetPosition))
@@ -77,6 +77,7 @@ public class Climber extends SubsystemBase {
     }
 
     public Command climbL1(){
+        
         return Commands.sequence(
             grabber.grab().until(grabber.isPossiblyConnected).withTimeout(0.5),
             new WaitCommand(0.25),

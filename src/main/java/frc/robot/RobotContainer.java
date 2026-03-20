@@ -163,16 +163,20 @@ public class RobotContainer {
     //TODO: PROGRAMMING DEBUG BUTTONS CODE REMOVE ME
 
 
+    // driver.start().onTrue(
+    //   Commands.sequence(
+    //     new InstantCommand(()->questnav.wantToTrack(false)),
+    //     swerve.zeroGyro(),
+    //     //    IFFFF QUEST IS GOOD BUT CAMS AREN'T, UNCOMMENT THIS AND HAVE JACOB GO TO CORNER FOR ZERO
+    //     new InstantCommand(()->questnav.setQuestPose(new Pose3d(swerve.getSwervePose()))),
+    //     new WaitCommand(0.5),
+    //     new InstantCommand(()->questnav.wantToTrack(true)),
+    //     Commands.none()
+    //   ).withTimeout(0.1)
+    // );
+
     driver.start().onTrue(
-      Commands.sequence(
-        new InstantCommand(()->questnav.wantToTrack(false)),
-        swerve.zeroGyro(),
-        //    IFFFF QUEST IS GOOD BUT CAMS AREN'T, UNCOMMENT THIS AND HAVE JACOB GO TO CORNER FOR ZERO
-        new InstantCommand(()->questnav.setQuestPose(new Pose3d(swerve.getSwervePose()))),
-        new WaitCommand(0.5),
-        new InstantCommand(()->questnav.wantToTrack(true)),
-        Commands.none()
-      ).withTimeout(0.1)
+      swerve.zeroGyro()
     );
      
 
@@ -235,7 +239,7 @@ public class RobotContainer {
     .whileTrue(spindexer.unclog());
 
     operator.povDown()
-    .whileTrue(climber.goHome());
+    .whileTrue(climber.stow());
 
     operator.b()
     .whileTrue(climber.prepareForClimbL1())

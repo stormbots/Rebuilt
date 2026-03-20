@@ -342,7 +342,7 @@ public class Swerve extends SubsystemBase {
       isOnTargetAngle = false;
       var error = bearing.get().minus(swerveDrive.getPose().getRotation());
 
-      if(Math.abs(error.getDegrees()) < 220.0){
+      if(Math.abs(error.getDegrees()) < 260.0){
         isOnTargetAngle = true;
       }
     }).finallyDo(()->{

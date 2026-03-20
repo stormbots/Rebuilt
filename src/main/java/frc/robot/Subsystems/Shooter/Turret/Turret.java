@@ -37,7 +37,7 @@ public class Turret extends SubsystemBase {
 
   //How much in ONE direction, hence max range divided by 2
   public static final double kMinRotation = -287.0;
-  public static final double kMaxRotation = -15.0;
+  public static final double kMaxRotation = -20.0;
   private double outPut = 3/12.0;
 
   Angle targetPosition = Degrees.of(0);
@@ -105,7 +105,7 @@ public class Turret extends SubsystemBase {
   }
 
   public boolean getOnTarget(){
-    return MathUtil.isNear(targetPosition.in(Degrees), motor.getEncoder().getPosition(), tolerance.in(Degrees));
+    return MathUtil.isNear(targetPosition.in(Degrees), motor.getEncoder().getPosition(), tolerance.in(Degrees)+6.0);
   }
 
   private SparkBaseConfig getMotorConfig(){

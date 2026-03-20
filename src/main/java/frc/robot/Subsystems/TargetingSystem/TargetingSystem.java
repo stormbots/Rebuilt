@@ -152,10 +152,10 @@ public class TargetingSystem extends SubsystemBase {
 
   //remove, we want to use field objects
   // ArrayList<Translation2d> bluePassTargets;
-  Translation2d blueLow = new Translation2d(1,0.5);
-  Translation2d blueHigh = new Translation2d(1,7.5);
-  Translation2d redLow = new Translation2d(15.6,0.5);
-  Translation2d redHigh = new Translation2d(15.6,7.5);
+  Translation2d blueLow = new Translation2d(1,1.5);
+  Translation2d blueHigh = new Translation2d(1,6.5);
+  Translation2d redLow = new Translation2d(15.6,1.5);
+  Translation2d redHigh = new Translation2d(15.6,6.5);
 
   Field2d field = new Field2d();
 

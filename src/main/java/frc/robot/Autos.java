@@ -108,6 +108,8 @@ public class Autos {
         // autoChooser.addOption("Red Right Go Center", this::RedRightGoCenter);
         autoChooser.addOption("CenterShootingAutoRedLeft", this::CenterShootAutoRedLEFT);
         autoChooser.addOption("CenterShootingAutoBlueLeft", this::CenterShootAutoBlueLEFT);
+        autoChooser.addOption("PassingAutoRedLeft", this::PassingAutoRedLEFT);
+        autoChooser.addOption("PassingAutoBlueLeft", this::PassingAutoBlueLEFT);
         // autoChooser.addOption("Red Left Center Shoot Slow", this::slowTestinCenterShotAutoRedLeft);
         autoChooser.addOption("Blue Depot", this::depotAutoBlue);
         // autoChooser.addOption("Red Depot", this::depotAutoRed);
@@ -249,29 +251,43 @@ public class Autos {
 
     public Command CenterShootAutoRedLEFT(){
         return Commands.sequence(
-            basicShootInitial8().withTimeout(3.5),
-            shooter.testSetHoodAngle(Degrees.of(0)).withTimeout(0.75),
-            pathing.followPathTeamFlipped(new Path("CenterShootAutoV2"))
+            pathing.followPathTeamFlipped(new Path("shootInitial")),
+            pathing.followPathTeamFlipped(new Path("CenterShootAutoV2")).withTimeout(20)
         );
     }
 
     public Command CenterShootAutoBlueLEFT(){
         return Commands.sequence(
-            basicShootInitial8().withTimeout(3.5),
-            shooter.testSetHoodAngle(Degrees.of(0)).withTimeout(0.75),
-            pathing.followPath(new Path("CenterShootAutoV2"))
+            pathing.followPathTeamFlipped(new Path("shootInitial")),
+            pathing.followPath(new Path("CenterShootAutoV2")).withTimeout(20)
+        );
+    }
+
+    public Command PassingAutoRedLEFT(){
+        return Commands.sequence(
+            pathing.followPathTeamFlipped(new Path("shootInitial")),
+            pathing.followPathTeamFlipped(new Path("testingStraightUnder")).withTimeout(20)
+        );
+    }
+
+    public Command PassingAutoBlueLEFT(){
+        return Commands.sequence(
+            pathing.followPathTeamFlipped(new Path("shootInitial")),
+            pathing.followPath(new Path("testingStraightUnder"))
         );
     }
 
     public Command redDepot(){
         return Commands.sequence(
-            basicShootInitial8().withTimeout(3.5),
-            pathing.followPathTeamFlipped(new Path("pleaseDontBreak"))
+            // basicShootInitial8().withTimeout(3.5),
+            // shooter.testSetHoodAngle(Degrees.of(0)).withTimeout(0.75),
+            pathing.followPathTeamFlipped(new Path("depotstart")),
+            pathing.followPathTeamFlipped(new Path("depotAuto"))
         );
     }
     public Command blueDepot(){
         return Commands.sequence(
-            basicShootInitial8().withTimeout(3.5),
+            pathing.followPathTeamFlipped(new Path("shootInitial")),
             pathing.followPath(new Path("depotAuto"))
         );
     }
