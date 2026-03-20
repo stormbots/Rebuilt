@@ -15,7 +15,7 @@
     {
       "type": "event_trigger",
       "t_ratio": 0.6200000000000007,
-      "lib_key": "intake"
+      "lib_key": "intakeWhileShooting"
     },
     {
       "type": "translation",
@@ -49,14 +49,14 @@
     },
     {
       "type": "event_trigger",
-      "t_ratio": 0.8430259199372518,
+      "t_ratio": 0.8430259199372515,
       "lib_key": "shoot"
     },
     {
       "type": "waypoint",
       "translation_target": {
-        "x_meters": 2.1440397341109425,
-        "y_meters": 4.880459134966859,
+        "x_meters": 1.4482802458611865,
+        "y_meters": 5.234235145941311,
         "intermediate_handoff_radius_meters": 0.2
       },
       "rotation_target": {
@@ -70,7 +70,7 @@
       {
         "value": 0.125,
         "start_ordinal": 2,
-        "end_ordinal": 3
+        "end_ordinal": 4
       },
       {
         "value": 0.5,

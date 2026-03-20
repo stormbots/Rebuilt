@@ -234,6 +234,9 @@ public class RobotContainer {
     operator.povUp()
     .whileTrue(spindexer.unclog());
 
+    operator.povDown()
+    .whileTrue(climber.goHome());
+
     operator.b()
     .whileTrue(climber.prepareForClimbL1())
     .onFalse(climber.climbL1());

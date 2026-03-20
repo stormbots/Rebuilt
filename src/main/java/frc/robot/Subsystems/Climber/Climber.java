@@ -13,6 +13,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import edu.wpi.first.wpilibj2.command.WaitCommand;
 import frc.robot.Subsystems.Climber.ClimberExtension.ClimberExtension;
 import frc.robot.Subsystems.Climber.Grabber.Grabber;
 
@@ -67,8 +68,8 @@ public class Climber extends SubsystemBase {
 
     public Command prepareForClimbL1(){
         return Commands.parallel(
-            stage1.setHeight(Inches.of(8)),
-            grabber.retract()
+            stage1.setHeight(Inches.of(8.35)),
+            grabber.retractPartial()
         )
         // .until(grabber.isRetracted.and(stage1.isAtTargetPosition))
         .finallyDo(stage1::stopMotor)
@@ -78,7 +79,8 @@ public class Climber extends SubsystemBase {
     public Command climbL1(){
         return Commands.sequence(
             grabber.grab().until(grabber.isPossiblyConnected).withTimeout(0.5),
-            stage1.setHeight(Inches.of(0))
+            new WaitCommand(0.25),
+            stage1.setHeight(Inches.of(2.5))
         )
         .finallyDo(stage1::stopMotor)
         .withName("Climb");

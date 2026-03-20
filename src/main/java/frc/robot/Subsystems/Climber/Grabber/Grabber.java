@@ -117,7 +117,7 @@ public class Grabber extends SubsystemBase {
   }
 
   public Command retractPartial(){
-    return setPosition(Degrees.of(kMinPosition+30));
+    return setPosition(Degrees.of(kMinPosition+40));
   }
 
   public Command goHome(){
