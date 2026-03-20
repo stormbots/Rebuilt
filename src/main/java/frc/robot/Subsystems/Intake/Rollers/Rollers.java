@@ -52,7 +52,7 @@ public class Rollers extends SubsystemBase {
     config
     .idleMode(IdleMode.kCoast)
     .inverted(true)
-    .smartCurrentLimit(60)
+    .smartCurrentLimit(50)
     .voltageCompensation(11);
 
     motor.configure(config, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
@@ -64,6 +64,8 @@ public class Rollers extends SubsystemBase {
   public void periodic() {
     SmartDashboard.putNumber("Intake/Rollers/DutyCycle", motor.getAppliedOutput());
     SmartDashboard.putNumber("Intake/Rollers/OutputCurrent", motor.getOutputCurrent());
+    SmartDashboard.putNumber("Intake/Rollers/Current", motor.getAppliedOutput());
+
     // SmartDashboard.putNumber("Intake/Rollers/Position", getPosition().in(Units.Degrees));
     // SmartDashboard.putNumber("Intake/Rollers/Velocity", getVelocity().in(Units.DegreesPerSecond));
     SmartDashboard.putString("Intake/Rollers/Command", getCurrentCommand()==null ? "None" : getCurrentCommand().getName() );
@@ -86,7 +88,7 @@ public class Rollers extends SubsystemBase {
 
   public Command intake(){
     // return setVelocity(100);
-    return setVoltage(9.5);
+    return setVoltage(8.0);
   }
 
  public Command eject(){

@@ -94,6 +94,8 @@ public class IntakeExtension extends SubsystemBase {
 
     SmartDashboard.putNumber("Intake/Extension/getAngle", getAngle().in(Degree));
     SmartDashboard.putString("Intake/Extension/Command", getCurrentCommand()==null ? "None" : getCurrentCommand().getName() );
+    SmartDashboard.putNumber("Intake/Extension/current", motor.getOutputCurrent());
+    SmartDashboard.putNumber("Intake/Extension/APcurrent", motor.getAppliedOutput());
   }
 
   @Override
