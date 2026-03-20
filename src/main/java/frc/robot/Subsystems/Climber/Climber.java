@@ -6,8 +6,7 @@ package frc.robot.Subsystems.Climber;
 
 import static edu.wpi.first.units.Units.Inches;
 
-import com.stormbots.CRTAbsoluteEncoder;
-
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -16,12 +15,15 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import frc.robot.Subsystems.Climber.ClimberExtension.ClimberExtension;
 import frc.robot.Subsystems.Climber.Grabber.Grabber;
+import frc.robot.Subsystems.Swerve.Swerve.SwerveInputs;
 
 /** Add your docs here. */
 public class Climber extends SubsystemBase {
     public static Distance kStage1Range = Inches.of(8.25);
     public static Distance kStage2Range = Inches.of(20);
 
+    private Rangefinders rangefinders = new Rangefinders();  
+      
     ClimberExtension stage1 = new ClimberExtension(
         "Stage1", 19, true, kStage1Range
     );
@@ -109,5 +111,17 @@ public class Climber extends SubsystemBase {
         .andThen(Commands.idle().withTimeout(1))
         .finallyDo(stage1::stopMotor)
         .withName("stow");
+    }
+
+    public SwerveInputs generateSwerveInputs(Pose2d botpose){
+        double facingAngleDegrees = botpose.getRotation().getDegrees();
+        if(facingAngleDegrees < 180  &&  facingAngleDegrees > 0){ facingAngleDegrees = 90; }
+        else{ facingAngleDegrees = -90;}
+
+        return rangefinders.generateInputs(facingAngleDegrees);
+    }
+
+    public boolean isLinedUpWithL1(){
+        return rangefinders.isLinedUpL1();
     }
 }

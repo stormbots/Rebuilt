@@ -6,12 +6,10 @@
 package frc.robot;
 
 
-import static edu.wpi.first.units.Units.Degree;
 import static edu.wpi.first.units.Units.Degrees;
 
 import com.stormbots.CRTAbsoluteEncoder;
 
-import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
@@ -21,9 +19,7 @@ import edu.wpi.first.wpilibj.SerialPort.Port;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
-import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
-import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
@@ -31,7 +27,6 @@ import frc.robot.Subsystems.FieldBehaviour;
 import frc.robot.Subsystems.Climber.Climber;
 import frc.robot.Subsystems.HopperSensors.HopperSensors;
 import frc.robot.Subsystems.Intake.Intake;
-import frc.robot.Subsystems.Lighting.Signals;
 import frc.robot.Subsystems.Lighting.WLED;
 import frc.robot.Subsystems.Photonvision.Photonvision;
 import frc.robot.Subsystems.Questnav.QuestNavSubsystem;
@@ -211,6 +206,7 @@ public class RobotContainer {
     // driver.(back left paddle) //global stow/defense mode
 
     driver.povUp().whileTrue(shooter.testHome());
+    //  driver.y().whileTrue(shooter.testSetHoodAngle(Degrees.of(30)));
 
   }
 
@@ -229,6 +225,7 @@ public class RobotContainer {
     operator.leftTrigger()
     .whileTrue(pass());
 
+    //Simple Climber Lineup
     operator.leftBumper()
     .whileTrue(fixedPass());
     //DO TS LATER
@@ -253,6 +250,19 @@ public class RobotContainer {
     operator.a()
     .whileTrue(fixedPassOpp())
     ;
+    //Operator Climber Lineup command
+    //NOTE: Driver may want a swerve.turnToHeading() for this; 
+    //Omitted due to prior odometry issues proving to be a risk factor
+    // operator.rightBumper().whileTrue(Commands.parallel(
+    //   climber.prepareForClimbL1(),
+    //   swerve.addSecondaryInputsTrueFielcentric(()->climber.generateSwerveInputs(swerve.getSwervePose())),
+    //   Commands.none()
+    // ).until(climber::isLinedUpWithL1)
+    // .andThen(climber.climbL1())
+    // );
+
+
+    // operator.povUp().whileTrue(spindexer.unclog()); // shake dye rotor / unclog
 
     //MAN GRABBER DO TS
     // operator.y()
@@ -342,6 +352,9 @@ public class RobotContainer {
         new WaitCommand(0.5).andThen(spindexer.feedToShooterForce())
       );
     }
+
+  
+  
 
   public Command getAutonomousCommand() {
     //TODO: Get this from Autos.java instead
