@@ -108,10 +108,16 @@ public class Autos {
         // autoChooser.addOption("Red Right Go Center", this::RedRightGoCenter);
         autoChooser.addOption("CenterShootingAutoRedLeft", this::CenterShootAutoRedLEFT);
         autoChooser.addOption("CenterShootingAutoBlueLeft", this::CenterShootAutoBlueLEFT);
+        autoChooser.addOption("CenterShootingAutoRedRight", this::CenterShootAutoRedRIGHT);
+        autoChooser.addOption("CenterShootingAutoBlueRight", this::CenterShootAutoBlueRIGHT);
+
         autoChooser.addOption("PassingAutoRedLeft", this::PassingAutoRedLEFT);
         autoChooser.addOption("PassingAutoBlueLeft", this::PassingAutoBlueLEFT);
+        autoChooser.addOption("PassingAutoRedRight", this::PassingAutoRedRIGHT);
+        autoChooser.addOption("PassingAutoBlueRight", this::PassingAutoBlueRIGHT);
+
         // autoChooser.addOption("Red Left Center Shoot Slow", this::slowTestinCenterShotAutoRedLeft);
-        autoChooser.addOption("Blue Depot", this::depotAutoBlue);
+        autoChooser.addOption("Blue Depot", this::blueDepot);
         // autoChooser.addOption("Red Depot", this::depotAutoRed);
         // autoChooser.addOption("Evil Mentor Auto", this::evilMentorAuto);
         // autoChooser.addOption("Evil Auto", this::evilAuto);
@@ -154,23 +160,23 @@ public class Autos {
         );
     }
 
-    public Command depotAutoBlue(){
-        return Commands.sequence(
-            basicShootInitial8(),
-            swerve.pidToPose(()->preIntDepot).alongWith(intake.intake()).until(()->swerve.isOnTargetTranslate()),
-            driveToPose(intDepot, intakeWhileShooting()),
-            intakeWhileShooting()
-            );
-    }
+    // public Command depotAutoBlue(){
+    //     return Commands.sequence(
+    //         basicShootInitial8(),
+    //         swerve.pidToPose(()->preIntDepot).alongWith(intake.intake()).until(()->swerve.isOnTargetTranslate()),
+    //         driveToPose(intDepot, intakeWhileShooting()),
+    //         intakeWhileShooting()
+    //         );
+    // }
 
-    public Command depotAutoRed(){
-        return Commands.sequence(
-            basicShootInitial8(),
-            driveToPose(preIntDepot, stow()),
-            driveToPose(intDepot, intakeWhileShooting()),
-            intakeWhileShooting()
-        );
-    }
+    // public Command depotAutoRed(){
+    //     return Commands.sequence(
+    //         basicShootInitial8(),
+    //         driveToPose(preIntDepot, stow()),
+    //         driveToPose(intDepot, intakeWhileShooting()),
+    //         intakeWhileShooting()
+    //     );
+    // }
 
     public Command slowTestinCenterShotAutoRedLeft(){
         Pose2d first = new Pose2d(9.25, 0.6, new Rotation2d());
@@ -185,47 +191,47 @@ public class Autos {
         );
     }
 
-    public Command evilMentorAuto(){
-        return Commands.sequence(
-            driveToPose(preTrenchInBlueRight, stow()), //near trench
-            driveToPose(preTrenchOutBlueRight, stow()), //far trench
-            //load up in the middle across center line
-            driveToPose(neutralHalfWayRight, intakeWhilePassing()),
-            driveToPose(neutralPreIntRight, intakeWhilePassing()),
-            driveToPoseSlowly(neutralIntRight, intakeWhilePassing(), 0.5),
-            //zoom back, pulling any fuel toward the trench
-            driveToPose(scoopFuel, intakeWhilePassing()),
-            //Drive to and through trench
-            driveToPose(preTrenchOutBlueRight, intakeWhilePassing()),
-            driveToPose(shotPoseRight, intakeOnly()),
-            //drive along the wall, satisfied with a job well done
-            driveToPoseSlowly(0.5, 0.5, 180, intakeWhileShooting(), 0.5),
-            Commands.none()
-        )
-        .withTimeout(20)
-        ;
-    }
+    // public Command evilMentorAuto(){
+    //     return Commands.sequence(
+    //         driveToPose(preTrenchInBlueRight, stow()), //near trench
+    //         driveToPose(preTrenchOutBlueRight, stow()), //far trench
+    //         //load up in the middle across center line
+    //         driveToPose(neutralHalfWayRight, intakeWhilePassing()),
+    //         driveToPose(neutralPreIntRight, intakeWhilePassing()),
+    //         driveToPoseSlowly(neutralIntRight, intakeWhilePassing(), 0.5),
+    //         //zoom back, pulling any fuel toward the trench
+    //         driveToPose(scoopFuel, intakeWhilePassing()),
+    //         //Drive to and through trench
+    //         driveToPose(preTrenchOutBlueRight, intakeWhilePassing()),
+    //         driveToPose(shotPoseRight, intakeOnly()),
+    //         //drive along the wall, satisfied with a job well done
+    //         driveToPoseSlowly(0.5, 0.5, 180, intakeWhileShooting(), 0.5),
+    //         Commands.none()
+    //     )
+    //     .withTimeout(20)
+    //     ;
+    // }
 
-    public Command evilMentorNoPass(){
-        return Commands.sequence(
-            driveToPose(preTrenchInBlueRight, stow()), //near trench
-            driveToPose(preTrenchOutBlueRight, stow()), //far trench
-            //load up in the middle across center line
-            driveToPose(neutralHalfWayRight, intakeOnly()),
-            driveToPose(neutralPreIntRight, intakeOnly()),
-            driveToPoseSlowly(neutralIntRight, intakeOnly(), 0.5),
-            //zoom back, pulling any fuel toward the trench
-            driveToPose(scoopFuel, intakeOnly()),
-            //Drive to and through trench
-            driveToPoseSlowly(preTrenchOutBlueRight, stow(), 1.0),
-            driveToPose(shotPoseRight, shootAuto()),
-            //drive along the wall, satisfied with a job well done
-            driveToPoseSlowly(0.5, 0.5, 180, intakeWhileShooting(), 0.5),
-            Commands.none()
-        )
-        .withTimeout(20)
-        ;
-    }
+    // public Command evilMentorNoPass(){
+    //     return Commands.sequence(
+    //         driveToPose(preTrenchInBlueRight, stow()), //near trench
+    //         driveToPose(preTrenchOutBlueRight, stow()), //far trench
+    //         //load up in the middle across center line
+    //         driveToPose(neutralHalfWayRight, intakeOnly()),
+    //         driveToPose(neutralPreIntRight, intakeOnly()),
+    //         driveToPoseSlowly(neutralIntRight, intakeOnly(), 0.5),
+    //         //zoom back, pulling any fuel toward the trench
+    //         driveToPose(scoopFuel, intakeOnly()),
+    //         //Drive to and through trench
+    //         driveToPoseSlowly(preTrenchOutBlueRight, stow(), 1.0),
+    //         driveToPose(shotPoseRight, shootAuto()),
+    //         //drive along the wall, satisfied with a job well done
+    //         driveToPoseSlowly(0.5, 0.5, 180, intakeWhileShooting(), 0.5),
+    //         Commands.none()
+    //     )
+    //     .withTimeout(20)
+    //     ;
+    // }
 
     public Command choppedInterStuff(){
         return Commands.sequence(
@@ -256,10 +262,33 @@ public class Autos {
         );
     }
 
+    public Command CenterShootAutoRedRIGHT(){
+        Path startPath = new Path("shootInitial");
+        startPath.mirror();
+        Path path = new Path("CenterShootAutoV2");
+        path.mirror();
+
+        return Commands.sequence(
+            pathing.followPathTeamFlipped(startPath),
+            pathing.followPathTeamFlipped(path).withTimeout(20)
+        );
+    }
+
     public Command CenterShootAutoBlueLEFT(){
         return Commands.sequence(
             pathing.followPathTeamFlipped(new Path("shootInitial")),
             pathing.followPath(new Path("CenterShootAutoV2")).withTimeout(20)
+        );
+    }
+
+    public Command CenterShootAutoBlueRIGHT(){
+        Path startPath = new Path("shootInitial");
+        startPath.mirror();
+        Path path = new Path("CenterShootAutoV2");
+        path.mirror();
+        return Commands.sequence(
+            pathing.followPathTeamFlipped(startPath),
+            pathing.followPath(path).withTimeout(20)
         );
     }
 
@@ -270,10 +299,32 @@ public class Autos {
         );
     }
 
+    public Command PassingAutoRedRIGHT(){
+        Path startPath = new Path("shootInitial");
+        startPath.mirror();
+        Path path = new Path("testingStraightUnder");
+        path.mirror();
+        return Commands.sequence(
+            pathing.followPathTeamFlipped(startPath),
+            pathing.followPathTeamFlipped(path).withTimeout(20)
+        );
+    }
+
     public Command PassingAutoBlueLEFT(){
         return Commands.sequence(
             pathing.followPathTeamFlipped(new Path("shootInitial")),
             pathing.followPath(new Path("testingStraightUnder"))
+        );
+    }
+
+    public Command PassingAutoBlueRIGHT(){
+        Path startPath = new Path("shootInitial");
+        startPath.mirror();
+        Path path = new Path("testingStraightUnder");
+        path.mirror();
+        return Commands.sequence(
+            pathing.followPathTeamFlipped(startPath),
+            pathing.followPath(path)
         );
     }
 
@@ -287,7 +338,7 @@ public class Autos {
     }
     public Command blueDepot(){
         return Commands.sequence(
-            pathing.followPathTeamFlipped(new Path("shootInitial")),
+            pathing.followPathTeamFlipped(new Path("depotstart")),
             pathing.followPath(new Path("depotAuto"))
         );
     }
@@ -297,20 +348,20 @@ public class Autos {
     /// SuperStructure State Commands ///////
     ////////////////////////////////////////
     
-    public Command driveToPose(double x, double y, double degrees, Command superState){
-        return driveToPose(new Pose2d(x, y, new Rotation2d(Degrees.of(degrees))), superState);
-    }
+    // public Command driveToPose(double x, double y, double degrees, Command superState){
+    //     return driveToPose(new Pose2d(x, y, new Rotation2d(Degrees.of(degrees))), superState);
+    // }
 
-    public Command driveToPoseSlowly(double x, double y, double degrees, Command superState, double maxVelocityMPS){
-        return driveToPoseSlowly(new Pose2d(x, y, new Rotation2d(Degrees.of(degrees))), superState, maxVelocityMPS);
-    }
+    // public Command driveToPoseSlowly(double x, double y, double degrees, Command superState, double maxVelocityMPS){
+    //     return driveToPoseSlowly(new Pose2d(x, y, new Rotation2d(Degrees.of(degrees))), superState, maxVelocityMPS);
+    // }
     
-    public Command driveToPose(Pose2d targetPose, Command superState){
-        return swerve.pidToPoseInterpolated(()->autoTeamFlippedPose(targetPose.getX(), targetPose.getY(), targetPose.getRotation().getDegrees()))
-        .alongWith(superState)
-        // .until(()->swerve.isOnTargetTranslate())
-        ;
-    }
+    // public Command driveToPose(Pose2d targetPose, Command superState){
+    //     return swerve.pidToPoseInterpolated(()->autoTeamFlippedPose(targetPose.getX(), targetPose.getY(), targetPose.getRotation().getDegrees()))
+    //     .alongWith(superState)
+    //     // .until(()->swerve.isOnTargetTranslate())
+    //     ;
+    
 
     public Command driveToPoseSlowly(Pose2d targetPose, Command superState, double maxVelocityMPS){
         return swerve.pidToPose(()->autoTeamFlippedPose(targetPose.getX(), targetPose.getY(), targetPose.getRotation().getDegrees()), maxVelocityMPS, Inches.of(5))

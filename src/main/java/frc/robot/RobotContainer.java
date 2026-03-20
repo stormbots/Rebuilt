@@ -217,8 +217,8 @@ public class RobotContainer {
 
   private void configureOperatorBindings() {
 
-    operator.a()
-    .whileTrue(shooter.testTurretVoltage(()->operator.getLeftY()*3));
+    // operator.a()
+    // .whileTrue(shooter.testTurretVoltage(()->operator.getLeftY()*3));
 
     operator.rightTrigger()
     .whileTrue(shootHub());
@@ -248,6 +248,10 @@ public class RobotContainer {
     operator.x()
     .whileTrue(shooter.shootWithDashboardValues())
     .whileTrue(Commands.waitSeconds(1).andThen(spindexer.feedToShooterForce()))
+    ;
+
+    operator.a()
+    .whileTrue(fixedPassOpp())
     ;
 
     //MAN GRABBER DO TS
@@ -335,7 +339,7 @@ public class RobotContainer {
     public Command fixedPassOpp(){
       return new ParallelCommandGroup(
         shooter.shoot(()->targeting.fixedPassOppAlliance()),
-        spindexer.feedToShooter()
+        new WaitCommand(0.5).andThen(spindexer.feedToShooterForce())
       );
     }
 

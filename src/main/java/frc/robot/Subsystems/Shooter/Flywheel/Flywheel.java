@@ -109,7 +109,7 @@ public class Flywheel extends SubsystemBase {
   // }
 
   public boolean getOnTarget(){
-    return MathUtil.isNear(targetRPM, leaderMotor.getEncoder().getVelocity(), tolerance*5);
+    return MathUtil.isNear(targetRPM, leaderMotor.getEncoder().getVelocity(), tolerance*6);
   }
 
   private SparkBaseConfig getMotorConfig(){

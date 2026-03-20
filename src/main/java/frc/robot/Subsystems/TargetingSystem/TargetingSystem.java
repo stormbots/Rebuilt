@@ -68,7 +68,7 @@ public class TargetingSystem extends SubsystemBase {
     }
   }
 
-  double timescalar = 1.2;
+  double timescalar = 1.0;
   double distanceoffset = 12.0;
   // distance, hoodangle, flywheel rpm
   LUT hubLUT = new LUT(new double[][]{
@@ -130,7 +130,7 @@ public class TargetingSystem extends SubsystemBase {
     {13*12+24+distanceoffset, 23, 2625, 0.63*timescalar},
     {14*12+24+distanceoffset, 23, 2712.5, 0.7*timescalar},
     {15*12+24+distanceoffset, 23, 2775, 0.75*timescalar},
-    {16*12+24+distanceoffset, 23, 2825, 0.8*timescalar} 
+    {16*12+24+distanceoffset, 23, 2850, 0.8*timescalar} 
 
   });
   
@@ -402,7 +402,7 @@ public class TargetingSystem extends SubsystemBase {
     return new ShooterState(Degrees.of(180), Degrees.of(45),3200 );
   }
   public ShooterState fixedPassOppAlliance(){
-    return new ShooterState(Degrees.of(180), Degrees.of(25),4000 );
+    return new ShooterState(Degrees.of(180), Degrees.of(40),3600 );
   }
 
 

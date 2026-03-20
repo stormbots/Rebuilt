@@ -52,7 +52,7 @@ public class Rollers extends SubsystemBase {
     config
     .idleMode(IdleMode.kCoast)
     .inverted(true)
-    .smartCurrentLimit(50)
+    .smartCurrentLimit(40)
     .voltageCompensation(11);
 
     motor.configure(config, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
