@@ -36,7 +36,7 @@ public class Photonvision extends SubsystemBase {
 
   private AprilTagFieldLayout aprilTagFieldLayout = AprilTagFieldLayout.loadField(AprilTagFields.k2026RebuiltWelded);
 
-  private Optional<PhotonCamera> rightCamera = Optional.empty();
+  // private Optional<PhotonCamera> rightCamera = Optional.empty();
   private Optional<PhotonCamera> leftCamera = Optional.empty();
 
   private Matrix<N3, N1> currentStdDevs = VecBuilder.fill(Double.MAX_VALUE, Double.MAX_VALUE, Double.MAX_VALUE);
@@ -68,20 +68,20 @@ public class Photonvision extends SubsystemBase {
     SmartDashboard.putData("visionfield", visionField2d);
 
     try{
-      rightCamera = Optional.of(new PhotonCamera("Right"));
+      // rightCamera = Optional.of(new PhotonCamera("Right"));
       leftCamera = Optional.of(new PhotonCamera("Left"));
     }
     catch(Error e){
       System.err.print(e);
-      rightCamera = Optional.empty();
+      // rightCamera = Optional.empty();
     }
 
   }
 
   public void updateOdometry(){
-    if(rightCamera.isPresent()){
-      updateCameraSideOdometry(rightEstimator, rightCamera.get());
-    }
+    // if(rightCamera.isPresent()){
+    //   updateCameraSideOdometry(rightEstimator, rightCamera.get());
+    // }
 
     if(leftCamera.isPresent()){
       updateCameraSideOdometry(leftEstimator, leftCamera.get());
@@ -181,7 +181,7 @@ public class Photonvision extends SubsystemBase {
     visionField2d.setRobotPose(swerve.getSwervePose());
     updateOdometry();
 
-    SmartDashboard.putBoolean("vision/rightCameraPresent", rightCamera.isPresent());
+    // SmartDashboard.putBoolean("vision/rightCameraPresent", rightCamera.isPresent());
     SmartDashboard.putBoolean("vision/leftCameraPresent", leftCamera.isPresent());
 
     SmartDashboard.putBoolean("vision/hasTarget", hasTarget());

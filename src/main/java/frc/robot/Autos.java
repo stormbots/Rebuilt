@@ -260,7 +260,7 @@ public class Autos {
 
     public Command CenterShootAutoRedLEFT(){
         return Commands.sequence(
-            pathing.followPathTeamFlipped(new Path("shootInitial")),
+            pathing.followPathTeamFlipped(new Path("shootInitial")).withTimeout(2.0),
             pathing.followPathTeamFlipped(new Path("CenterShootAutoV2")).withTimeout(20)
         );
     }
@@ -272,14 +272,14 @@ public class Autos {
         path.mirror();
 
         return Commands.sequence(
-            pathing.followPathTeamFlipped(startPath),
+            pathing.followPathTeamFlipped(startPath).withTimeout(2.0),
             pathing.followPathTeamFlipped(path).withTimeout(20)
         );
     }
 
     public Command CenterShootAutoBlueLEFT(){
         return Commands.sequence(
-            pathing.followPath(new Path("shootInitial")),
+            pathing.followPath(new Path("shootInitial")).withTimeout(2.0),
             pathing.followPath(new Path("CenterShootAutoV2")).withTimeout(20)
         );
     }
@@ -290,14 +290,14 @@ public class Autos {
         Path path = new Path("CenterShootAutoV2");
         path.mirror();
         return Commands.sequence(
-            pathing.followPath(startPath),
+            pathing.followPath(startPath).withTimeout(2.0),
             pathing.followPath(path).withTimeout(20)
         );
     }
 
     public Command PassingAutoRedLEFT(){
         return Commands.sequence(
-            pathing.followPathTeamFlipped(new Path("shootInitial")),
+            pathing.followPathTeamFlipped(new Path("shootInitial")).withTimeout(2.0),
             pathing.followPathTeamFlipped(new Path("testingStraightUnder")).withTimeout(20)
         );
     }
@@ -308,14 +308,14 @@ public class Autos {
         Path path = new Path("testingStraightUnder");
         path.mirror();
         return Commands.sequence(
-            pathing.followPathTeamFlipped(startPath),
+            pathing.followPathTeamFlipped(startPath).withTimeout(2.0),
             pathing.followPathTeamFlipped(path).withTimeout(20)
         );
     }
 
     public Command PassingAutoBlueLEFT(){
         return Commands.sequence(
-            pathing.followPath(new Path("shootInitial")),
+            pathing.followPath(new Path("shootInitial")).withTimeout(2.0),
             pathing.followPath(new Path("testingStraightUnder"))
         );
     }
@@ -326,7 +326,7 @@ public class Autos {
         Path path = new Path("testingStraightUnder");
         path.mirror();
         return Commands.sequence(
-            pathing.followPath(startPath),
+            pathing.followPath(startPath).withTimeout(2.0),
             pathing.followPath(path)
         );
     }
@@ -335,13 +335,13 @@ public class Autos {
         return Commands.sequence(
             // basicShootInitial8().withTimeout(3.5),
             // shooter.testSetHoodAngle(Degrees.of(0)).withTimeout(0.75),
-            pathing.followPathTeamFlipped(new Path("depotstart")),
+            pathing.followPathTeamFlipped(new Path("depotstart")).withTimeout(2.0),
             pathing.followPathTeamFlipped(new Path("depotAuto"))
         );
     }
     public Command blueDepot(){
         return Commands.sequence(
-            pathing.followPath(new Path("depotstart")),
+            pathing.followPath(new Path("depotstart")).withTimeout(2.0),
             pathing.followPath(new Path("depotAuto"))
         );
     }

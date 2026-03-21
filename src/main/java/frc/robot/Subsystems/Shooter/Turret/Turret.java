@@ -38,7 +38,7 @@ public class Turret extends SubsystemBase {
   //How much in ONE direction, hence max range divided by 2
   public static final double kMinRotation = -287.0;
   public static final double kMaxRotation = -20.0;
-  private double outPut = 3/12.0;
+  private double outPut = 3/12.0*1.10;
 
   Angle targetPosition = Degrees.of(0);
   Angle tolerance = Degrees.of(3);
@@ -128,7 +128,7 @@ public class Turret extends SubsystemBase {
 
     config.closedLoop
       .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
-      .p(0.3 * 12 * 2.5 / 90.0)
+      .p(0.3 * 12 * 2.5 / 90.0 * 1.5)
       .positionWrappingEnabled(false)
       .maxOutput(outPut)
       .minOutput(-outPut)

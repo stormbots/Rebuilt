@@ -68,8 +68,9 @@ public class TargetingSystem extends SubsystemBase {
     }
   }
 
-  double timescalar = 1.2;
+  double timescalar = 1.1;
   double distanceoffset = 12.0;
+  double fudgeFactor = 30.0;
   // distance, hoodangle, flywheel rpm
   LUT hubLUT = new LUT(new double[][]{
     // {22+14, 5, 2050},
@@ -117,20 +118,20 @@ public class TargetingSystem extends SubsystemBase {
     // {15*12+24, 23, 2775, 0.80798},
     // {16*12+24, 23, 2825, 0.84108},
     //EVERYTHING UNDER THIS IS PROBABLY ACTUALLY CORRECT
-    {3*12+24+distanceoffset, 12, 2245, 0.417*timescalar},
-    {4*12+24+distanceoffset, 12, 2255, 0.467*timescalar},
-    {5*12+24+distanceoffset, 13.5, 2250, 0.517*timescalar},
-    {6*12+24+distanceoffset, 17, 2270, 0.5*timescalar},
-    {7*12+24+distanceoffset, 20, 2355, 0.467*timescalar},
-    {8*12+24+distanceoffset, 23, 2425, 0.500*timescalar},
-    {9*12+24+distanceoffset, 23, 2475, 0.483*timescalar},
-    {10*12+24+distanceoffset, 23, 2510, 0.500*timescalar},
-    {11*12+24+distanceoffset, 23, 2550, 0.550*timescalar},//EVERY TOF BELOW THIS NEEDS TO BE DOUBLE CHECKED
-    {12*12+24+distanceoffset, 23, 2600, 0.6*timescalar},
-    {13*12+24+distanceoffset, 23, 2625, 0.63*timescalar},
-    {14*12+24+distanceoffset, 23, 2712.5, 0.7*timescalar},
-    {15*12+24+distanceoffset, 23, 2775, 0.75*timescalar},
-    {16*12+24+distanceoffset, 23, 2850, 0.8*timescalar} 
+    {3*12+24+distanceoffset, 12, 2245+fudgeFactor, 0.417*timescalar},
+    {4*12+24+distanceoffset, 12, 2255+fudgeFactor, 0.467*timescalar},
+    {5*12+24+distanceoffset, 13.5, 2250+fudgeFactor, 0.517*timescalar},
+    {6*12+24+distanceoffset, 17, 2270+fudgeFactor, 0.5*timescalar},
+    {7*12+24+distanceoffset, 20, 2355+fudgeFactor, 0.467*timescalar},
+    {8*12+24+distanceoffset, 23, 2425+fudgeFactor, 0.500*timescalar},
+    {9*12+24+distanceoffset, 23, 2475+fudgeFactor, 0.483*timescalar},
+    {10*12+24+distanceoffset, 23, 2510+fudgeFactor, 0.500*timescalar},
+    {11*12+24+distanceoffset, 23, 2550+fudgeFactor, 0.550*timescalar},//EVERY TOF BELOW THIS NEEDS TO BE DOUBLE CHECKED
+    {12*12+24+distanceoffset, 23, 2600+fudgeFactor, 0.6*timescalar},
+    {13*12+24+distanceoffset, 23, 2625+fudgeFactor, 0.63*timescalar},
+    {14*12+24+distanceoffset, 23, 2712.5+fudgeFactor, 0.7*timescalar},
+    {15*12+24+distanceoffset, 23, 2775+fudgeFactor, 0.75*timescalar},
+    {16*12+24+distanceoffset, 23, 2850+fudgeFactor, 0.8*timescalar} 
 
   });
   
