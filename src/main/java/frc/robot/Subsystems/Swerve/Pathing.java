@@ -49,7 +49,7 @@ public class Pathing extends SubsystemBase {
     this::setAutoInputs, 
     new PIDController(2.5, 0.0, 0.0),    // Translation PID
     new PIDController(1.0, 0.0, 0.0),    // Rotation PID
-    new PIDController(0.75, 0.0, 0.0)     // Cross-track PID
+    new PIDController(0.0, 0.0, 0.0)     // Cross-track PID
     ).withTRatioBasedTranslationHandoffs(true)
     ;
     FollowPath.registerEventTrigger("intake", intake.intake());
