@@ -12,6 +12,7 @@ import static edu.wpi.first.units.Units.Inches;
 import java.util.function.Supplier;
 
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
@@ -21,6 +22,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
+import edu.wpi.first.wpilibj2.command.WaitCommand;
 import frc.robot.Subsystems.Intake.Intake;
 import frc.robot.Subsystems.Questnav.QuestNavSubsystem;
 import frc.robot.Subsystems.Shooter.Shooter;
@@ -79,6 +81,12 @@ public class Autos {
         Pose2d intDepot = new Pose2d(0.52, 6.0, new Rotation2d(Degrees.of(180-15)));
         Pose2d intDepotRed = new Pose2d(16.02, 2.0, new Rotation2d(Degrees.of(15)));
 
+        //FORCED POSES
+        Pose2d startRedLeft = new Pose2d(12.577+0.37465, 0.4445, new Rotation2d(Degrees.of(-180)));
+        Pose2d startRedRight = new Pose2d(12.577+0.37465, 7.6755, new Rotation2d(Degrees.of(-180)));
+        Pose2d startBlueLeft = new Pose2d(3.52535+0.8, 7.6755, new Rotation2d());
+        Pose2d startBlueRight = new Pose2d(3.52535+0.8, 0.4445, new Rotation2d());
+
     public Autos(
         Swerve swerve,
         Shooter shooter,
@@ -97,9 +105,13 @@ public class Autos {
         this.targeting = targeting;
 
         SmartDashboard.putData("AutoSelector/chooser",autoChooser);
+        // SmartDashboard.putBoolean("ForceSetPose", false);
         autoChooser.addOption("RedDepot", this::redDepot);
         autoChooser.addOption("Blue Depot", this::blueDepot);
         autoChooser.addOption("ShootInitial", this::basicShootToEmpty);
+
+        SmartDashboard.putBoolean("ForceSetPose", SmartDashboard.getBoolean("ForceSetPose", false));
+        SmartDashboard.setPersistent("ForceSetPose");
 
         // autoChooser.addOption("SHOOTIT", object);
 
@@ -260,6 +272,7 @@ public class Autos {
 
     public Command CenterShootAutoRedLEFT(){
         return Commands.sequence(
+            forceSetPose(startRedLeft).withTimeout(0.1),
             pathing.followPathTeamFlipped(new Path("shootInitial")).withTimeout(2.0),
             pathing.followPathTeamFlipped(new Path("CenterShootAutoV2")).withTimeout(20)
         );
@@ -272,6 +285,7 @@ public class Autos {
         path.mirror();
 
         return Commands.sequence(
+            forceSetPose(startRedRight).withTimeout(0.1),
             pathing.followPathTeamFlipped(startPath).withTimeout(2.0),
             pathing.followPathTeamFlipped(path).withTimeout(20)
         );
@@ -279,6 +293,7 @@ public class Autos {
 
     public Command CenterShootAutoBlueLEFT(){
         return Commands.sequence(
+            forceSetPose(startBlueLeft).withTimeout(0.1),
             pathing.followPath(new Path("shootInitial")).withTimeout(2.0),
             pathing.followPath(new Path("CenterShootAutoV2")).withTimeout(20)
         );
@@ -290,6 +305,7 @@ public class Autos {
         Path path = new Path("CenterShootAutoV2");
         path.mirror();
         return Commands.sequence(
+            forceSetPose(startBlueRight).withTimeout(0.1),
             pathing.followPath(startPath).withTimeout(2.0),
             pathing.followPath(path).withTimeout(20)
         );
@@ -297,6 +313,7 @@ public class Autos {
 
     public Command PassingAutoRedLEFT(){
         return Commands.sequence(
+            forceSetPose(startRedLeft).withTimeout(0.1),
             pathing.followPathTeamFlipped(new Path("shootInitial")).withTimeout(2.0),
             pathing.followPathTeamFlipped(new Path("testingStraightUnder")).withTimeout(20)
         );
@@ -308,6 +325,7 @@ public class Autos {
         Path path = new Path("testingStraightUnder");
         path.mirror();
         return Commands.sequence(
+            forceSetPose(startRedRight).withTimeout(0.1),
             pathing.followPathTeamFlipped(startPath).withTimeout(2.0),
             pathing.followPathTeamFlipped(path).withTimeout(20)
         );
@@ -315,6 +333,7 @@ public class Autos {
 
     public Command PassingAutoBlueLEFT(){
         return Commands.sequence(
+            forceSetPose(startBlueLeft).withTimeout(0.1),
             pathing.followPath(new Path("shootInitial")).withTimeout(2.0),
             pathing.followPath(new Path("testingStraightUnder"))
         );
@@ -326,6 +345,7 @@ public class Autos {
         Path path = new Path("testingStraightUnder");
         path.mirror();
         return Commands.sequence(
+            forceSetPose(startBlueRight).withTimeout(0.1),
             pathing.followPath(startPath).withTimeout(2.0),
             pathing.followPath(path)
         );
@@ -335,13 +355,14 @@ public class Autos {
         return Commands.sequence(
             // basicShootInitial8().withTimeout(3.5),
             // shooter.testSetHoodAngle(Degrees.of(0)).withTimeout(0.75),
-            pathing.followPathTeamFlipped(new Path("depotstart")).withTimeout(2.0),
+            // forceSetPose(new Pose2d(12.577+0.37465, 4.0, new Rotation2d(Degrees.of(-180)))).withTimeout(2.0),
+            pathing.followPathTeamFlipped(new Path("depotstart")).withTimeout(5.0),
             pathing.followPathTeamFlipped(new Path("depotAuto"))
         );
     }
     public Command blueDepot(){
         return Commands.sequence(
-            pathing.followPath(new Path("depotstart")).withTimeout(2.0),
+            pathing.followPath(new Path("depotstart")).withTimeout(5.0),
             pathing.followPath(new Path("depotAuto"))
         );
     }
@@ -365,6 +386,19 @@ public class Autos {
     //     // .until(()->swerve.isOnTargetTranslate())
     //     ;
     
+
+    public Command forceSetPose(Pose2d pose){
+        SmartDashboard.putBoolean("ForceSetPose", SmartDashboard.getBoolean("ForceSetPose", false));
+        SmartDashboard.setPersistent("ForceSetPose");
+        return Commands.either(
+            Commands.sequence(
+                swerve.setInitialPose(pose),
+                questNav.setQuestPoseCommand(new Pose3d(pose)), 
+                new WaitCommand(2.0)
+            ),
+            new InstantCommand(), 
+            ()->SmartDashboard.getBoolean("ForceSetPose", false));
+    }
 
     public Command driveToPoseSlowly(Pose2d targetPose, Command superState, double maxVelocityMPS){
         return swerve.pidToPose(()->autoTeamFlippedPose(targetPose.getX(), targetPose.getY(), targetPose.getRotation().getDegrees()), maxVelocityMPS, Inches.of(5))

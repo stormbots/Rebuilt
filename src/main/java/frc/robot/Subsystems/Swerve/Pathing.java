@@ -99,9 +99,9 @@ public class Pathing extends SubsystemBase {
 
     public Command shootAuto(){
         return new ParallelCommandGroup(
-        swerve.turnToHeadingWithinTurretRange(()->{
-          return targeting.getHeadingToTarget(swerve.getSwervePose().getTranslation(), targeting.getHubTarget()).plus(new Rotation2d(Degrees.of(-153.5)));
-        }),
+        // swerve.turnToHeadingWithinTurretRange(()->{
+        //   return targeting.getHeadingToTarget(swerve.getSwervePose().getTranslation(), targeting.getHubTarget()).plus(new Rotation2d(Degrees.of(-153.5)));
+        // }),
         shooter.shootHubVelComp(),
         spindexer.feedToShooter()
         );
@@ -111,7 +111,7 @@ public class Pathing extends SubsystemBase {
         return new ParallelCommandGroup(
             intake.intake(),
             shooter.pass(),
-            spindexer.feedToShooterForce()
+            spindexer.feedToShooter()
         );
     }
 
@@ -119,7 +119,7 @@ public class Pathing extends SubsystemBase {
       return new ParallelCommandGroup(
           intake.intake(),
           shooter.shootHubVelComp(),
-          spindexer.feedToShooterForce()
+          spindexer.feedToShooter()
       );
   }
 

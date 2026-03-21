@@ -15,11 +15,11 @@ import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.SparkFlexConfig;
 
-import edu.wpi.first.units.Units;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class Rollers extends SubsystemBase {
@@ -97,9 +97,13 @@ public class Rollers extends SubsystemBase {
   }
 
   public Command stop(){
-    return run(()->{
-        motor.stopMotor();
-    });
+    return Commands.sequence(
+          run(()->{
+            motor.set(0);
+          })
+          .withTimeout(0.5),
+          run(motor::stopMotor)
+    );
   }
 
   public AngularVelocity getVelocity(){

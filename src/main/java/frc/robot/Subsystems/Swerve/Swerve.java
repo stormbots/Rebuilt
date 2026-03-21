@@ -390,6 +390,16 @@ public class Swerve extends SubsystemBase {
     return pidToPose(targetPoseSupplier,maximumSpeed,Inches.of(5));
   }
 
+  public Command setInitialPose(Pose2d targetPose){
+    return runOnce(()->
+    setInitialPoseVoid(targetPose)
+    );
+  }
+
+  private void setInitialPoseVoid(Pose2d targetPose){
+    swerveDrive.resetOdometry(targetPose);
+  }
+
 
   public Command pidToPose(Supplier<Pose2d> targetPoseSupplier, double maxVelocityMPS, Distance tolerance){
     return Commands.run(() -> {
