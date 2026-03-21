@@ -98,10 +98,6 @@ public class Rollers extends SubsystemBase {
 
   public Command stop(){
     return Commands.sequence(
-          run(()->{
-            motor.set(0);
-          })
-          .withTimeout(0.5),
           run(motor::stopMotor)
     );
   }
