@@ -19,6 +19,8 @@ import com.google.gson.JsonSerializer;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.SerialPort;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.RobotContainer;
 import frc.robot.Subsystems.Lighting.LedSegment.LedMultiRange;
@@ -35,6 +37,7 @@ public class WLED extends SubsystemBase{
   private static int indivualRoll = -1;
   public static final int numPatterns = 23;
   private static int chanceIndividual = 10;
+  private static boolean auraMode = false;
   public WLED(SerialPort serialPort, Photonvision vision) {
     if (chanceIndividual==0){
       chanceIndividual = 2;
@@ -68,6 +71,10 @@ public class WLED extends SubsystemBase{
     return new LedSegment(id, start, stop, reverse);
   }
 
+  // private static Command setAuraMode(){
+  //   return run
+  // }
+
 
   public static int getDefaultPattern(){
     if (DriverStation.getAlliance().isEmpty()){
@@ -79,7 +86,7 @@ public class WLED extends SubsystemBase{
     else if (DriverStation.isTeleopEnabled()){
       return numPatterns+3;
     }
-    else if (vision.doesNotHaveTarget()){
+    else if (vision.doesNotHaveTarget()&&!auraMode){
       return numPatterns+4;
     }
     else if(indivualRoll == (chanceIndividual*2)-1){

@@ -124,7 +124,7 @@ public class Flywheel extends SubsystemBase {
 
     config.closedLoop
       .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
-      .p(0/150.0)
+      .p(0.0)
       .i(0.000000)
       .d(0.0)
     .feedForward

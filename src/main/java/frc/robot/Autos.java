@@ -97,9 +97,11 @@ public class Autos {
         this.targeting = targeting;
 
         SmartDashboard.putData("AutoSelector/chooser",autoChooser);
+        autoChooser.addOption("RedDepot", this::redDepot);
+        autoChooser.addOption("Blue Depot", this::blueDepot);
+        autoChooser.addOption("ShootInitial", this::basicShootToEmpty);
 
-        autoChooser.setDefaultOption("Select Auto",()->new InstantCommand());
-        autoChooser.addOption("VV UNTESTED VV",()->new InstantCommand());
+        // autoChooser.addOption("SHOOTIT", object);
 
         //ACTUAL OPTIONS BELOW HERE
         // autoChooser.addOption("Blue Left Go Center", this::BlueLeftGoCenter);
@@ -117,15 +119,16 @@ public class Autos {
         autoChooser.addOption("PassingAutoBlueRight", this::PassingAutoBlueRIGHT);
 
         // autoChooser.addOption("Red Left Center Shoot Slow", this::slowTestinCenterShotAutoRedLeft);
-        autoChooser.addOption("Blue Depot", this::blueDepot);
+        
         // autoChooser.addOption("Red Depot", this::depotAutoRed);
         // autoChooser.addOption("Evil Mentor Auto", this::evilMentorAuto);
         // autoChooser.addOption("Evil Auto", this::evilAuto);
         // autoChooser.addOption("Evil AUTO NO PASSING", this::evilMentorNoPass);
         // autoChooser.addOption("Chopped AUTOS", this::choppedInterStuff);
         // autoChooser.addOption("stupidthingy", this::wtfauto);
-        autoChooser.addOption("RedDepot", this::redDepot);
-        
+
+        autoChooser.setDefaultOption("Select Auto",()->new InstantCommand());
+        autoChooser.addOption("VV UNTESTED VV",()->new InstantCommand());
 
     }
 
@@ -153,10 +156,10 @@ public class Autos {
     }
     public Command basicShootToEmpty(){
         return Commands.sequence(
-            swerve.turnToHeading(()->{
+            swerve.turnToHeadingWithinTurretRange(()->{
                 return targeting.getHeadingToTarget(swerve.getSwervePose().getTranslation(), targeting.getHubTarget()).plus(Rotation2d.k180deg);
             }).until(()->swerve.isOnTargetAngle()).withTimeout(1.0),
-            shootAuto().withTimeout(3)
+            shootAuto().withTimeout(5)
         );
     }
 
@@ -276,7 +279,7 @@ public class Autos {
 
     public Command CenterShootAutoBlueLEFT(){
         return Commands.sequence(
-            pathing.followPathTeamFlipped(new Path("shootInitial")),
+            pathing.followPath(new Path("shootInitial")),
             pathing.followPath(new Path("CenterShootAutoV2")).withTimeout(20)
         );
     }
@@ -287,7 +290,7 @@ public class Autos {
         Path path = new Path("CenterShootAutoV2");
         path.mirror();
         return Commands.sequence(
-            pathing.followPathTeamFlipped(startPath),
+            pathing.followPath(startPath),
             pathing.followPath(path).withTimeout(20)
         );
     }
@@ -312,7 +315,7 @@ public class Autos {
 
     public Command PassingAutoBlueLEFT(){
         return Commands.sequence(
-            pathing.followPathTeamFlipped(new Path("shootInitial")),
+            pathing.followPath(new Path("shootInitial")),
             pathing.followPath(new Path("testingStraightUnder"))
         );
     }
@@ -323,7 +326,7 @@ public class Autos {
         Path path = new Path("testingStraightUnder");
         path.mirror();
         return Commands.sequence(
-            pathing.followPathTeamFlipped(startPath),
+            pathing.followPath(startPath),
             pathing.followPath(path)
         );
     }
@@ -338,7 +341,7 @@ public class Autos {
     }
     public Command blueDepot(){
         return Commands.sequence(
-            pathing.followPathTeamFlipped(new Path("depotstart")),
+            pathing.followPath(new Path("depotstart")),
             pathing.followPath(new Path("depotAuto"))
         );
     }

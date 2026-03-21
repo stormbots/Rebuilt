@@ -105,7 +105,10 @@ public class Turret extends SubsystemBase {
   }
 
   public boolean getOnTarget(){
-    return MathUtil.isNear(targetPosition.in(Degrees), motor.getEncoder().getPosition(), tolerance.in(Degrees)+15.0);
+    if(targetPosition.in(Degrees) < kMaxRotation && targetPosition.in(Degrees) > kMinRotation){
+      return MathUtil.isNear(targetPosition.in(Degrees), motor.getEncoder().getPosition(), tolerance.in(Degrees)+1.0);
+    }
+    return false;
   }
 
   private SparkBaseConfig getMotorConfig(){

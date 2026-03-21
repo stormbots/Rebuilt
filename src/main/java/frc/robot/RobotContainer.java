@@ -217,17 +217,21 @@ public class RobotContainer {
     // .whileTrue(shooter.testTurretVoltage(()->operator.getLeftY()*3));
 
     operator.rightTrigger()
-    .whileTrue(shootHub());
+    .whileTrue(shootHub())
+    .whileTrue(wled.signals.automaticShot().repeatedly());
 
     operator.rightBumper()
-    .whileTrue(fixedShot());
+    .whileTrue(fixedShot())
+    .whileTrue(wled.signals.manualShot().repeatedly());;
 
     operator.leftTrigger()
-    .whileTrue(pass());
+    .whileTrue(pass())
+    .whileTrue(wled.signals.automaticShot().repeatedly());;
 
     //Simple Climber Lineup
     operator.leftBumper()
-    .whileTrue(fixedPass());
+    .whileTrue(fixedPass())
+    .whileTrue(wled.signals.manualShot().repeatedly());;
     //DO TS LATER
     // operator.povDown()
     // .whileTrue(globalStow());
@@ -245,10 +249,12 @@ public class RobotContainer {
     operator.x()
     .whileTrue(shooter.shootWithDashboardValues())
     .whileTrue(Commands.waitSeconds(1).andThen(spindexer.feedToShooterForce()))
+    .whileTrue(wled.signals.wrongShot().repeatedly())
     ;
 
     operator.a()
     .whileTrue(fixedPassOpp())
+    .whileTrue(wled.signals.manualShot().repeatedly());
     ;
     //Operator Climber Lineup command
     //NOTE: Driver may want a swerve.turnToHeading() for this; 

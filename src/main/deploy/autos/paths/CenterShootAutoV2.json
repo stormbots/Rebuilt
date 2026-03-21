@@ -5,7 +5,7 @@
       "translation_target": {
         "x_meters": 4.0,
         "y_meters": 7.535,
-        "intermediate_handoff_radius_meters": 0.4
+        "intermediate_handoff_radius_meters": 0.6
       },
       "rotation_target": {
         "rotation_radians": 0.0,
@@ -22,7 +22,7 @@
       "translation_target": {
         "x_meters": 6.446268965368175,
         "y_meters": 7.535000000000002,
-        "intermediate_handoff_radius_meters": 0.2
+        "intermediate_handoff_radius_meters": 0.4
       },
       "rotation_target": {
         "rotation_radians": 0.0,
@@ -49,9 +49,9 @@
     {
       "type": "waypoint",
       "translation_target": {
-        "x_meters": 7.3,
-        "y_meters": 5.535,
-        "intermediate_handoff_radius_meters": 0.35
+        "x_meters": 7.504804003336114,
+        "y_meters": 5.535000000000001,
+        "intermediate_handoff_radius_meters": 0.4
       },
       "rotation_target": {
         "rotation_radians": -0.7853981633974483,
@@ -75,7 +75,7 @@
       "translation_target": {
         "x_meters": 4.0,
         "y_meters": 7.55,
-        "intermediate_handoff_radius_meters": 0.2
+        "intermediate_handoff_radius_meters": 0.4
       },
       "rotation_target": {
         "rotation_radians": 3.141592653589793,
@@ -84,8 +84,20 @@
     },
     {
       "type": "event_trigger",
-      "t_ratio": 0.42846460266037606,
+      "t_ratio": 0.22381647573282465,
       "lib_key": "intakeWhileShooting"
+    },
+    {
+      "type": "waypoint",
+      "translation_target": {
+        "x_meters": 1.3531693077564646,
+        "y_meters": 7.577802335279399,
+        "intermediate_handoff_radius_meters": 0.4
+      },
+      "rotation_target": {
+        "rotation_radians": 3.141592653589793,
+        "profiled_rotation": true
+      }
     },
     {
       "type": "translation",
@@ -99,7 +111,7 @@
       {
         "value": 0.1,
         "start_ordinal": 6,
-        "end_ordinal": 6
+        "end_ordinal": 7
       },
       {
         "value": 0.5,

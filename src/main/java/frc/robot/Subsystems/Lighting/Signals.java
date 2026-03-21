@@ -124,6 +124,30 @@ public class Signals extends SubsystemBase {
     return command.ignoringDisable(true);
   }
 
+  public Command automaticShot(){
+    return Commands.sequence(
+    right.solidColor(CustomColor.kGreen),
+    center.solidColor(CustomColor.kGreen),
+    left.solidColor(CustomColor.kGreen)
+  );
+  }
+
+  public Command manualShot(){
+    return Commands.sequence(
+    right.solidColor(CustomColor.kPurple),
+    center.solidColor(CustomColor.kPurple),
+    left.solidColor(CustomColor.kPurple)
+  );
+  }
+
+  public Command wrongShot(){
+    return Commands.sequence(
+    right.solidColor(CustomColor.kYellow),
+    center.solidColor(CustomColor.kYellow),
+    left.solidColor(CustomColor.kYellow)
+  );
+  }
+
 }
 
 

@@ -68,7 +68,7 @@ public class TargetingSystem extends SubsystemBase {
     }
   }
 
-  double timescalar = 1.0;
+  double timescalar = 1.2;
   double distanceoffset = 12.0;
   // distance, hoodangle, flywheel rpm
   LUT hubLUT = new LUT(new double[][]{
