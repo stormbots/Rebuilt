@@ -325,7 +325,7 @@ public class RobotContainer {
   public Command pass(){
     return new ParallelCommandGroup(
       swerve.verifyAngleTargetPass(()->{
-        return targeting.getHeadingToTarget(swerve.getSwervePose().getTranslation(), targeting.getPassTarget()).plus(Rotation2d.k180deg);
+        return targeting.getHeadingToTarget(swerve.getSwervePose().getTranslation(), targeting.getPassTarget()).plus(new Rotation2d(Degrees.of(-153.5)));
       }),
       shooter.pass(),
       spindexer.feedToShooter()
@@ -334,7 +334,7 @@ public class RobotContainer {
     public Command shootHub(){
       return new ParallelCommandGroup(
         swerve.turnToHeadingWithinTurretRange(()->{
-          return targeting.getHeadingToTarget(swerve.getSwervePose().getTranslation(), targeting.getHubTarget()).plus(Rotation2d.k180deg);
+          return targeting.getHeadingToTarget(swerve.getSwervePose().getTranslation(), targeting.getHubTarget()).plus(new Rotation2d(Degrees.of(-153.5)));
         }),
         shooter.shootHubVelComp(),
         spindexer.feedToShooter()

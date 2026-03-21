@@ -373,7 +373,7 @@ public class Swerve extends SubsystemBase {
       double kp = 2.0 / 120.0; //90 degrees is 1 output
       double output = error.getDegrees()*kp;
       output = MathUtil.clamp(output, -2.0, 2.0);
-      if(Math.abs(error.getDegrees()) > 140.0){
+      if(Math.abs(error.getDegrees()) > 135.0){
         secondaryInputs.r = output;
       }
       else{

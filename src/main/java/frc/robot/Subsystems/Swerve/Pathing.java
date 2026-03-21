@@ -100,7 +100,7 @@ public class Pathing extends SubsystemBase {
     public Command shootAuto(){
         return new ParallelCommandGroup(
         swerve.turnToHeadingWithinTurretRange(()->{
-          return targeting.getHeadingToTarget(swerve.getSwervePose().getTranslation(), targeting.getHubTarget()).plus(Rotation2d.k180deg);
+          return targeting.getHeadingToTarget(swerve.getSwervePose().getTranslation(), targeting.getHubTarget()).plus(new Rotation2d(Degrees.of(-153.5)));
         }),
         shooter.shootHubVelComp(),
         spindexer.feedToShooter()
