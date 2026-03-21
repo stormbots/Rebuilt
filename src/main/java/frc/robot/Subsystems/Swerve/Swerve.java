@@ -66,7 +66,7 @@ public class Swerve extends SubsystemBase {
     try
     {
       swerveDrive = new SwerveParser(swerveJsonDirectory)
-      .createSwerveDrive(maximumSpeed, new Pose2d(3.5,7.5,new Rotation2d(Degrees.of(180))));
+      .createSwerveDrive(maximumSpeed, new Pose2d(12.577+0.37465, 4.0, new Rotation2d(Degrees.of(-180))));
     } catch (Exception e)
     {
       System.err.println("Could not find robot config for " + botname);

@@ -70,13 +70,12 @@ public class TargetingSystem extends SubsystemBase {
 
   double timescalar = 1.1;
   double distanceoffset = 12.0;
-  double fudgeFactor = 50.0;
+  double fudgeFactor = 20.0;
   // distance, hoodangle, flywheel rpm
   LUT hubLUT = new LUT(new double[][]{
     // {22+14, 5, 2050},
     // {32+22, 10, 2050},
-    // {48+22, 10, 2100},
-    // {60+22, 13, 2100},
+    // {48+22, 10, 2100},\\\\\\\\    // {60+22, 13, 2100},
     // {72+22, 23, 2100},
     // {84+22, 26, 2100},
     // {96+22, 30, 2150},

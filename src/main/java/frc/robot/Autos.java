@@ -356,14 +356,14 @@ public class Autos {
             // basicShootInitial8().withTimeout(3.5),
             // shooter.testSetHoodAngle(Degrees.of(0)).withTimeout(0.75),
             // forceSetPose(new Pose2d(12.577+0.37465, 4.0, new Rotation2d(Degrees.of(-180)))).withTimeout(2.0),
-            pathing.followPathTeamFlipped(new Path("depotstart")).withTimeout(5.0),
-            pathing.followPathTeamFlipped(new Path("depotAuto"))
+            // pathing.followPathTeamFlipped(new Path("depotstart")).withTimeout(5.0),
+            pathing.followPathTeamFlipped(new Path("depotAuto")).withTimeout(18)
         );
     }
     public Command blueDepot(){
         return Commands.sequence(
-            pathing.followPath(new Path("depotstart")).withTimeout(5.0),
-            pathing.followPath(new Path("depotAuto"))
+            // pathing.followPath(new Path("depotstart")).withTimeout(5.0),
+            pathing.followPath(new Path("depotAuto")).withTimeout(18)
         );
     }
 
