@@ -54,10 +54,10 @@ public class DyeRotor extends SubsystemBase{
 
     @Override
     public void periodic(){
-        SmartDashboard.putNumber("DyeRotor/Output", motor.getAppliedOutput());
+        SmartDashboard.putNumber("Spindexer/DyeRotor/Output", motor.getAppliedOutput());
         // SmartDashboard.putNumber("DyeRotor/Position",motor.getEncoder().getPosition());
         // SmartDashboard.putNumber("DyeRotor/Velocity",motor.getEncoder().getVelocity());
-        SmartDashboard.putNumber("DyeRotor/Current",motor.getOutputCurrent());
+        SmartDashboard.putNumber("Spindexer/DyeRotor/Current",motor.getOutputCurrent());
     }
 
     @Override

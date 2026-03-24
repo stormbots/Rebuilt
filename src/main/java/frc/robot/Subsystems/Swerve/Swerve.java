@@ -17,6 +17,7 @@ import java.util.function.Consumer;
 import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
 
+import com.revrobotics.spark.SparkFlex;
 import com.studica.frc.AHRS;
 
 import dev.doglog.DogLog;
@@ -66,7 +67,7 @@ public class Swerve extends SubsystemBase {
     try
     {
       swerveDrive = new SwerveParser(swerveJsonDirectory)
-      .createSwerveDrive(maximumSpeed, new Pose2d(12.577+0.37465, 4.0, new Rotation2d(Degrees.of(-180))));
+      .createSwerveDrive(maximumSpeed, new Pose2d(4.000, 7.535, new Rotation2d()));
     } catch (Exception e)
     {
       System.err.println("Could not find robot config for " + botname);
@@ -128,8 +129,18 @@ public class Swerve extends SubsystemBase {
 
   @Override
   public void periodic() {
+
+    // SmartDashboard.putNumber("Swerve/current", swerveDrive.);
     // This method will be called once per scheduler run
     swerveDrive.updateOdometry();
+
+    var modules  = swerveDrive.getModules();
+    for(var module : modules){
+      var motor = (SparkFlex)module.getDriveMotor().getMotor();
+      //do the thing
+      SmartDashboard.putNumber("Swerve/current", motor.getOutputCurrent());
+    }
+
     //Log the pose to allow AdvantageScope to work properly
     DogLog.log("Swerve/pose", swerveDrive.getPose());
 

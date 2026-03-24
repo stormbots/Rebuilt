@@ -105,21 +105,16 @@ public class Autos {
         this.targeting = targeting;
 
         SmartDashboard.putData("AutoSelector/chooser",autoChooser);
-        // SmartDashboard.putBoolean("ForceSetPose", false);
-        autoChooser.addOption("RedDepot", this::redDepot);
-        autoChooser.addOption("Blue Depot", this::blueDepot);
-        autoChooser.addOption("ShootInitial", this::basicShootToEmpty);
-
+        //FORCE SET POSE IS CHOPPED DO NOT USE, shouldn't even be on their dashboard, needs fixing and could still prove useful
         SmartDashboard.putBoolean("ForceSetPose", SmartDashboard.getBoolean("ForceSetPose", false));
         SmartDashboard.setPersistent("ForceSetPose");
 
-        // autoChooser.addOption("SHOOTIT", object);
 
         //ACTUAL OPTIONS BELOW HERE
-        // autoChooser.addOption("Blue Left Go Center", this::BlueLeftGoCenter);
-        // autoChooser.addOption("Blue Right Go Center", this::BlueRightGoCenter);
-        // autoChooser.addOption("Red Left Go Center", this::RedLeftGoCenter);
-        // autoChooser.addOption("Red Right Go Center", this::RedRightGoCenter);
+        autoChooser.addOption("RedDepot", this::redDepot);
+        autoChooser.addOption("Blue Depot", this::blueDepot);
+        autoChooser.addOption("ShootOnlyEight", this::basicShootToEmpty);
+
         autoChooser.addOption("CenterShootingAutoRedLeft", this::CenterShootAutoRedLEFT);
         autoChooser.addOption("CenterShootingAutoBlueLeft", this::CenterShootAutoBlueLEFT);
         autoChooser.addOption("CenterShootingAutoRedRight", this::CenterShootAutoRedRIGHT);
@@ -130,18 +125,10 @@ public class Autos {
         autoChooser.addOption("PassingAutoRedRight", this::PassingAutoRedRIGHT);
         autoChooser.addOption("PassingAutoBlueRight", this::PassingAutoBlueRIGHT);
 
-        // autoChooser.addOption("Red Left Center Shoot Slow", this::slowTestinCenterShotAutoRedLeft);
-        
-        // autoChooser.addOption("Red Depot", this::depotAutoRed);
-        // autoChooser.addOption("Evil Mentor Auto", this::evilMentorAuto);
-        // autoChooser.addOption("Evil Auto", this::evilAuto);
-        // autoChooser.addOption("Evil AUTO NO PASSING", this::evilMentorNoPass);
-        // autoChooser.addOption("Chopped AUTOS", this::choppedInterStuff);
-        // autoChooser.addOption("stupidthingy", this::wtfauto);
 
         autoChooser.setDefaultOption("Select Auto",()->new InstantCommand());
         autoChooser.addOption("VV UNTESTED VV",()->new InstantCommand());
-
+        autoChooser.addOption("ClimbAutoChoppedWhyAreWeDoingThisIWannaShootSoBad", this::climbAutoRed);
     }
 
     //Get Auto Command
@@ -158,6 +145,8 @@ public class Autos {
     /////////////////////////
     //ALL AUTOS BELLOW HERE sk was here!!!!!!!!!//
     /////////////////////////
+    
+    // BASIC STUFF, DO NOT RUN AT THE START OF A BLINE AUTO, IT BREAKS EVENT TRIGGERS AND MAKES PATH CHOPPED, SUPER LAST RESORT AUTOS
     public Command basicShootInitial8(){
         return Commands.sequence(
             swerve.turnToHeading(()->{
@@ -175,100 +164,27 @@ public class Autos {
         );
     }
 
-    // public Command depotAutoBlue(){
-    //     return Commands.sequence(
-    //         basicShootInitial8(),
-    //         swerve.pidToPose(()->preIntDepot).alongWith(intake.intake()).until(()->swerve.isOnTargetTranslate()),
-    //         driveToPose(intDepot, intakeWhileShooting()),
-    //         intakeWhileShooting()
-    //         );
-    // }
 
-    // public Command depotAutoRed(){
-    //     return Commands.sequence(
-    //         basicShootInitial8(),
-    //         driveToPose(preIntDepot, stow()),
-    //         driveToPose(intDepot, intakeWhileShooting()),
-    //         intakeWhileShooting()
-    //     );
-    // }
-
-    public Command slowTestinCenterShotAutoRedLeft(){
-        Pose2d first = new Pose2d(9.25, 0.6, new Rotation2d());
-        Pose2d second = new Pose2d(9.25, 3.0, new Rotation2d(Degrees.of(135)));
-        Pose2d third = new Pose2d(14, 0.6, new Rotation2d());
+    //THESE ARE PID AUTOS NOT BLINE, idk where we're gonna be at after today's practice so I will leave just this one for future
+    public Command depotAutoBlue(){
         return Commands.sequence(
-            swerve.pidToPose(()->first).until(()->swerve.isOnTargetTranslate()),
-            swerve.pidToPose(()->second, 1.0, Inches.of(5)).alongWith(intake.intake()).until(()->swerve.isOnTargetTranslate()),
-            swerve.pidToPose(()->first).until(()->swerve.isOnTargetTranslate()),
-            swerve.pidToPose(()->third).until(()->swerve.isOnTargetTranslate()),
-            shootAuto().withTimeout(10)
+            basicShootInitial8(),
+            swerve.pidToPose(()->preIntDepot).alongWith(intake.intake()).until(()->swerve.isOnTargetTranslate()),
+            driveToPose(intDepot, intakeWhileShooting()),
+            intakeWhileShooting()
+            );
+    }
+
+    public Command depotAutoRed(){
+        return Commands.sequence(
+            basicShootInitial8(),
+            driveToPose(preIntDepot, stow()),
+            driveToPose(intDepot, intakeWhileShooting()),
+            intakeWhileShooting()
         );
     }
 
-    // public Command evilMentorAuto(){
-    //     return Commands.sequence(
-    //         driveToPose(preTrenchInBlueRight, stow()), //near trench
-    //         driveToPose(preTrenchOutBlueRight, stow()), //far trench
-    //         //load up in the middle across center line
-    //         driveToPose(neutralHalfWayRight, intakeWhilePassing()),
-    //         driveToPose(neutralPreIntRight, intakeWhilePassing()),
-    //         driveToPoseSlowly(neutralIntRight, intakeWhilePassing(), 0.5),
-    //         //zoom back, pulling any fuel toward the trench
-    //         driveToPose(scoopFuel, intakeWhilePassing()),
-    //         //Drive to and through trench
-    //         driveToPose(preTrenchOutBlueRight, intakeWhilePassing()),
-    //         driveToPose(shotPoseRight, intakeOnly()),
-    //         //drive along the wall, satisfied with a job well done
-    //         driveToPoseSlowly(0.5, 0.5, 180, intakeWhileShooting(), 0.5),
-    //         Commands.none()
-    //     )
-    //     .withTimeout(20)
-    //     ;
-    // }
-
-    // public Command evilMentorNoPass(){
-    //     return Commands.sequence(
-    //         driveToPose(preTrenchInBlueRight, stow()), //near trench
-    //         driveToPose(preTrenchOutBlueRight, stow()), //far trench
-    //         //load up in the middle across center line
-    //         driveToPose(neutralHalfWayRight, intakeOnly()),
-    //         driveToPose(neutralPreIntRight, intakeOnly()),
-    //         driveToPoseSlowly(neutralIntRight, intakeOnly(), 0.5),
-    //         //zoom back, pulling any fuel toward the trench
-    //         driveToPose(scoopFuel, intakeOnly()),
-    //         //Drive to and through trench
-    //         driveToPoseSlowly(preTrenchOutBlueRight, stow(), 1.0),
-    //         driveToPose(shotPoseRight, shootAuto()),
-    //         //drive along the wall, satisfied with a job well done
-    //         driveToPoseSlowly(0.5, 0.5, 180, intakeWhileShooting(), 0.5),
-    //         Commands.none()
-    //     )
-    //     .withTimeout(20)
-    //     ;
-    // }
-
-    public Command choppedInterStuff(){
-        return Commands.sequence(
-            // basicShootInitial8(),
-            pathing.followPathTeamFlipped(new Path("CenterShootAuto")),
-            basicShootToEmpty()
-        );
-    }
-
-    public Command evilAuto(){
-        return Commands.sequence(
-            pathing.followPathTeamFlipped(new Path("CenterShootAuto"))
-        ).withTimeout(21);
-    }
-
-
-    public Command wtfauto(){
-        return Commands.sequence(
-            swerve.pidToPoseInterpolated(()->new Pose2d(3,4,new Rotation2d(180))),
-            swerve.pidToPoseInterpolated(()->new Pose2d(7,4,new Rotation2d(90)))
-        ).withTimeout(21);
-    }
+    //ALL OF THESE AUTOS ARE THE GOOD BLINE TYPE
 
     public Command CenterShootAutoRedLEFT(){
         return Commands.sequence(
@@ -315,6 +231,7 @@ public class Autos {
         return Commands.sequence(
             forceSetPose(startRedLeft).withTimeout(0.1),
             pathing.followPathTeamFlipped(new Path("shootInitial")).withTimeout(2.0),
+            pathing.followPathTeamFlipped(new Path("testingStraightUnder")).withTimeout(20),
             pathing.followPathTeamFlipped(new Path("testingStraightUnder")).withTimeout(20)
         );
     }
@@ -336,6 +253,12 @@ public class Autos {
             forceSetPose(startBlueLeft).withTimeout(0.1),
             pathing.followPath(new Path("shootInitial")).withTimeout(2.0),
             pathing.followPath(new Path("testingStraightUnder"))
+        );
+    }
+
+    public Command climbAutoRed(){
+        return Commands.sequence(
+            pathing.followPath(new Path("climbAuto"))
         );
     }
 
@@ -372,20 +295,22 @@ public class Autos {
     /// SuperStructure State Commands ///////
     ////////////////////////////////////////
     
-    // public Command driveToPose(double x, double y, double degrees, Command superState){
-    //     return driveToPose(new Pose2d(x, y, new Rotation2d(Degrees.of(degrees))), superState);
-    // }
 
-    // public Command driveToPoseSlowly(double x, double y, double degrees, Command superState, double maxVelocityMPS){
-    //     return driveToPoseSlowly(new Pose2d(x, y, new Rotation2d(Degrees.of(degrees))), superState, maxVelocityMPS);
-    // }
+    //THESE PID COMMANDS ARE CHOPPED AND NOT TUNED THERE IS A REASON WE RUNNING BLINE, DO NOT USE IN MOST CASES
+    public Command driveToPose(double x, double y, double degrees, Command superState){
+        return driveToPose(new Pose2d(x, y, new Rotation2d(Degrees.of(degrees))), superState);
+    }
+
+    public Command driveToPoseSlowly(double x, double y, double degrees, Command superState, double maxVelocityMPS){
+        return driveToPoseSlowly(new Pose2d(x, y, new Rotation2d(Degrees.of(degrees))), superState, maxVelocityMPS);
+    }
     
-    // public Command driveToPose(Pose2d targetPose, Command superState){
-    //     return swerve.pidToPoseInterpolated(()->autoTeamFlippedPose(targetPose.getX(), targetPose.getY(), targetPose.getRotation().getDegrees()))
-    //     .alongWith(superState)
-    //     // .until(()->swerve.isOnTargetTranslate())
-    //     ;
-    
+    public Command driveToPose(Pose2d targetPose, Command superState){
+        return swerve.pidToPoseInterpolated(()->autoTeamFlippedPose(targetPose.getX(), targetPose.getY(), targetPose.getRotation().getDegrees()))
+        .alongWith(superState)
+        // .until(()->swerve.isOnTargetTranslate())
+        ;
+    }
 
     public Command forceSetPose(Pose2d pose){
         SmartDashboard.putBoolean("ForceSetPose", SmartDashboard.getBoolean("ForceSetPose", false));
