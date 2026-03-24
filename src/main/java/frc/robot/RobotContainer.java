@@ -259,13 +259,15 @@ public class RobotContainer {
     //Operator Climber Lineup command
     //NOTE: Driver may want a swerve.turnToHeading() for this; 
     //Omitted due to prior odometry issues proving to be a risk factor
-    // operator.rightBumper().whileTrue(Commands.parallel(
-    //   climber.prepareForClimbL1(),
-    //   swerve.addSecondaryInputsTrueFielcentric(()->climber.generateSwerveInputs(swerve.getSwervePose())),
-    //   Commands.none()
-    // ).until(climber::isLinedUpWithL1)
+    operator.y()
+    .whileTrue(Commands.parallel(
+      // climber.prepareForClimbL1(),
+      swerve.addSecondaryInputsTrueFielcentric(()->climber.generateSwerveInputs(swerve.getSwervePose())),
+      Commands.none()
+    )
+    // .until(climber::isLinedUpWithL1)
     // .andThen(climber.climbL1())
-    // );
+    );
 
 
     // operator.povUp().whileTrue(spindexer.unclog()); // shake dye rotor / unclog

@@ -36,6 +36,9 @@ public class Climber extends SubsystemBase {
     public ClimberVisual visual = new ClimberVisual();
 
     public Climber(){
+        SmartDashboard.putData("Climber/RFLeft",rangefinders.left);
+        SmartDashboard.putData("Climber/RFRight",rangefinders.right);
+
 
         // new Trigger(()->stage1.isHomed() && stage2.isHomed())
         // .whileTrue(
@@ -115,7 +118,7 @@ public class Climber extends SubsystemBase {
 
     public SwerveInputs generateSwerveInputs(Pose2d botpose){
         double facingAngleDegrees = botpose.getRotation().getDegrees();
-        if(facingAngleDegrees < 180  &&  facingAngleDegrees > 0){ facingAngleDegrees = 90; }
+        if((facingAngleDegrees < 180  &&  facingAngleDegrees > 0)){ facingAngleDegrees = 90; }
         else{ facingAngleDegrees = -90;}
 
         return rangefinders.generateInputs(facingAngleDegrees);

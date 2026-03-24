@@ -12,8 +12,8 @@ import frc.robot.Subsystems.Swerve.Swerve.SwerveInputs;
 
 /** Add your docs here. */
 public class Rangefinders {
-    public LaserCanWrapper left = new LaserCanWrapper(3).configureShortRange().setThreshhold(Inches.of(12));
-    public LaserCanWrapper right = new LaserCanWrapper(2).configureShortRange().setThreshhold(Inches.of(12));
+    public LaserCanWrapper left = new LaserCanWrapper(2).configureShortRange().setThreshhold(Inches.of(24));
+    public LaserCanWrapper right = new LaserCanWrapper(3).configureShortRange().setThreshhold(Inches.of(24));
     SwerveInputs swerveInputs = new SwerveInputs();
 
     
