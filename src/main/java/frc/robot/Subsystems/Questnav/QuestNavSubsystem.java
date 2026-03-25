@@ -19,6 +19,7 @@ import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -29,10 +30,12 @@ import gg.questnav.questnav.QuestNav;
 
 public class QuestNavSubsystem extends SubsystemBase {
   /** Creates a new QuestNav. */
+  Field2d field = new Field2d();
   Swerve swerveSubsystem;
   private boolean wantToTrack = true;
   public QuestNavSubsystem(Swerve swerveSubsystem) {
     this.swerveSubsystem = swerveSubsystem;
+    SmartDashboard.putData("QuestField", field);
   }
 
   //Values to change when we get bot
@@ -50,9 +53,9 @@ public class QuestNavSubsystem extends SubsystemBase {
   QuestNav questNav = new QuestNav();
   Matrix<N3, N1> QUESTNAV_STD_DEVS =
       VecBuilder.fill(
-        0.02, // Trust down to 2cm in X direction
-          0.02, // Trust down to 2cm in Y direction
-      0.035 // Trust down to 2 degrees rotational
+        0.03, // Trust down to 2cm in X direction
+          0.03, // Trust down to 2cm in Y direction
+      0.035*2.5 // Trust down to 5 degrees rotational, .035 is 2 deg,
       );
 
 @Override
@@ -76,6 +79,7 @@ public class QuestNavSubsystem extends SubsystemBase {
             // Transform by the mount pose to get your robot pose
             Pose3d robotPose = questPose.transformBy(robotToQuest.inverse());
             //add to swervedrive pose
+            field.setRobotPose(robotPose.toPose2d());
             swerveSubsystem.addVisionMeasurement(robotPose.toPose2d(), timestamp, QUESTNAV_STD_DEVS);
         }
     }

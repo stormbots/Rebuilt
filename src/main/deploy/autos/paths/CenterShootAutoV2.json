@@ -19,7 +19,7 @@
     },
     {
       "type": "event_trigger",
-      "t_ratio": 0.8999999999999982,
+      "t_ratio": 0.4754150959007885,
       "lib_key": "intake"
     },
     {
@@ -66,7 +66,7 @@
         "intermediate_handoff_radius_meters": 0.4
       },
       "rotation_target": {
-        "rotation_radians": 3.141592653589793,
+        "rotation_radians": -3.1175577307513507,
         "profiled_rotation": true
       }
     },

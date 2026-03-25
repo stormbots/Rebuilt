@@ -81,6 +81,9 @@ public class Swerve extends SubsystemBase {
     swerveDrive.setCosineCompensator(false);
     SwerveDriveTelemetry.verbosity = TelemetryVerbosity.HIGH;
     SmartDashboard.putData("odometryField", odometryField);
+
+    swerveDrive.getRobotVelocity();
+    swerveDrive.getFieldVelocity();
   }
 
 
@@ -296,7 +299,9 @@ public class Swerve extends SubsystemBase {
   }
 
   public ChassisSpeeds getFieldRelativeChassisSpeeds(){
-    return swerveDrive.getRobotVelocity();
+    //TODO Shouldn't.... this be
+    return swerveDrive.getFieldVelocity();
+    // return swerveDrive.getRobotVelocity();
   }
 
 
