@@ -113,9 +113,9 @@ public class RobotContainer {
 
     ShiftTracking.canShoot.onTrue(wled.signals.shiftStart()).onFalse(wled.signals.shiftEnd());
 
-    new Trigger(DriverStation::isTeleopEnabled).onTrue(wled.signals.reboot());
+    new Trigger(DriverStation::isEnabled).onTrue(wled.signals.reboot());
 
-    new Trigger(DriverStation::isAutonomousEnabled).onTrue(wled.signals.reboot());
+    new Trigger(DriverStation::isEnabled).and(DriverStation::isFMSAttached).onTrue(WLED.setAuraMode());
 
 
 

@@ -15,13 +15,13 @@
     {
       "type": "event_trigger",
       "t_ratio": 0.0,
-      "lib_key": "shoot"
+      "lib_key": "intakeWhileShooting"
     },
     {
       "type": "waypoint",
       "translation_target": {
-        "x_meters": 2.5507890633498937,
-        "y_meters": 6.789591353999011,
+        "x_meters": 1.698,
+        "y_meters": 6.1,
         "intermediate_handoff_radius_meters": 0.7
       },
       "rotation_target": {
@@ -30,33 +30,28 @@
       }
     },
     {
-      "type": "event_trigger",
-      "t_ratio": 0.25607096550715913,
-      "lib_key": "intakeWhileShooting"
-    },
-    {
       "type": "translation",
-      "x_meters": 1.768799159347136,
-      "y_meters": 6.842121408021986,
-      "intermediate_handoff_radius_meters": 0.2
+      "x_meters": 0.304,
+      "y_meters": 6.1,
+      "intermediate_handoff_radius_meters": 0.25
     },
     {
       "type": "waypoint",
       "translation_target": {
-        "x_meters": 0.8631025854879057,
-        "y_meters": 6.746529691409508,
+        "x_meters": 0.3276914095079235,
+        "y_meters": 5.106897414512094,
         "intermediate_handoff_radius_meters": 0.5
       },
       "rotation_target": {
-        "rotation_radians": 4.101523742186674,
+        "rotation_radians": -3.141592653589793,
         "profiled_rotation": true
       }
     },
     {
       "type": "waypoint",
       "translation_target": {
-        "x_meters": 0.9704811189543361,
-        "y_meters": 5.4723018022395165,
+        "x_meters": 1.0582542632412426,
+        "y_meters": 5.135838082473045,
         "intermediate_handoff_radius_meters": 0.4
       },
       "rotation_target": {
@@ -66,14 +61,14 @@
     },
     {
       "type": "event_trigger",
-      "t_ratio": 0.8294182275027612,
+      "t_ratio": 0.8378074089008225,
       "lib_key": "shoot"
     },
     {
       "type": "waypoint",
       "translation_target": {
-        "x_meters": 1.2581050999062269,
-        "y_meters": 5.146462001654404,
+        "x_meters": 1.2141951626355292,
+        "y_meters": 5.078839949958298,
         "intermediate_handoff_radius_meters": 0.6
       },
       "rotation_target": {
@@ -85,14 +80,14 @@
   "constraints": {
     "max_velocity_meters_per_sec": [
       {
-        "value": 0.125,
-        "start_ordinal": 3,
+        "value": 0.1,
+        "start_ordinal": 2,
         "end_ordinal": 3
       },
       {
-        "value": 0.075,
+        "value": 0.1,
         "start_ordinal": 0,
-        "end_ordinal": 2
+        "end_ordinal": 1
       },
       {
         "value": 0.5,
@@ -100,7 +95,7 @@
         "end_ordinal": 4
       },
       {
-        "value": 0.075,
+        "value": 0.1,
         "start_ordinal": 5,
         "end_ordinal": 5
       }

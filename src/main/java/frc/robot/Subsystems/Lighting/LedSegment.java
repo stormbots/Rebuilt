@@ -173,9 +173,14 @@ public class LedSegment extends LedBase {
       }
     }
 
-    public void reset(){
+    public void resetData(){
       data.reset();
     }
+
+    // public void resetSegment(){
+    //   setFreeze(false);
+    //   setPalette(0);
+    // }
 
     public LedSegmentData getData(){
       return data;

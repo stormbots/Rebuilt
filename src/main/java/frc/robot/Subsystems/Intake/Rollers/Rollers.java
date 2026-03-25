@@ -15,6 +15,7 @@ import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.SparkFlexConfig;
 
+import edu.wpi.first.units.Units;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -35,13 +36,13 @@ public class Rollers extends SubsystemBase {
     double factor = 1; //convert to surface speed of roller
     config.encoder
     .positionConversionFactor(factor)
-    .velocityConversionFactor(factor/60);
+    .velocityConversionFactor(factor);
 
     config.closedLoop.feedForward
     .sva(0, 12/6000.0/factor, 0);
 
     config.closedLoop
-    .p(1/1000.0);
+    .p(1/350.0);
 
     config.closedLoop.maxMotion
     .maxAcceleration(20)
@@ -65,9 +66,8 @@ public class Rollers extends SubsystemBase {
     SmartDashboard.putNumber("Intake/Rollers/DutyCycle", motor.getAppliedOutput());
     SmartDashboard.putNumber("Intake/Rollers/Current", motor.getOutputCurrent());
     // SmartDashboard.putNumber("Intake/Rollers/Current", motor.getAppliedOutput());
-
     // SmartDashboard.putNumber("Intake/Rollers/Position", getPosition().in(Units.Degrees));
-    // SmartDashboard.putNumber("Intake/Rollers/Velocity", getVelocity().in(Units.DegreesPerSecond));
+    SmartDashboard.putNumber("Intake/Rollers/Velocity", getVelocity().in(Units.RPM));
     SmartDashboard.putString("Intake/Rollers/Command", getCurrentCommand()==null ? "None" : getCurrentCommand().getName() );
   }
 
@@ -87,8 +87,8 @@ public class Rollers extends SubsystemBase {
   }
 
   public Command intake(){
-    // return setVelocity(100);
-    return setVoltage(8.0);
+    return setVelocity(8.0/12.0 *6000.0);
+    // return setVoltage(8.0);
   }
 
  public Command eject(){

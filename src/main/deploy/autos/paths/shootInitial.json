@@ -19,13 +19,13 @@
     },
     {
       "type": "event_trigger",
-      "t_ratio": 1.0,
+      "t_ratio": 0.9796844291873417,
       "lib_key": "hoodDown"
     },
     {
       "type": "translation",
-      "x_meters": 2.5035705421184327,
-      "y_meters": 7.386105988323603,
+      "x_meters": 2.4596839699749795,
+      "y_meters": 7.441,
       "intermediate_handoff_radius_meters": 0.6
     }
   ],

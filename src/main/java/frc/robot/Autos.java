@@ -111,19 +111,19 @@ public class Autos {
 
 
         //ACTUAL OPTIONS BELOW HERE
-        autoChooser.addOption("RedDepot", this::redDepot);
+        autoChooser.addOption("Red Depot", this::redDepot);
         autoChooser.addOption("Blue Depot", this::blueDepot);
         autoChooser.addOption("ShootOnlyEight", this::basicShootToEmpty);
 
-        autoChooser.addOption("CenterShootingAutoRedLeft", this::CenterShootAutoRedLEFT);
-        autoChooser.addOption("CenterShootingAutoBlueLeft", this::CenterShootAutoBlueLEFT);
-        autoChooser.addOption("CenterShootingAutoRedRight", this::CenterShootAutoRedRIGHT);
-        autoChooser.addOption("CenterShootingAutoBlueRight", this::CenterShootAutoBlueRIGHT);
+        autoChooser.addOption("RL Center Auto", this::CenterShootAutoRedLEFT);
+        autoChooser.addOption("BL Center Auto", this::CenterShootAutoBlueLEFT);
+        autoChooser.addOption("RR  Center Auto", this::CenterShootAutoRedRIGHT);
+        autoChooser.addOption("BR Center Auto", this::CenterShootAutoBlueRIGHT);
 
-        autoChooser.addOption("PassingAutoRedLeft", this::PassingAutoRedLEFT);
-        autoChooser.addOption("PassingAutoBlueLeft", this::PassingAutoBlueLEFT);
-        autoChooser.addOption("PassingAutoRedRight", this::PassingAutoRedRIGHT);
-        autoChooser.addOption("PassingAutoBlueRight", this::PassingAutoBlueRIGHT);
+        autoChooser.addOption("RL Passing Auto", this::PassingAutoRedLEFT);
+        autoChooser.addOption("BL Passing Auto", this::PassingAutoBlueLEFT);
+        autoChooser.addOption("RR Passing Auto", this::PassingAutoRedRIGHT);
+        autoChooser.addOption("BR Passing Auto", this::PassingAutoBlueRIGHT);
 
 
         autoChooser.setDefaultOption("Select Auto",()->new InstantCommand());
@@ -270,7 +270,7 @@ public class Autos {
         return Commands.sequence(
             forceSetPose(startBlueRight).withTimeout(0.1),
             pathing.followPath(startPath).withTimeout(2.0),
-            pathing.followPath(path)
+            pathing.followPath(path).withTimeout(20.0)
         );
     }
 
@@ -280,7 +280,8 @@ public class Autos {
             // shooter.testSetHoodAngle(Degrees.of(0)).withTimeout(0.75),
             // forceSetPose(new Pose2d(12.577+0.37465, 4.0, new Rotation2d(Degrees.of(-180)))).withTimeout(2.0),
             // pathing.followPathTeamFlipped(new Path("depotstart")).withTimeout(5.0),
-            pathing.followPathTeamFlipped(new Path("depotAuto")).withTimeout(18)
+            pathing.followPathTeamFlipped(new Path("depotAuto")).withTimeout(14),
+            pathing.followPath(new Path("climbAuto")).withTimeout(5.0)
         );
     }
     public Command blueDepot(){

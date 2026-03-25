@@ -71,13 +71,17 @@ public class WLED extends SubsystemBase{
     return new LedSegment(id, start, stop, reverse);
   }
 
-  // private static Command setAuraMode(){
-  //   return run
-  // }
+  public static Command setAuraMode(){
+    return Commands.runOnce(()->{
+      if (!auraMode){
+        auraMode = true;
+      }
+    });
+  }
 
 
   public static int getDefaultPattern(){
-    if (DriverStation.getAlliance().isEmpty()){
+    if (!DriverStation.isDSAttached()){
       return numPatterns+2;
     }
     else if(DriverStation.isAutonomousEnabled()){
@@ -108,7 +112,7 @@ public class WLED extends SubsystemBase{
   @Override
   public void periodic() {
     serializeSegments();
-    SmartDashboard.putNumber("leds/defaultPattern", getDefaultPattern());
+    // SmartDashboard.putNumber("leds/defaultPattern", getDefaultPattern());
   }
 
   private static String gsonSerialize(LedSegment segment){
@@ -136,7 +140,7 @@ public class WLED extends SubsystemBase{
             needsComma = true;
           }
           json += gsonSerialize(segments.get(i));
-          segments.get(i).reset();
+          segments.get(i).resetData();
         }
       }
       calls++;

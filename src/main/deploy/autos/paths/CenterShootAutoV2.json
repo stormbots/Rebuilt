@@ -18,6 +18,11 @@
       "lib_key": "hoodDown"
     },
     {
+      "type": "event_trigger",
+      "t_ratio": 0.8999999999999982,
+      "lib_key": "intake"
+    },
+    {
       "type": "waypoint",
       "translation_target": {
         "x_meters": 6.446268965368175,
@@ -30,15 +35,10 @@
       }
     },
     {
-      "type": "event_trigger",
-      "t_ratio": 0.8999999999999997,
-      "lib_key": "intake"
-    },
-    {
       "type": "waypoint",
       "translation_target": {
-        "x_meters": 7.3,
-        "y_meters": 7.0,
+        "x_meters": 7.0074228523769815,
+        "y_meters": 6.663536280233527,
         "intermediate_handoff_radius_meters": 0.7
       },
       "rotation_target": {
@@ -49,8 +49,8 @@
     {
       "type": "waypoint",
       "translation_target": {
-        "x_meters": 7.665721434528777,
-        "y_meters": 4.9352168473728115,
+        "x_meters": 7.680350291909926,
+        "y_meters": 4.862072560467057,
         "intermediate_handoff_radius_meters": 0.5
       },
       "rotation_target": {
@@ -84,7 +84,7 @@
     },
     {
       "type": "event_trigger",
-      "t_ratio": 0.22381647573282465,
+      "t_ratio": 0.06399999999999985,
       "lib_key": "intakeWhileShooting"
     },
     {
