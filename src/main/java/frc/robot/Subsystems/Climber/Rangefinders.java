@@ -23,17 +23,15 @@ public class Rangefinders {
      */
     public  SwerveInputs generateInputs(double facingAngleDegrees){
         swerveInputs.clear();
-        if(facingAngleDegrees == 90){
-            if(left.isBreakBeamTripped.getAsBoolean() && right.isBreakBeamTripped.getAsBoolean()){
-                swerveInputs.ty= 0.1; 
+        if(left.isBreakBeamTripped.getAsBoolean() && right.isBreakBeamTripped.getAsBoolean()){
+                swerveInputs.ty= 0.05; 
             } else if(left.isBreakBeamTripped.getAsBoolean()){
-                swerveInputs.tx = -0.1;
+                swerveInputs.tx = -0.05;
             } else if(right.isBreakBeamTripped.getAsBoolean()){
-                swerveInputs.tx = 0.1;
+                swerveInputs.tx = 0.05;
             }
-        }
 
-        if(facingAngleDegrees == -90){
+        if(facingAngleDegrees == 90){
             //flip outputs for going the other field direction
             swerveInputs.tx*=-1;
             swerveInputs.ty*=-1;

@@ -19,6 +19,7 @@ import com.revrobotics.spark.config.SparkFlexConfig;
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.Command.InterruptionBehavior;
 import edu.wpi.first.wpilibj2.command.FunctionalCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -89,6 +90,17 @@ public class ClimberExtension extends SubsystemBase {
   public SparkAbsoluteEncoder getAbsoluteEncoder(){
     return motor.getAbsoluteEncoder();
   }
+
+  public Command setPrepareCurrentLimit(){
+    //TODO: Plaaceholder
+    return Commands.runOnce(()->setCurrentLimit(5), this);
+  }
+
+  public Command setClimbCurrentLimit(){
+    //TODO: Plaaceholder
+    return Commands.runOnce(()->setCurrentLimit(kClimbingCurrentMax), this);
+  }
+
 
   public Command goHome(){
     return new FunctionalCommand(

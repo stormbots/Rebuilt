@@ -72,10 +72,12 @@ public class Climber extends SubsystemBase {
     }
 
     public Command prepareForClimbL1(){
-        return Commands.parallel(
+        return Commands.sequence(
+            stage1.setPrepareCurrentLimit(),
+            Commands.parallel(
             stage1.setHeight(Inches.of(8.25)),
             grabber.retractPartial()
-        )
+        ))
         // .until(grabber.isRetracted.and(stage1.isAtTargetPosition))
         .finallyDo(stage1::stopMotor)
         .withName("PrepareToClimb");
@@ -84,6 +86,7 @@ public class Climber extends SubsystemBase {
     public Command climbL1(){
         
         return Commands.sequence(
+            stage1.setClimbCurrentLimit(),
             grabber.grab().until(grabber.isPossiblyConnected).withTimeout(0.5),
             new WaitCommand(0.25),
             stage1.setHeight(Inches.of(2.5))

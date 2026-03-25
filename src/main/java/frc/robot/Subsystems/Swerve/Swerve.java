@@ -255,9 +255,6 @@ public class Swerve extends SubsystemBase {
   public Command addSecondaryInputsTrueFielcentric(Supplier<SwerveInputs> inputs){
     return Commands.run(()->{
       secondaryInputs.add(inputs.get());
-      SmartDashboard.putNumber("climber/inputs/r", inputs.get().r);
-      SmartDashboard.putNumber("climber/inputs/tx", inputs.get().tx);
-      SmartDashboard.putNumber("climber/inputs/ty", inputs.get().ty);
     })
     ;
   }
