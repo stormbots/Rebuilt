@@ -59,6 +59,7 @@ public class Pathing extends SubsystemBase {
     FollowPath.registerEventTrigger("pass", pass());
     FollowPath.registerEventTrigger("intakeStop", intake.stop());
     FollowPath.registerEventTrigger("hoodDown", shooter.testSetHoodAngle(Degrees.of(0)));
+
     
     
 

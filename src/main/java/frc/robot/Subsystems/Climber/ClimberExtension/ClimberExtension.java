@@ -93,7 +93,7 @@ public class ClimberExtension extends SubsystemBase {
 
   public Command setPrepareCurrentLimit(){
     //TODO: Plaaceholder
-    return Commands.runOnce(()->setCurrentLimit(5), this);
+    return Commands.runOnce(()->setCurrentLimit(8), this);
   }
 
   public Command setClimbCurrentLimit(){

@@ -153,10 +153,19 @@ public class IntakeExtension extends SubsystemBase {
     });
   }
 
-  public Command up(){
+  public Command stow(){
     return Commands.sequence(
       setAngle(90, 0).until(()->getAngle().in(Degree) > 80),
       setAngle(90, 0)
+    )
+    .withName("Stow")
+    ;
+  }
+
+  public Command up(){
+    return Commands.sequence(
+      setAngle(70, 0).until(()->getAngle().in(Degree) > 60),
+      setAngle(70, 0)
     )
     .withName("Up")
     ;

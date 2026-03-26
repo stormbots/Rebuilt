@@ -74,6 +74,7 @@ public class Climber extends SubsystemBase {
     public Command prepareForClimbL1(){
         return Commands.sequence(
             stage1.setPrepareCurrentLimit(),
+            new WaitCommand(1.0),
             Commands.parallel(
             stage1.setHeight(Inches.of(8.25)),
             grabber.retractPartial()

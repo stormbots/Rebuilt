@@ -20,30 +20,48 @@
     {
       "type": "waypoint",
       "translation_target": {
-        "x_meters": 1.698,
-        "y_meters": 6.1,
-        "intermediate_handoff_radius_meters": 0.7
+        "x_meters": 0.7449791492910758,
+        "y_meters": 7.065504587155962,
+        "intermediate_handoff_radius_meters": 0.45
       },
       "rotation_target": {
-        "rotation_radians": 3.141592653589793,
+        "rotation_radians": -2.0943951023931953,
         "profiled_rotation": true
       }
     },
     {
       "type": "translation",
-      "x_meters": 0.304,
-      "y_meters": 6.1,
-      "intermediate_handoff_radius_meters": 0.25
+      "x_meters": 0.34999999999999987,
+      "y_meters": 5.953711426188491,
+      "intermediate_handoff_radius_meters": 0.45
     },
     {
       "type": "waypoint",
       "translation_target": {
-        "x_meters": 0.3276914095079235,
-        "y_meters": 5.106897414512094,
+        "x_meters": 0.8034945788156795,
+        "y_meters": 6.919082568807341,
+        "intermediate_handoff_radius_meters": 0.4
+      },
+      "rotation_target": {
+        "rotation_radians": -1.9198621771937625,
+        "profiled_rotation": true
+      }
+    },
+    {
+      "type": "translation",
+      "x_meters": 0.30925027522935733,
+      "y_meters": 5.912828256880736,
+      "intermediate_handoff_radius_meters": 0.2
+    },
+    {
+      "type": "waypoint",
+      "translation_target": {
+        "x_meters": 1.2423603002502082,
+        "y_meters": 6.189432860717265,
         "intermediate_handoff_radius_meters": 0.5
       },
       "rotation_target": {
-        "rotation_radians": -3.141592653589793,
+        "rotation_radians": -1.5707963267948966,
         "profiled_rotation": true
       }
     },
@@ -55,13 +73,13 @@
         "intermediate_handoff_radius_meters": 0.4
       },
       "rotation_target": {
-        "rotation_radians": 3.9269908169872414,
+        "rotation_radians": -2.0943951023931953,
         "profiled_rotation": true
       }
     },
     {
       "type": "event_trigger",
-      "t_ratio": 0.8378074089008225,
+      "t_ratio": 0.8378074089008251,
       "lib_key": "shoot"
     },
     {
@@ -80,7 +98,7 @@
   "constraints": {
     "max_velocity_meters_per_sec": [
       {
-        "value": 0.1,
+        "value": 0.2,
         "start_ordinal": 2,
         "end_ordinal": 3
       },

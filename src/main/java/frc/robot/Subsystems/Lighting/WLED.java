@@ -36,7 +36,7 @@ public class WLED extends SubsystemBase{
   private static int defaultPattern = -1;
   private static int indivualRoll = -1;
   public static final int numPatterns = 23;
-  private static int chanceIndividual = 10;
+  private static int chanceIndividual = 8;
   private static boolean auraMode = false;
   public WLED(SerialPort serialPort, Photonvision vision) {
     if (chanceIndividual==0){

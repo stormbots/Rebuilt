@@ -51,7 +51,7 @@ public class RobotContainer {
   QuestNavSubsystem questnav = new QuestNavSubsystem(swerve);
   Pathing pathing = new Pathing(swerve, shooter, intake, spindexer, targeting);
   WLED wled = new WLED(new SerialPort(115200, Port.kUSB1),photonvision);
-  Autos autos = new Autos(swerve, shooter, intake, questnav, spindexer, pathing, targeting);
+  Autos autos = new Autos(swerve, shooter, intake, questnav, spindexer, pathing, targeting, climber);
   ShiftTracking shiftTracking = new ShiftTracking();
   // Bling bling = new Bling(); //TODO: Currently no bling lights on bot
   FieldBehaviour fieldBehaviour = new FieldBehaviour();
@@ -240,7 +240,8 @@ public class RobotContainer {
     .whileTrue(spindexer.unclog());
 
     operator.povDown()
-    .whileTrue(climber.stow());
+    .whileTrue(climber.stow())
+    .whileTrue(intake.stow());
 
     operator.b()
     .whileTrue(climber.prepareForClimbL1())
@@ -263,7 +264,7 @@ public class RobotContainer {
     .whileTrue(Commands.parallel(
       // climber.prepareForClimbL1(),
       swerve.addSecondaryInputsTrueFielcentric(()->climber.generateSwerveInputs(swerve.getSwervePose())),
-      
+
       Commands.none()
     )
     // .until(climber::isLinedUpWithL1)

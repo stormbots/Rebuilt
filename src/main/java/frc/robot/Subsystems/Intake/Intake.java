@@ -59,8 +59,8 @@ public class Intake extends SubsystemBase {
 
   public Command bringUp(){
     var upRollers = Commands.parallel(
-      left.up(),
-      right.up(),
+      left.stow(),
+      right.stow(),
       rollers.intake()
     )
     .withTimeout(0.5)
@@ -85,6 +85,16 @@ public class Intake extends SubsystemBase {
       right.up()
     )
     .withName("Stop")
+    ;
+  }
+
+  public Command stow(){
+    return Commands.parallel(
+      rollers.stop(),
+      left.stow(),
+      right.stow()
+    )
+    .withName("Stow")
     ;
   }
 

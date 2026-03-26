@@ -23,6 +23,7 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
+import frc.robot.Subsystems.Climber.Climber;
 import frc.robot.Subsystems.Intake.Intake;
 import frc.robot.Subsystems.Questnav.QuestNavSubsystem;
 import frc.robot.Subsystems.Shooter.Shooter;
@@ -45,6 +46,7 @@ public class Autos {
     Spindexer spindexer;
     Pathing pathing;
     TargetingSystem targeting;
+    Climber climber;
 
 
     SendableChooser<Supplier<Command>> autoChooser = new SendableChooser<>();
@@ -94,7 +96,8 @@ public class Autos {
         QuestNavSubsystem questNav,
         Spindexer spindexer,
         Pathing pathing,
-        TargetingSystem targeting
+        TargetingSystem targeting,
+        Climber climber
     ){
         this.swerve = swerve;
         this.shooter = shooter;
@@ -103,6 +106,7 @@ public class Autos {
         this.spindexer = spindexer;
         this.pathing = pathing;
         this.targeting = targeting;
+        this.climber = climber;
 
         SmartDashboard.putData("AutoSelector/chooser",autoChooser);
         //FORCE SET POSE IS CHOPPED DO NOT USE, shouldn't even be on their dashboard, needs fixing and could still prove useful
@@ -281,7 +285,9 @@ public class Autos {
             // forceSetPose(new Pose2d(12.577+0.37465, 4.0, new Rotation2d(Degrees.of(-180)))).withTimeout(2.0),
             // pathing.followPathTeamFlipped(new Path("depotstart")).withTimeout(5.0),
             pathing.followPathTeamFlipped(new Path("depotAuto")).withTimeout(14),
-            pathing.followPath(new Path("climbAuto")).withTimeout(5.0)
+            pathing.followPath(new Path("climbAuto")).withTimeout(3.0),
+            swerve.addSecondaryInputsTrueFielcentric(()->climber.generateSwerveInputs(swerve.getSwervePose())).withTimeout(3.0)
+
         );
     }
     public Command blueDepot(){
