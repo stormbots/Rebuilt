@@ -5,6 +5,7 @@
 package frc.robot.Subsystems.Intake;
 
 import static edu.wpi.first.units.Units.Degree;
+import static edu.wpi.first.units.Units.Degrees;
 
 import com.stormbots.CRTAbsoluteEncoder;
 
@@ -29,8 +30,17 @@ public class Intake extends SubsystemBase {
     && right.getAngle().in(Degree) < 45
   );
 
-  public Intake(){
+  public Intake(Trigger isShooting){
     CRTAbsoluteEncoder.getInstance().setEncoder2(left.getAbsoluteEncoder());
+
+    var retractedAngle = Degrees.of(90);
+    var shootingAngle = Degrees.of(70);
+    isShooting
+    .onTrue(Commands.runOnce(()->left.setStowPosition(shootingAngle)))
+    .onTrue(Commands.runOnce(()->right.setStowPosition(shootingAngle)))
+    .onFalse(Commands.runOnce(()->left.setStowPosition(retractedAngle)))
+    .onFalse(Commands.runOnce(()->right.setStowPosition(retractedAngle)))
+    ;
   }
 
   @Override

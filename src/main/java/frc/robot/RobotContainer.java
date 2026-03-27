@@ -45,7 +45,7 @@ public class RobotContainer {
   Photonvision photonvision = new Photonvision(swerve);
   TargetingSystem targeting = new TargetingSystem(swerve);
   Shooter shooter = new Shooter(targeting);
-  Intake intake = new Intake();
+  Intake intake = new Intake(shooter.isReadyToAcceptFuel);
   Climber climber = new Climber();
   Spindexer spindexer = new Spindexer(shooter.isReadyToAcceptFuel.and(swerve::isOnTargetAngle));
   QuestNavSubsystem questnav = new QuestNavSubsystem(swerve);

@@ -28,6 +28,7 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
 
 public class IntakeExtension extends SubsystemBase {
   SparkFlex motor;
+  private double stowAngle = 90;
   
   // Breaks on real robot? It shouldn't....
   // IntakeExtensionSim sim = new IntakeExtensionSim(motor);
@@ -155,8 +156,8 @@ public class IntakeExtension extends SubsystemBase {
 
   public Command stow(){
     return Commands.sequence(
-      setAngle(90, 0).until(()->getAngle().in(Degree) > 80),
-      setAngle(90, 0)
+      setAngle(stowAngle, 0).until(()->getAngle().in(Degree) > stowAngle-10),
+      setAngle(stowAngle, 0)
     )
     .withName("Stow")
     ;
@@ -192,5 +193,9 @@ public class IntakeExtension extends SubsystemBase {
 
   private Command setVoltage(double volts){
     return run(()->motor.setVoltage(volts));
+  }
+
+  public void setStowPosition(Angle angle){
+    this.stowAngle = angle.in(Degrees);
   }
 }
