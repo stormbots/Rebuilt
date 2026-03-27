@@ -86,6 +86,7 @@ public class IntakeExtension extends SubsystemBase {
     motor.getEncoder().setPosition(90);
     
     setDefaultCommand(up());
+    // setDefaultCommand(stow());
   }
 
   @Override
@@ -169,6 +170,21 @@ public class IntakeExtension extends SubsystemBase {
     )
     .withName("Up")
     ;
+  }
+
+  public Command upTest(String name){
+    if (name.equals("Stow")||name.equals("UpTest")){
+      return Commands.sequence(
+      setAngle(70, 0).until(()->getAngle().in(Degree) > 60),
+      setAngle(70, 0)
+    )
+    .withName("UpTest")
+    ;
+    }
+    else{
+      return Commands.none();
+    }
+    
   }
 
   public Command upTrapeziodal(){

@@ -98,6 +98,16 @@ public class Intake extends SubsystemBase {
     ;
   }
 
+  public Command shootingStow(){
+    return Commands.parallel(
+      rollers.stop(),
+      left.upTest(left.getCurrentCommand().getName()),
+      right.upTest(right.getCurrentCommand().getName())
+    )
+    .withName("ShootingUp")
+    ;
+  }
+
   public Command testRollers(){
     return Commands.parallel(
       rollers.setVoltage(2)

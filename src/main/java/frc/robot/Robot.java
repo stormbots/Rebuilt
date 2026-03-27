@@ -16,10 +16,12 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.WaitCommand;
 import frc.robot.Constants.Bumpers;
 import frc.robot.Constants.Intake;
 import frc.robot.Subsystems.HopperSensors.HopperSensors;
 import frc.robot.Subsystems.HopperSensors.FuelSim.FuelSim;
+import gg.questnav.questnav.QuestNav;
 
 public class Robot extends TimedRobot {
   private Command m_autonomousCommand;
@@ -75,7 +77,13 @@ public class Robot extends TimedRobot {
    m_autonomousCommand = robotContainer.autos.getAutonomousCommand();
 
     if (m_autonomousCommand != null) {
-      CommandScheduler.getInstance().schedule(m_autonomousCommand);
+      CommandScheduler.getInstance().schedule(
+        Commands.sequence(
+          new WaitCommand(0.1),
+          robotContainer.questWantToTrack(),
+          new WaitCommand(0.25),
+          m_autonomousCommand
+          ));
     }
   }
 

@@ -11,6 +11,7 @@ import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import frc.robot.Subsystems.Climber.ClimberExtension.ClimberExtension;
@@ -27,9 +28,9 @@ public class Climber extends SubsystemBase {
     ClimberExtension stage1 = new ClimberExtension(
         "Stage1", 19, true, kStage1Range
     );
-    ClimberExtension stage2 = new ClimberExtension(
-        "Stage2", 20, true, kStage2Range
-    );
+    // ClimberExtension stage2 = new ClimberExtension(
+    //     "Stage2", 20, true, kStage2Range
+    // );
 
     Grabber grabber = new Grabber();
 
@@ -49,7 +50,7 @@ public class Climber extends SubsystemBase {
 
     @Override
     public void periodic(){
-        visual.update(stage1.getHeight(), stage2.getHeight());
+        // visual.update(stage1.getHeight(), stage2.getHeight());
         SmartDashboard.putNumber("climber/position", (stage1.getHeight().in(Inches)));
     }
 
@@ -68,7 +69,8 @@ public class Climber extends SubsystemBase {
     }
 
     public Command setStage2Voltage(double voltage){
-        return stage2.setVoltage(voltage);
+        // return stage2.setVoltage(voltage);
+        return new InstantCommand();
     }
 
     public Command prepareForClimbL1(){

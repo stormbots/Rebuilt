@@ -9,6 +9,8 @@ import static edu.wpi.first.units.Units.Inches;
 import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.Radians;
 
+import java.util.function.Supplier;
+
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -32,7 +34,7 @@ public class QuestNavSubsystem extends SubsystemBase {
   /** Creates a new QuestNav. */
   Field2d field = new Field2d();
   Swerve swerveSubsystem;
-  private boolean wantToTrack = true;
+  private boolean wantToTrack = false;
   public QuestNavSubsystem(Swerve swerveSubsystem) {
     this.swerveSubsystem = swerveSubsystem;
     SmartDashboard.putData("QuestField", field);
@@ -79,8 +81,8 @@ public class QuestNavSubsystem extends SubsystemBase {
             // Transform by the mount pose to get your robot pose
             Pose3d robotPose = questPose.transformBy(robotToQuest.inverse());
             //add to swervedrive pose
-            field.setRobotPose(robotPose.toPose2d());
             swerveSubsystem.addVisionMeasurement(robotPose.toPose2d(), timestamp, QUESTNAV_STD_DEVS);
+            field.setRobotPose(robotPose.toPose2d());
         }
     }
   }
@@ -88,6 +90,7 @@ public class QuestNavSubsystem extends SubsystemBase {
   public void setQuestPose(Pose3d robotPose)
   {
     questNav.setPose(robotPose.transformBy(robotToQuest));
+    field.setRobotPose(robotPose.toPose2d());
   }
 
   public Command setQuestPoseCommand()
@@ -100,9 +103,12 @@ public class QuestNavSubsystem extends SubsystemBase {
     return run(()->setQuestPose(robotPose));
   }
 
+  public Command setQuestPoseCommand(Supplier<Pose2d> robotPose){
+     return run(()->setQuestPose(new Pose3d(robotPose.get()))); 
+  }
   public Command wantToTrackCommand(boolean bool)
   {
-    return run(()->wantToTrack(bool));
+    return runOnce(()->wantToTrack(bool));
   }
 
 

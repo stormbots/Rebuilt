@@ -26,6 +26,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 public class Rollers extends SubsystemBase {
 
   SparkFlex motor = new SparkFlex(11, MotorType.kBrushless);
+  SparkFlex follower = new SparkFlex(20, MotorType.kBrushless);
 
   RollersSim sim = new RollersSim(motor);
 
@@ -42,7 +43,7 @@ public class Rollers extends SubsystemBase {
     .sva(0, 12/6000.0/factor, 0);
 
     config.closedLoop
-    .p(1/350.0);
+    .p(1/350.0*0.5*0.5*1.2);
 
     config.closedLoop.maxMotion
     .maxAcceleration(20)
@@ -53,10 +54,15 @@ public class Rollers extends SubsystemBase {
     config
     .idleMode(IdleMode.kCoast)
     .inverted(true)
-    .smartCurrentLimit(45)
+    .smartCurrentLimit(30)
     .voltageCompensation(11);
 
     motor.configure(config, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+    
+    config
+    .follow(motor,true)
+    ;
+    follower.configure(config, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
 
     setDefaultCommand(stop());
   }
@@ -65,6 +71,7 @@ public class Rollers extends SubsystemBase {
   public void periodic() {
     SmartDashboard.putNumber("Intake/Rollers/DutyCycle", motor.getAppliedOutput());
     SmartDashboard.putNumber("Intake/Rollers/Current", motor.getOutputCurrent());
+    SmartDashboard.putNumber("Intake/Rollers/Follower/Current", follower.getOutputCurrent());
     // SmartDashboard.putNumber("Intake/Rollers/Current", motor.getAppliedOutput());
     // SmartDashboard.putNumber("Intake/Rollers/Position", getPosition().in(Units.Degrees));
     SmartDashboard.putNumber("Intake/Rollers/Velocity", getVelocity().in(Units.RPM));

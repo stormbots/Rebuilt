@@ -71,6 +71,10 @@ public class RobotContainer {
     questnav.setQuestPose(new Pose3d(swerve.getSwervePose()));
   };
 
+  public Command questWantToTrack(){
+    return questnav.wantToTrackCommand(true);
+  }
+
 
   public RobotContainer() {
     SmartDashboard.putNumber("robotContainer/flywheelrpm", rpm);
@@ -78,7 +82,6 @@ public class RobotContainer {
 
 
     HopperSensors.getInstance(); //Ensure this always exists and is updating
-    questnav.setQuestPose(new Pose3d(swerve.swerveDrive.getPose().getX(), swerve.swerveDrive.getPose().getY(), 0.0, new Rotation3d(0.0, 0.0, 0.0)));
    
     configureDriverBindings();
     configureOperatorBindings();
@@ -171,7 +174,20 @@ public class RobotContainer {
     // );
 
     driver.start().onTrue(
+      Commands.sequence(
+      questnav.wantToTrackCommand(false),
       swerve.zeroGyro()
+      )
+    );
+
+    driver.povLeft().onTrue(
+      Commands.sequence(
+        questnav.setQuestPoseCommand(
+          ()->swerve.getSwervePose()
+        ),
+        new WaitCommand(0.3),
+        questnav.wantToTrackCommand(true)
+      )
     );
      
 
@@ -219,19 +235,28 @@ public class RobotContainer {
     operator.rightTrigger()
     .whileTrue(shootHub())
     .whileTrue(wled.signals.automaticShot().repeatedly());
+    // .whileTrue(intake.shootingStow());
+    ;
 
     operator.rightBumper()
     .whileTrue(fixedShot())
-    .whileTrue(wled.signals.manualShot().repeatedly());;
+    .whileTrue(wled.signals.manualShot().repeatedly());
+    // .whileTrue(intake.shootingStow());
+    ;
 
     operator.leftTrigger()
     .whileTrue(pass())
-    .whileTrue(wled.signals.automaticShot().repeatedly());;
+    .whileTrue(wled.signals.automaticShot().repeatedly());
+    // .whileTrue(intake.shootingStow());
+    ;
 
     //Simple Climber Lineup
     operator.leftBumper()
     .whileTrue(fixedPass())
-    .whileTrue(wled.signals.manualShot().repeatedly());;
+    .whileTrue(wled.signals.manualShot().repeatedly());
+    // .whileTrue(intake.shootingStow());
+    ;
+    
     //DO TS LATER
     // operator.povDown()
     // .whileTrue(globalStow());
@@ -251,11 +276,13 @@ public class RobotContainer {
     .whileTrue(shooter.shootWithDashboardValues())
     .whileTrue(Commands.waitSeconds(1).andThen(spindexer.feedToShooterForce()))
     .whileTrue(wled.signals.wrongShot().repeatedly())
+    // .whileTrue(intake.shootingStow());
     ;
 
     operator.a()
     .whileTrue(fixedPassOpp())
     .whileTrue(wled.signals.manualShot().repeatedly());
+    // .whileTrue(intake.shootingStow());
     ;
     //Operator Climber Lineup command
     //NOTE: Driver may want a swerve.turnToHeading() for this; 
