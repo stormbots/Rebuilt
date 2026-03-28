@@ -207,6 +207,7 @@ public class Autos {
         return Commands.sequence(
             forceSetPose(startRedRight).withTimeout(0.1),
             pathing.followPathTeamFlipped(startPath).withTimeout(3.0),
+            pathing.followPathTeamFlipped(path).withTimeout(20),
             pathing.followPathTeamFlipped(path).withTimeout(20)
         );
     }
@@ -215,6 +216,7 @@ public class Autos {
         return Commands.sequence(
             forceSetPose(startBlueLeft).withTimeout(0.1),
             pathing.followPath(new Path("shootInitial")).withTimeout(3.0),
+            pathing.followPath(new Path("CenterShootAutoV2")).withTimeout(20),
             pathing.followPath(new Path("CenterShootAutoV2")).withTimeout(20)
         );
     }
@@ -227,6 +229,7 @@ public class Autos {
         return Commands.sequence(
             forceSetPose(startBlueRight).withTimeout(0.1),
             pathing.followPath(startPath).withTimeout(3.0),
+            pathing.followPath(path).withTimeout(20),
             pathing.followPath(path).withTimeout(20)
         );
     }
@@ -248,6 +251,7 @@ public class Autos {
         return Commands.sequence(
             forceSetPose(startRedRight).withTimeout(0.1),
             pathing.followPathTeamFlipped(startPath).withTimeout(3.0),
+            pathing.followPathTeamFlipped(path).withTimeout(20),
             pathing.followPathTeamFlipped(path).withTimeout(20)
         );
     }
@@ -256,6 +260,7 @@ public class Autos {
         return Commands.sequence(
             forceSetPose(startBlueLeft).withTimeout(0.1),
             pathing.followPath(new Path("shootInitial")).withTimeout(3.0),
+            pathing.followPath(new Path("testingStraightUnder")),
             pathing.followPath(new Path("testingStraightUnder"))
         );
     }
@@ -274,6 +279,7 @@ public class Autos {
         return Commands.sequence(
             forceSetPose(startBlueRight).withTimeout(0.1),
             pathing.followPath(startPath).withTimeout(3.0),
+            pathing.followPath(path).withTimeout(20.0),
             pathing.followPath(path).withTimeout(20.0)
         );
     }

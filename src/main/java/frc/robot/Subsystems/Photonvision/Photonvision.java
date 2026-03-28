@@ -41,7 +41,7 @@ public class Photonvision extends SubsystemBase {
   private Optional<PhotonCamera> leftCamera = Optional.empty();
 
   private Matrix<N3, N1> currentStdDevs = VecBuilder.fill(Double.MAX_VALUE, Double.MAX_VALUE, Double.MAX_VALUE);
-  private Matrix<N3, N1> singleTagStdDevs = VecBuilder.fill(4, 4, 8);
+  private Matrix<N3, N1> singleTagStdDevs = VecBuilder.fill(.75, .75, 4);
   private Matrix<N3, N1> multiTagStdDevs = VecBuilder.fill(0.5, 0.5, 1);
 
   private Transform3d rightCameraToCenter = new Transform3d(new Translation3d(

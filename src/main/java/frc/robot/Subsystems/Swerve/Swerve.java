@@ -154,6 +154,7 @@ public class Swerve extends SubsystemBase {
     .add(fieldInputs)
     .add(secondaryInputs)
     ;
+    odometryField.getObject("navxAngle").setPose(new Pose2d());
 
 
     //Don't generate output when off
@@ -187,7 +188,8 @@ public class Swerve extends SubsystemBase {
     SmartDashboard.putNumber("swerve/secondaryInput/r", secondaryInputs.r);
 
 
-    SmartDashboard.putNumber("swerve/anglegyro", swerveDrive.getGyro().getRotation3d().getAngle());
+    SmartDashboard.putNumber("swerve/anglegyro", navx.getAngle());
+    odometryField.getObject("navxAngle").setPose(new Pose2d(0, 0, navx.getRotation2d()));
   }
 
 
