@@ -14,8 +14,8 @@ import edu.wpi.first.units.measure.Distance;
 /** Add your docs here. */
 public class Constants {
     public static class Field{
-        public static Translation2d blueHub=new Translation2d(4.6,4);
-        public static Translation2d redHub=new Translation2d(11.97,4);
+        public static Translation2d blueHub=new Translation2d(4.619,4.025);
+        public static Translation2d redHub=new Translation2d(11.955,4.025);
     }
 
     public static class Shooter{

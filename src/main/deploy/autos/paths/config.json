@@ -1,11 +1,16 @@
 {
-  "robot_length_meters": 0.2,
-  "robot_width_meters": 0.2,
-  "default_max_velocity_meters_per_sec": 0.5,
-  "default_max_acceleration_meters_per_sec2": 0.25,
-  "default_intermediate_handoff_radius_meters": 0.2,
-  "default_max_velocity_deg_per_sec": 220.0,
-  "default_max_acceleration_deg_per_sec2": 400.0,
-  "default_end_translation_tolerance_meters": 0.03,
-  "default_end_rotation_tolerance_deg": 2.0
+  "path_elements": [
+    {
+      "type": "waypoint",
+      "translation_target": {
+        "x_meters": 11.955282359360796,
+        "y_meters": 4.038592359580135,
+        "intermediate_handoff_radius_meters": 0.2
+      },
+      "rotation_target": {
+        "rotation_radians": 0.0,
+        "profiled_rotation": true
+      }
+    }
+  ]
 }

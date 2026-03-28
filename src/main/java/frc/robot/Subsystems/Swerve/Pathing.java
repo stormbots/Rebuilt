@@ -59,6 +59,7 @@ public class Pathing extends SubsystemBase {
     FollowPath.registerEventTrigger("pass", pass());
     FollowPath.registerEventTrigger("intakeStop", intake.stop());
     FollowPath.registerEventTrigger("hoodDown", shooter.testSetHoodAngle(Degrees.of(0)));
+    FollowPath.registerEventTrigger("stopShooting", stopShooting());
 
     
     
@@ -89,6 +90,13 @@ public class Pathing extends SubsystemBase {
   @Override
   public void periodic() {
     // This method will be called once per scheduler run
+  }
+
+  public Command stopShooting(){
+    return new ParallelCommandGroup(
+      shooter.testSetHoodAngle(Degrees.of(0)),
+      spindexer.stop()
+    );
   }
 
   public Command pass(){

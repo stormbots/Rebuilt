@@ -33,7 +33,7 @@ public class Turret extends SubsystemBase {
   public static final double kGear1ToothCount = 20;
   public static final double kGear2ToothCount = 21;
   
-  public static final double kGearing = (1.0 / 3.0) * (10.0 / 132.0) * (177.0/198.0);
+  public static final double kGearing = (1.0 / 3.0) * (10.0 / 132.0) * (177.0/198.0) / (176.606/180.0);
 
   //How much in ONE direction, hence max range divided by 2
   public static final double kMinRotation = -287.0;
