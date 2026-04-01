@@ -187,6 +187,10 @@ public class Swerve extends SubsystemBase {
     SmartDashboard.putNumber("swerve/secondaryInput/ty", secondaryInputs.ty);
     SmartDashboard.putNumber("swerve/secondaryInput/r", secondaryInputs.r);
 
+    SmartDashboard.putNumber("swerve/currentSpeedX", swerveDrive.getRobotVelocity().vxMetersPerSecond);
+    SmartDashboard.putNumber("swerve/currentSpeedY", swerveDrive.getRobotVelocity().vyMetersPerSecond);
+    SmartDashboard.putNumber("swerve/currentSpeeds", Math.abs(swerveDrive.getRobotVelocity().vxMetersPerSecond)+Math.abs(swerveDrive.getRobotVelocity().vyMetersPerSecond));
+
 
     SmartDashboard.putNumber("swerve/anglegyro", navx.getAngle());
     odometryField.getObject("navxAngle").setPose(new Pose2d(0, 0, navx.getRotation2d()));
