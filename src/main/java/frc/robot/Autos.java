@@ -192,7 +192,7 @@ public class Autos {
 
     public Command CenterShootAutoRedLEFT(){
         return Commands.sequence(
-            forceSetPose(startRedLeft).withTimeout(0.1),
+            // forceSetPose(startRedLeft).withTimeout(0.1),
             pathing.followPathTeamFlipped(new Path("shootInitial")).withTimeout(3.0),
             pathing.followPathTeamFlipped(new Path("CenterShootAutoV2")).withTimeout(20)
         );
@@ -205,8 +205,8 @@ public class Autos {
         path.mirror();
 
         return Commands.sequence(
-            forceSetPose(startRedRight).withTimeout(0.1),
-            pathing.followPathTeamFlipped(startPath).withTimeout(3.0),
+            // forceSetPose(startRedRight).withTimeout(0.1),
+            pathing.followPathTeamFlipped(startPath).withTimeout(2.0),
             pathing.followPathTeamFlipped(path).withTimeout(20),
             pathing.followPathTeamFlipped(path).withTimeout(20)
         );
@@ -214,8 +214,8 @@ public class Autos {
 
     public Command CenterShootAutoBlueLEFT(){
         return Commands.sequence(
-            forceSetPose(startBlueLeft).withTimeout(0.1),
-            pathing.followPath(new Path("shootInitial")).withTimeout(3.0),
+            // forceSetPose(startBlueLeft).withTimeout(0.1),
+            pathing.followPath(new Path("shootInitial")).withTimeout(2.0),
             pathing.followPath(new Path("CenterShootAutoV2")).withTimeout(20),
             pathing.followPath(new Path("CenterShootAutoV2")).withTimeout(20)
         );
@@ -227,8 +227,8 @@ public class Autos {
         Path path = new Path("CenterShootAutoV2");
         path.mirror();
         return Commands.sequence(
-            forceSetPose(startBlueRight).withTimeout(0.1),
-            pathing.followPath(startPath).withTimeout(3.0),
+            // forceSetPose(startBlueRight).withTimeout(0.1),
+            pathing.followPath(startPath).withTimeout(2.0),
             pathing.followPath(path).withTimeout(20),
             pathing.followPath(path).withTimeout(20)
         );

@@ -244,6 +244,11 @@ public class RobotContainer {
     // .whileTrue(intake.shootingStow());
     ;
 
+    operator.povLeft()
+    .whileTrue(shooter.shootWithDashboardValues())
+    .whileTrue(Commands.waitSeconds(1).andThen(spindexer.feedToShooter()))
+    ;
+
     operator.leftTrigger()
     .whileTrue(pass())
     .whileTrue(wled.signals.automaticShot().repeatedly());
