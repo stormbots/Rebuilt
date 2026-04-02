@@ -49,6 +49,7 @@ public class Shooter {
 
     public Shooter(TargetingSystem targeting) {
         this.targeting=targeting;
+        turret.setDefaultCommand(turret.setAngle(targeting::getTurretTracking));
     }
 
     // public TargetingSystem.ShooterState getCurrentState(){

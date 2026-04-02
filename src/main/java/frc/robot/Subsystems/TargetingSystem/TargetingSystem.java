@@ -395,6 +395,21 @@ public class TargetingSystem extends SubsystemBase {
     return getLUTShooterStateBotVelCompensated(swerve::getSwervePose, this::getPassTarget, passLUT, swerve::getFieldRelativeChassisSpeeds);
   }
 
+  //idle the hood and flywheels
+  public ShooterState getTurretTracking(){
+    boolean isBlue = DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Blue;
+
+    //if we're within the shooting zones for our respective alliance
+    if(
+      isBlue && swerve.getSwervePose().getX() < 4.572 ||
+      !isBlue && swerve.getSwervePose().getX() > 16.535-4.572
+    ){
+      return getHubBotVelCompensated();
+    }
+    
+    return getPassBotVelCompensated();
+  }
+
   public ShooterState fixedShot(){
     return new ShooterState(Degrees.of(180), Degrees.of(10),2210 );
   }
