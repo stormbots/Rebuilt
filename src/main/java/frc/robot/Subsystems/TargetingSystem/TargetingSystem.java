@@ -68,72 +68,39 @@ public class TargetingSystem extends SubsystemBase {
     }
   }
 
-  double timescalar = 1.0;
-  double distanceoffset = 0.0;
+  double fps=240.0;
+  // double timescalar = 1.0;
+  // double distanceoffset = 0.0;
   double fudgeFactor = 0.0;
-  // distance, hoodangle, flywheel rpm
+  // distance, hoodangle, flywheel rpm, TOF
   LUT hubLUT = new LUT(new double[][]{
-    // {22+14, 5, 2050},
-    // {32+22, 10, 2050},
-    // {48+22, 10, 2100},\\\\\\\\    // {60+22, 13, 2100},
-    // {72+22, 23, 2100},
-    // {84+22, 26, 2100},
-    // {96+22, 30, 2150},
-    // {108+22, 30, 2200},
-    // {120+22, 30, 2300},
-    // {132+22, 30, 2350},
-    // {144+22, 30, 2400},
-    // {156+22, 30, 2450},
-    // {168+22, 30, 2500},
-    // {180+22, 30, 2550},
-    // {192+22, 30, 2625}
-    // {22+14, 5, 2050, 0.8},
-    // {32+22, 10, 2050, 0.8},
-    // {48+22, 10, 2100, 0.8},
-    // {60+22, 13, 2100, 0.8},
-    // {72+22, 23, 2100, 0.8},
-    // {84+22, 26, 2100, 0.8},
-    // {96+22, 30, 2150, 0.5763},
-    // {108+22, 30, 2200, 0.6094},
-    // {120+22, 30, 2300, 0.64250},
-    // {132+22, 30, 2350, 0.67559},
-    // {144+22, 30, 2400, 0.70869},
-    // {156+22, 30, 2450, 0.74179},
-    // {168+22, 30, 2500, 0.77489},
-    // {180+22, 30, 2550, 0.80798},
-    // {192+22, 30, 2625, 0.84108},
-    // {3*12+24, 12, 2245, 0.5},
-    // {4*12+24, 12, 2255, 0.5},
-    // {5*12+24, 13.5, 2250, 0.5},
-    // {6*12+24, 17, 2270, 0.5},
-    // {7*12+24, 20, 2355, 0.5},
-    // {8*12+24, 23, 2425, 0.5763},
-    // {9*12+24, 23, 2475, 0.6094},
-    // {10*12+24, 23, 2510, 0.64250},
-    // {11*12+24, 23, 2550, 0.67559},
-    // {12*12+24, 23, 2600, 0.70869},
-    // {13*12+24, 23, 2625, 0.74179},
-    // {14*12+24, 23, 2712.5, 0.77489},
-    // {15*12+24, 23, 2775, 0.80798},
-    // {16*12+24, 23, 2825, 0.84108},
     //EVERYTHING UNDER THIS IS PROBABLY ACTUALLY CORRECT
-    {3*12+24+distanceoffset, 12, 2245+fudgeFactor, 0.417*timescalar},
-    {4*12+24+distanceoffset, 12, 2255+fudgeFactor, 0.467*timescalar},
-    {5*12+24+distanceoffset, 13.5, 2250+fudgeFactor, 0.517*timescalar},
-    {6*12+24+distanceoffset, 17, 2270+fudgeFactor, 0.5*timescalar},
-    {7*12+24+distanceoffset, 20, 2355+fudgeFactor, 0.467*timescalar},
-    {8*12+24+distanceoffset, 23, 2425+fudgeFactor, 0.500*timescalar},
-    {9*12+24+distanceoffset, 23, 2475+fudgeFactor, 0.483*timescalar},
-    {10*12+24+distanceoffset, 23, 2510+fudgeFactor, 0.500*timescalar},
-    {11*12+24+distanceoffset, 23, 2550+fudgeFactor, 0.550*timescalar},//EVERY TOF BELOW THIS NEEDS TO BE DOUBLE CHECKED
-    {12*12+24+distanceoffset, 23, 2600+fudgeFactor, 0.6*timescalar},
-    {13*12+24+distanceoffset, 23, 2625+fudgeFactor, 0.63*timescalar},
-    {14*12+24+distanceoffset, 23, 2712.5+fudgeFactor+15, 0.7*timescalar},
-    {15*12+24+distanceoffset, 23, 2775+fudgeFactor+15, 0.75*timescalar},
-    {16*12+24+distanceoffset, 23, 2850+fudgeFactor+15, 0.8*timescalar} 
+    // {3*12+24+distanceoffset, 12, 2245+fudgeFactor, 0.417*timescalar},
+    // {4*12+24+distanceoffset, 12, 2255+fudgeFactor, 0.467*timescalar},
+    // {5*12+24+distanceoffset, 13.5, 2250+fudgeFactor, 0.517*timescalar},
+    // {6*12+24+distanceoffset, 17, 2270+fudgeFactor, 0.5*timescalar},
+    // {7*12+24+distanceoffset, 20, 2355+fudgeFactor, 0.467*timescalar},
+    // {8*12+24+distanceoffset, 23, 2425+fudgeFactor, 0.500*timescalar},
+    // {9*12+24+distanceoffset, 23, 2475+fudgeFactor, 0.483*timescalar},
+    // {10*12+24+distanceoffset, 23, 2510+fudgeFactor, 0.500*timescalar},
+    // {11*12+24+distanceoffset, 23, 2550+fudgeFactor, 0.550*timescalar},//EVERY TOF BELOW THIS NEEDS TO BE DOUBLE CHECKED
+    // {12*12+24+distanceoffset, 23, 2600+fudgeFactor, 0.6*timescalar},
+    // {13*12+24+distanceoffset, 23, 2625+fudgeFactor, 0.63*timescalar},
+    // {14*12+24+distanceoffset, 23, 2712.5+fudgeFactor+15, 0.7*timescalar},
+    // {15*12+24+distanceoffset, 23, 2775+fudgeFactor+15, 0.75*timescalar},
+    // {16*12+24+distanceoffset, 23, 2850+fudgeFactor+15, 0.8*timescalar}
 
+    //Quinn doesn't seem to want to delete things so adding new lines
+    { 41,  5, 2245, 129/fps },
+    { 60, 10, 2245, 127/fps },
+    { 84, 20, 2345, 114/fps },
+    {108, 23, 2345, 103/fps }, //TOF estimated! Measure....
+    {132, 23, 2480, 117/fps }, //is this 2480 or 2490?
+    {156, 23, 2540, 129/fps },
+    {180, 25, 2670, 135/fps },
+    {204, 25, 2770, 142/fps },
+    {216, 25, 2800, 156/fps }
   });
-  
 
   //distance, hoodangle, flywheel rpm
   public LUT passLUT = new LUT(new double[][]{
