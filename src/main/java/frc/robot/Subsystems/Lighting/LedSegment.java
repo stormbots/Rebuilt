@@ -601,7 +601,7 @@ public class LedSegment extends LedBase {
      * - Benito Antonio Martínez Ocasio, 2026
     */
     public Command seguimosAqui(){
-      double duration = 2.5;
+      double duration = 1.5;
       LedMultiRange chile = new LedMultiRange(new LedRange(CustomColor.kChileBlue),new LedRange(CustomColor.kWhite,15,3), new LedRange(CustomColor.kChileBlue),new LedRange(CustomColor.kWhite,3,2),new LedRange(CustomColor.kRed));
       LedMultiRange argentina = new LedMultiRange(new LedRange(CustomColor.kArgentinaBlue),new LedRange(CustomColor.kWhite,12,5), new LedRange(CustomColor.kArgentinaYellow),new LedRange(CustomColor.kWhite,12,8),new LedRange(CustomColor.kArgentinaBlue));
       LedMultiRange uruguay = new LedMultiRange(new LedRange(CustomColor.kWhite),new LedRange(CustomColor.kUruguayYellow,3.75,23.0/16), new LedRange(CustomColor.kWhite),new LedRange(CustomColor.kBlue,9,6),new LedRange(CustomColor.kWhite),new LedRange(CustomColor.kBlue,9,8),new LedRange(CustomColor.kWhite));
