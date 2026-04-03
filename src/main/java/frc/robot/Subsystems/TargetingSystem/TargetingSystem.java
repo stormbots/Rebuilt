@@ -94,12 +94,12 @@ public class TargetingSystem extends SubsystemBase {
     { 41,  5, 2245, 129/fps },
     { 60, 10, 2245, 127/fps },
     { 84, 20, 2345, 114/fps },
-    {108, 23, 2345, 103/fps }, //TOF estimated! Measure....
-    {132, 23, 2480, 117/fps }, //is this 2480 or 2490?
-    {156, 23, 2540, 129/fps },
-    {180, 25, 2670, 135/fps },
-    {204, 25, 2770, 142/fps },
-    {216, 25, 2800, 156/fps }
+    {108, 23, 2345, 117/fps },
+    {132, 23, 2490, 129/fps },
+    {156, 23, 2540, 135/fps },
+    {180, 25, 2670, 142/fps },
+    {204, 25, 2770, 156/fps },
+    {216, 25, 2800, 160/fps } //observed TOF: +/-3 frames
   });
 
   //distance, hoodangle, flywheel rpm
