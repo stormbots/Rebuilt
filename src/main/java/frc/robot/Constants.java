@@ -13,24 +13,23 @@ import edu.wpi.first.units.measure.Distance;
 
 /** Add your docs here. */
 public class Constants {
-    public static class Field{
-        public static Translation2d blueHub=new Translation2d(4.619,4.025);
-        public static Translation2d redHub=new Translation2d(11.955,4.025);
-    }
+  public static class Field{
+    public static Translation2d blueHub = new Translation2d(4.619,4.025);
+    public static Translation2d redHub = new Translation2d(11.955,4.025);
+  }
 
-    public static class Shooter{
-        public static Translation3d botToTurretOffset = new Translation3d(0, 0, Inches.of(20).in(Meter));
-    }
+  public static class Shooter{
+    public static Translation3d botToTurretOffset = new Translation3d(0, 0, Inches.of(20).in(Meter));
+  }
 
-    public static class Bumpers{
-        public static Distance width = Inches.of(22);
-        public static Distance length = Inches.of(22);
-        public static Distance height = Inches.of(6);
-    }
+  public static class Bumpers{
+    public static Distance width = Inches.of(22);
+    public static Distance length = Inches.of(22);
+    public static Distance height = Inches.of(6);
+  }
 
-    public static class Intake{
-        public static Distance reach = Inches.of(6);
-        public static Distance width = Inches.of(22);
-    }
-
+  public static class Intake{
+    public static Distance reach = Inches.of(6);
+    public static Distance width = Inches.of(22);
+  }
 }

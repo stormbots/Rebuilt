@@ -36,23 +36,21 @@ public class Robot extends TimedRobot {
 
     switch(Preferences.getString("BotName", "compbot")){
       case "tabi":
-      //Set up a network bridge to access the Orange Pi
-      // PortForwarder.add(5800, "photonvision.local", 5800);
-      break;
+        //Set up a network bridge to access the Orange Pi
+        // PortForwarder.add(5800, "photonvision.local", 5800);
+        break;
 
       case "practicebot":
-      break;
+        break;
 
       case "compbot":
-
-      break;
-
       case "compBot":
         //Actually reset the name.
         Preferences.setString("BotName", "compbot");
+        break;
       default:
-      //No name set: Set a default to make the key visible.
-      Preferences.setString("BotName", "compbot");
+        //No name set: Set a default to make the key visible.
+        Preferences.setString("BotName", "compbot");
     }
   }
 
@@ -128,9 +126,9 @@ public class Robot extends TimedRobot {
   public void simulationPeriodic() {
     super.simulationInit();
     //Simulate stuff for a bit then stop because it burns battery
-    if(Timer.getFPGATimestamp()<=120){
+    if(Timer.getFPGATimestamp() <= 120){
       FuelSim.getInstance().updateSim();
-    }else if(Timer.getFPGATimestamp()<=121){
+    }else if(Timer.getFPGATimestamp() <= 121){
       FuelSim.getInstance().clearFuel();
     }
   }

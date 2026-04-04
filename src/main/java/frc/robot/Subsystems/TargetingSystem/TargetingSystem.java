@@ -146,27 +146,24 @@ public class TargetingSystem extends SubsystemBase {
   public Pose2d getBestTarget(Pose2d botPosition){
     var alliance = DriverStation.getAlliance().orElse(Alliance.Blue);
 
-    if(alliance==Alliance.Blue){
-      if(botPosition.getX()<4.6) return new Pose2d(getHubTarget(),new Rotation2d());
-    }else{
-      if(botPosition.getX()>11.9) return new Pose2d(getHubTarget(),new Rotation2d());
+    if(alliance == Alliance.Blue && botPosition.getX() < 4.6){
+      return new Pose2d(getHubTarget(), new Rotation2d());
     }
-    return new Pose2d(getPassTarget(),new Rotation2d());
+    
+    if(botPosition.getX() > 11.9){
+      return new Pose2d(getHubTarget(), new Rotation2d());
+    }
+
+    return new Pose2d(getPassTarget(), new Rotation2d());
   }
 
   public Pose2d getTarLockTemp(){
-    return new Pose2d(Constants.Field.blueHub,new Rotation2d());
-  }
-
-  private Pose2d getBestTarget(){
-    return getBestTarget(swerve.getSwervePose());
+    return new Pose2d(Constants.Field.blueHub, new Rotation2d());
   }
 
   /** Generate a fieldcentric heading from bot location to target */
   public Rotation2d getHeadingToTarget(Translation2d botTranslation,Translation2d target){
-    // SmartDashboard.putNumber("bruh/bruh", value)
-    var angle = target.minus(botTranslation).getAngle();
-    return angle;
+    return target.minus(botTranslation).getAngle();
   }
 
   /** Return the distance between bot position and target */
@@ -179,7 +176,6 @@ public class TargetingSystem extends SubsystemBase {
   public Translation3d getTurretCenterpoint(){
     return new Translation3d(swerve.getSwervePose().getTranslation()).plus(Constants.Shooter.botToTurretOffset);
   }
-
   
   public ShooterState getLUTShooterState(Supplier<Pose2d> botPose, Supplier<Translation2d> target, LUT lut){
     
@@ -200,7 +196,6 @@ public class TargetingSystem extends SubsystemBase {
     SmartDashboard.putNumber("shooter/turret/turretInput", heading.minus(botPose.get().getRotation()).getMeasure().in(Degrees));
 
     return new ShooterState(heading.minus(botPose.get().getRotation()).getMeasure(), Degrees.of(angle), rpm);
-    // return new ShooterState(Degrees.of(0), Degrees.of(angle), rpm);
   }
 
   public Translation2d getBotVelCompensatedTarget(Supplier<Pose2d> botPose, Supplier<Translation2d> target, LUT lut, Supplier<ChassisSpeeds> botVelocity){
@@ -271,7 +266,7 @@ public class TargetingSystem extends SubsystemBase {
 
     if(Robot.isSimulation()){
         //Generate a slightly fancier version for the 3D viewer
-        var turret3d=new Pose3d(getTurretCenterpoint(),new Rotation3d(angle));
+        var turret3d = new Pose3d(getTurretCenterpoint(),new Rotation3d(angle));
         DogLog.log("targeting/Turret", turret3d);
     }
 
@@ -283,14 +278,11 @@ public class TargetingSystem extends SubsystemBase {
     );
 
     field.getObject("bestTargetCompensated").setPose(new Pose2d(compensatedTarget,new Rotation2d()));
-
   }
 
   @Override
   public void simulationPeriodic() {
   }
-
-
 
   /** Compute a Translation3d representing a velocity vector of a fired Fuel. 
    * Necessary for FuelSim testing.
@@ -321,26 +313,16 @@ public class TargetingSystem extends SubsystemBase {
     return getLUTShooterStateBotVelCompensated(swerve::getSwervePose, this::getHubTarget, hubLUT, swerve::getFieldRelativeChassisSpeeds);
   }
 
-  //IDT this is needed for now. We'll see. if it is, i'd like getPass() to use this method
-  // public ShooterState getGroundShot(Pose2d target){
-  //   return getGroundShooterState(swerve.getSwervePose(),target.getTranslation(), passLUT);
-  // }
-
-
-  // private Translation2d getClosest(Translation2d bot, Collection<Translation2d> targets){
-  //   // ArrayList<Translation2d>.of(new Translation2d(),new Translation2d());
-  //   new Arraylist {new Translation2d(),new Translation2d()};
-  //   return bot.nearest(aaaaa);
-  // }
-
   public Angle getNearestAllianceWallAngle(Pose2d botPose){
-    if( swerve.getSwervePose().getRotation().getMeasure().isNear(Degrees.of(90), Degrees.of(90)) ) return Degree.of(90);
+    if(swerve.getSwervePose().getRotation().getMeasure().isNear(Degrees.of(90), Degrees.of(90))) {
+      return Degree.of(90);
+    }
     
     return Degrees.of(-90);
   }
 
   public Translation2d getPassTarget(){
-    if(DriverStation.getAlliance().orElse(Alliance.Blue)==Alliance.Blue){
+    if(DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Blue){
       return swerve.getSwervePose().getY() > 4.2 ? blueHigh : blueLow;
     }
     return swerve.getSwervePose().getY() > 4.2 ? redHigh : redLow;
@@ -348,14 +330,6 @@ public class TargetingSystem extends SubsystemBase {
 
   public ShooterState getPass(){
     return getLUTShooterState(swerve::getSwervePose, this::getPassTarget, passLUT);
-
-    // Translation2d target = new Translation2d(2, 2); //get best target
-    // return getLUTShooterState(swerve::getSwervePose,()->target, passLUT);
-
-    // Translation2d turretTranslation = getTurretCenterpoint().toTranslation2d();
-    // Rotation2d heading = getHeadingToTarget(turretTranslation, getPassTarget());
-
-    // return new ShooterState(heading.minus(swerve.getSwervePose().getRotation()).getMeasure(), Degrees.of(30), 2760);
   }
 
   public ShooterState getPassBotVelCompensated(){
@@ -371,7 +345,4 @@ public class TargetingSystem extends SubsystemBase {
   public ShooterState fixedPassOppAlliance(){
     return new ShooterState(Degrees.of(180), Degrees.of(40),3600 );
   }
-
-
-
 }

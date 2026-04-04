@@ -28,9 +28,6 @@ public class Pathing extends SubsystemBase {
   TargetingSystem targeting;
 
   FollowPath.Builder pathBuilder;
-  // double autoinputx;
-  // double autoinputy;
-  // double autoinputr;
 
   public Pathing(Swerve swerve,
         Shooter shooter,
@@ -52,6 +49,7 @@ public class Pathing extends SubsystemBase {
     new PIDController(0.0, 0.0, 0.0)     // Cross-track PID
     ).withTRatioBasedTranslationHandoffs(true)
     ;
+  
     FollowPath.registerEventTrigger("intake", intake.intake());
     FollowPath.registerEventTrigger("shoot", shootAuto());
     FollowPath.registerEventTrigger("intakeWhileShooting", intakeWhileShooting());
@@ -60,17 +58,11 @@ public class Pathing extends SubsystemBase {
     FollowPath.registerEventTrigger("intakeStop", intake.stop());
     FollowPath.registerEventTrigger("hoodDown", shooter.testSetHoodAngle(Degrees.of(0)));
     FollowPath.registerEventTrigger("stopShooting", stopShooting());
-
-    
-    
-
-
   }
 
   public Command followPath(Path path){
     return pathBuilder.build(path);
   }
-
 
   public Command followPathTeamFlipped(Path path){
     path.flip();
@@ -81,11 +73,8 @@ public class Pathing extends SubsystemBase {
     //Converting robot relative from bline for field relative inputs
     Rotation2d heading = swerve.getSwervePose().getRotation(); 
     ChassisSpeeds fieldRelative = ChassisSpeeds.fromRobotRelativeSpeeds(robotRelative, heading);
-    // autoinputx = fieldRelative.vxMetersPerSecond * 2.0;
-    // autoinputy = fieldRelative.vyMetersPerSecond *2.0 ;
-    // autoinputr = fieldRelative.omegaRadiansPerSecond *2.0;
     swerve.setPrimaryInputsVoid(()->fieldRelative.vxMetersPerSecond, ()->fieldRelative.vyMetersPerSecond, ()->fieldRelative.omegaRadiansPerSecond);
-}
+  }
   
   @Override
   public void periodic() {
@@ -100,36 +89,32 @@ public class Pathing extends SubsystemBase {
   }
 
   public Command pass(){
-        return new ParallelCommandGroup(
-            shooter.pass(),
-            spindexer.feedToShooterForce()
-        );
-    }
-
-    public Command shootAuto(){
-        return new ParallelCommandGroup(
-        // swerve.turnToHeadingWithinTurretRange(()->{
-        //   return targeting.getHeadingToTarget(swerve.getSwervePose().getTranslation(), targeting.getHubTarget()).plus(new Rotation2d(Degrees.of(-153.5)));
-        // }),
-        shooter.shootHubVelComp(),
-        spindexer.feedToShooter()
-        );
-    }
-
-    public Command intakeWhilePassing(){
-        return new ParallelCommandGroup(
-            intake.intake(),
-            shooter.pass(),
-            spindexer.feedToShooter()
-        );
-    }
-
-  public Command intakeWhileShooting(){
-      return new ParallelCommandGroup(
-          intake.intake(),
-          shooter.shootHubVelComp(),
-          spindexer.feedToShooter()
-      );
+    return new ParallelCommandGroup(
+      shooter.pass(),
+      spindexer.feedToShooterForce()
+    );
   }
 
+  public Command shootAuto(){
+    return new ParallelCommandGroup(
+      shooter.shootHubVelComp(),
+      spindexer.feedToShooter()
+    );
+  }
+
+  public Command intakeWhilePassing(){
+    return new ParallelCommandGroup(
+      intake.intake(),
+      shooter.pass(),
+      spindexer.feedToShooter()
+    );
+  }
+
+  public Command intakeWhileShooting(){
+    return new ParallelCommandGroup(
+      intake.intake(),
+      shooter.shootHubVelComp(),
+      spindexer.feedToShooter()
+    );
+  }
 }

@@ -14,77 +14,68 @@ import com.revrobotics.spark.config.SparkFlexConfig;
 
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
-public class UpGoer extends SubsystemBase{
-    SparkFlex motor = new SparkFlex(13, MotorType.kBrushless);
-    UpGoerSim sim = new UpGoerSim(motor);
+public class UpGoer extends SubsystemBase {
+  SparkFlex motor = new SparkFlex(13, MotorType.kBrushless);
+  UpGoerSim sim = new UpGoerSim(motor);
 
-    public UpGoer(){
-        var config = new SparkFlexConfig();
+  public UpGoer() {
+    var config = new SparkFlexConfig();
 
-        var conversionfactor = 5.0;
-        config.encoder.positionConversionFactor(1/conversionfactor);
-        config.encoder.velocityConversionFactor(1/conversionfactor/60);
+    var conversionfactor = 5.0;
+    config.encoder.positionConversionFactor(1 / conversionfactor);
+    config.encoder.velocityConversionFactor(1 / conversionfactor / 60);
 
-        config
-        .idleMode(IdleMode.kCoast)
-        .inverted(true)
-        .smartCurrentLimit(30)
-        ;
+    config
+      .idleMode(IdleMode.kCoast)
+      .inverted(true)
+      .smartCurrentLimit(30);
 
-        // config.closedLoop
-        // .p(0)
-        // ;
-        
-        config.closedLoop.feedForward
-        .kV(1/(7600.0/conversionfactor))
-        ;
+    config.closedLoop.feedForward
+      .kV(1 / (7600.0 / conversionfactor));
 
-        motor.configure(config , ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+    motor.configure(config, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
 
-        motor.getEncoder().setPosition(0);
-        setDefaultCommand(stop());
-    }
+    motor.getEncoder().setPosition(0);
+    setDefaultCommand(stop());
+  }
 
-    @Override
-    public void periodic(){
-        SmartDashboard.putNumber("UpGoer/Output", motor.getAppliedOutput());
-        SmartDashboard.putNumber("UpGoer/Position",motor.getEncoder().getPosition());
-        SmartDashboard.putNumber("UpGoer/Velocity",motor.getEncoder().getVelocity());
-        SmartDashboard.putNumber("UpGoer/Current",motor.getOutputCurrent());
-    }
+  @Override
+  public void periodic() {
+    SmartDashboard.putNumber("UpGoer/Output", motor.getAppliedOutput());
+    SmartDashboard.putNumber("UpGoer/Position", motor.getEncoder().getPosition());
+    SmartDashboard.putNumber("UpGoer/Velocity", motor.getEncoder().getVelocity());
+    SmartDashboard.putNumber("UpGoer/Current", motor.getOutputCurrent());
+  }
 
-    
-    public void simulationPeriodic(){
-        sim.update();
-    }
+  public void simulationPeriodic() {
+    sim.update();
+  }
 
-    public Command setVelocity(double velocity){
-        return run(()->{ 
-            motor.getClosedLoopController().setSetpoint(velocity, ControlType.kVelocity);
-        });
-    }
+  public Command setVelocity(double velocity) {
+    return run(() -> {
+      motor.getClosedLoopController().setSetpoint(velocity, ControlType.kVelocity);
+    });
+  }
 
-    public Command stop(){
-        return run(motor::stopMotor);
-    }
+  public Command stop() {
+    return run(motor::stopMotor);
+  }
 
-    public Command feed(){
-        return setVoltage(11);
-    }
+  public Command feed() {
+    return setVoltage(11);
+  }
 
-    public Command unclog(){
-        return setVoltage(6);
-    }
+  public Command unclog() {
+    return setVoltage(6);
+  }
 
-    public Command setVoltage(double volts){
-        return run(()->motor.setVoltage(volts));
-    }
+  public Command setVoltage(double volts) {
+    return run(() -> motor.setVoltage(volts));
+  }
 
-    public double getVelocity(){
-        return motor.getEncoder().getVelocity();
-    }
-        
+  public double getVelocity() {
+    return motor.getEncoder().getVelocity();
+  }
 }
