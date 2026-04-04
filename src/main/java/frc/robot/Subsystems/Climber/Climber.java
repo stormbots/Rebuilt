@@ -20,117 +20,94 @@ import frc.robot.Subsystems.Swerve.Swerve.SwerveInputs;
 
 /** Add your docs here. */
 public class Climber extends SubsystemBase {
-    public static Distance kStage1Range = Inches.of(8.25);
-    public static Distance kStage2Range = Inches.of(20);
+  public static Distance kStage1Range = Inches.of(8.25);
+  public static Distance kStage2Range = Inches.of(20);
 
-    private Rangefinders rangefinders = new Rangefinders();  
-      
-    ClimberExtension stage1 = new ClimberExtension(
-        "Stage1", 19, true, kStage1Range
+  private Rangefinders rangefinders = new Rangefinders();
+
+  ClimberExtension stage1 = new ClimberExtension("Stage1", 19, true, kStage1Range);
+
+  Grabber grabber = new Grabber();
+
+  public ClimberVisual visual = new ClimberVisual();
+
+  public Climber() {
+    SmartDashboard.putData("Climber/RFLeft", rangefinders.left);
+    SmartDashboard.putData("Climber/RFRight", rangefinders.right);
+  }
+
+  @Override
+  public void periodic() {
+    SmartDashboard.putNumber("climber/position", (stage1.getHeight().in(Inches)));
+  }
+
+  public Command goHome() {
+    return Commands.parallel(
+      stage1.goHome(),
+      grabber.retract(),
+      Commands.none()
     );
-    // ClimberExtension stage2 = new ClimberExtension(
-    //     "Stage2", 20, true, kStage2Range
-    // );
+  }
 
-    Grabber grabber = new Grabber();
+  public Command setStage1Voltage(double voltage) {
+    return stage1.setVoltage(voltage);
+  }
 
-    public ClimberVisual visual = new ClimberVisual();
+  public Command setStage2Voltage(double voltage) {
+    return new InstantCommand();
+  }
 
-    public Climber(){
-        SmartDashboard.putData("Climber/RFLeft",rangefinders.left);
-        SmartDashboard.putData("Climber/RFRight",rangefinders.right);
+  public Command prepareForClimbL1() {
+    return Commands.sequence(
+      stage1.setPrepareCurrentLimit(),
+      new WaitCommand(1.0),
+      Commands.parallel(
+          stage1.setHeight(Inches.of(8.25)),
+          grabber.retractPartial()))
+    .finallyDo(stage1::stopMotor)
+    .withName("PrepareToClimb");
+  }
 
+  public Command climbL1() {
+    return Commands.sequence(
+      stage1.setClimbCurrentLimit(),
+      grabber.grab().until(grabber.isPossiblyConnected).withTimeout(0.5),
+      new WaitCommand(0.25),
+      stage1.setHeight(Inches.of(2.5)))
+    .finallyDo(stage1::stopMotor)
+    .withName("Climb");
+  }
 
-        // new Trigger(()->stage1.isHomed() && stage2.isHomed())
-        // .whileTrue(
-        //     stage2.setHeight(kStage2Range.minus(Inches.of(3)))
-        //     .withName("PresetStage2")
-        // );
+  public Command declimbL1() {
+    return Commands.sequence(
+      stage1.setHeight(Inches.of(6)).until(stage1.isAtTargetPosition),
+      grabber.retract())
+    .finallyDo(stage1::stopMotor)
+    .withName("declimb");
+    // at end, not sure if actually away from post
+  }
+
+  public Command stow() {
+    return Commands.parallel(
+      stage1.setHeight(Inches.of(0)),
+      grabber.retract())
+    .andThen(Commands.idle().withTimeout(1))
+    .finallyDo(stage1::stopMotor)
+    .withName("stow");
+  }
+
+  public SwerveInputs generateSwerveInputs(Pose2d botpose) {
+    double facingAngleDegrees = botpose.getRotation().getDegrees();
+    if ((facingAngleDegrees < 180 && facingAngleDegrees > 0)) {
+      facingAngleDegrees = 90;
+    } else {
+      facingAngleDegrees = -90;
     }
 
-    @Override
-    public void periodic(){
-        // visual.update(stage1.getHeight(), stage2.getHeight());
-        SmartDashboard.putNumber("climber/position", (stage1.getHeight().in(Inches)));
-    }
+    return rangefinders.generateInputs(facingAngleDegrees);
+  }
 
-
-    public Command goHome(){
-        return Commands.parallel(
-            stage1.goHome(),
-            // stage2.goHomes(),
-            grabber.retract(),
-            Commands.none()
-        );
-    }
-
-    public Command setStage1Voltage(double voltage){
-        return stage1.setVoltage(voltage);
-    }
-
-    public Command setStage2Voltage(double voltage){
-        // return stage2.setVoltage(voltage);
-        return new InstantCommand();
-    }
-
-    public Command prepareForClimbL1(){
-        return Commands.sequence(
-            stage1.setPrepareCurrentLimit(),
-            new WaitCommand(1.0),
-            Commands.parallel(
-            stage1.setHeight(Inches.of(8.25)),
-            grabber.retractPartial()
-        ))
-        // .until(grabber.isRetracted.and(stage1.isAtTargetPosition))
-        .finallyDo(stage1::stopMotor)
-        .withName("PrepareToClimb");
-    }
-
-    public Command climbL1(){
-        
-        return Commands.sequence(
-            stage1.setClimbCurrentLimit(),
-            grabber.grab().until(grabber.isPossiblyConnected).withTimeout(0.5),
-            new WaitCommand(0.25),
-            stage1.setHeight(Inches.of(2.5))
-        )
-        .finallyDo(stage1::stopMotor)
-        .withName("Climb");
-    }
-
-    public Command declimbL1() {
-        return Commands.sequence(
-            stage1.setHeight(Inches.of(6))
-            .until(stage1.isAtTargetPosition),
-            grabber.retract()
-        )
-        .finallyDo(stage1::stopMotor)
-        .withName("declimb")
-        ;
-        //at end, not sure if actually away from post
-    }
-
-    public Command stow(){
-        return Commands.parallel(
-            stage1.setHeight(Inches.of(0)),
-            // stage2.setHeight(Inches.of(10)),
-            grabber.retract()
-        )
-        // .until(grabber.isRetracted.and(stage1.isAtTargetPosition))
-        .andThen(Commands.idle().withTimeout(1))
-        .finallyDo(stage1::stopMotor)
-        .withName("stow");
-    }
-
-    public SwerveInputs generateSwerveInputs(Pose2d botpose){
-        double facingAngleDegrees = botpose.getRotation().getDegrees();
-        if((facingAngleDegrees < 180  &&  facingAngleDegrees > 0)){ facingAngleDegrees = 90; }
-        else{ facingAngleDegrees = -90;}
-
-        return rangefinders.generateInputs(facingAngleDegrees);
-    }
-
-    public boolean isLinedUpWithL1(){
-        return rangefinders.isLinedUpL1();
-    }
+  public boolean isLinedUpWithL1() {
+    return rangefinders.isLinedUpL1();
+  }
 }

@@ -27,7 +27,6 @@ import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Subsystems.Swerve.Swerve;
 
 public class Photonvision extends SubsystemBase {
@@ -93,6 +92,7 @@ public class Photonvision extends SubsystemBase {
     this.swerve = swerve;
     SmartDashboard.putData("visionfield", visionField2d);
 
+    // TODO: Fix this! If one camera throws an error, we have no cameras
     try{
       rightCamera = Optional.of(new PhotonCamera("FrontRight"));
       frontLeftCamera = Optional.of(new PhotonCamera("FrontLeft"));
@@ -150,7 +150,6 @@ public class Photonvision extends SubsystemBase {
     }
 
     visionEstimate.ifPresent(
-      
       est ->{
         var estimatedStdDevs = getEstimationStdDevs();
 
@@ -169,8 +168,6 @@ public class Photonvision extends SubsystemBase {
           backLeftHasTarget = true;
         };
       }
-      
-      
     );
   }
 
@@ -182,12 +179,10 @@ public class Photonvision extends SubsystemBase {
     return !hasTarget();
   }
 
-
   public void updateEstimationStdDevs(Optional<EstimatedRobotPose> estimatedPose, List<PhotonTrackedTarget> targets){
     if( estimatedPose.isEmpty() ){
       currentStdDevs = singleTagStdDevs;
-    }
-    else{
+    } else{
       var estimatedStdDevs = singleTagStdDevs;
       int numTags = 0;
       double avgDistance = 0.0;
@@ -205,17 +200,15 @@ public class Photonvision extends SubsystemBase {
 
       if (numTags == 0){
         currentStdDevs = singleTagStdDevs;
-      }
-      else{
+      } else{
         avgDistance /= numTags;
 
-        if( numTags>1 ){ estimatedStdDevs = multiTagStdDevs; }
-        
-        if( numTags == 1 && avgDistance > 4 ){
+        if(numTags > 1){
+          estimatedStdDevs = multiTagStdDevs;
+        } else if(numTags == 1 && avgDistance > 4){
           estimatedStdDevs = VecBuilder.fill(Double.MAX_VALUE, Double.MAX_VALUE, Double.MAX_VALUE);
-        }
-        else{
-          estimatedStdDevs = estimatedStdDevs.times( 1+(avgDistance*avgDistance/30) );
+        } else{
+          estimatedStdDevs = estimatedStdDevs.times(1 + (avgDistance*avgDistance / 30));
         }
         currentStdDevs = estimatedStdDevs;
       }
@@ -240,8 +233,3 @@ public class Photonvision extends SubsystemBase {
     SmartDashboard.putBoolean("vision/doesNotHaveTarget", doesNotHaveTarget());
   }
 }
-
-
-
-
-

@@ -22,10 +22,7 @@ import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.FunctionalCommand;
-import edu.wpi.first.wpilibj2.command.InstantCommand;
-import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.Command.InterruptionBehavior;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
@@ -33,7 +30,7 @@ import frc.robot.Subsystems.TargetingSystem.TargetingSystem;
 
 public class Hood extends SubsystemBase {
 
-  public static final double kGearing = (1.0 / 15.0) * ( 10.0 / 164.0 );
+  public static final double kGearing = (1.0 / 15.0) * (10.0 / 164.0);
 
   public static final int kPreHomeCurrentLimit = 10;
   //CANNOT be higher than 20, ITS A NEO 550
@@ -45,14 +42,14 @@ public class Hood extends SubsystemBase {
   public static final double minAngle = homeAngle+0.5;
   public static final double maxAngle = 43.0;
 
-  private boolean homed = true;//TODO:make actual homed thingy
+  private boolean homed = true; //TODO:make actual homed thingy
 
   private Angle targetAngle = Degrees.of(minAngle);
   private Angle tolerance = Degrees.of(3); 
 
   SparkMax motor = new SparkMax(15, MotorType.kBrushless);
 
-  Trigger isAtHome = new Trigger(()-> !homed && motor.getOutputCurrent()>kHomeCurrentThreshold ).debounce(0.1);
+  Trigger isAtHome = new Trigger(()->!homed && motor.getOutputCurrent() > kHomeCurrentThreshold).debounce(0.1);
 
   /** Creates a new Hood. */
   public Hood() {
@@ -107,14 +104,12 @@ public class Hood extends SubsystemBase {
 
   public Command setAngle(Supplier<Angle> angle, Supplier<Angle> tolerance){
     return run(()->{
-      // if(homed){
-        this.targetAngle = angle.get();
-        this.tolerance = tolerance.get();
-        motor.getClosedLoopController().setSetpoint(
-          targetAngle.in(Degrees),
-          ControlType.kPosition
-        );
-      // }
+      this.targetAngle = angle.get();
+      this.tolerance = tolerance.get();
+      motor.getClosedLoopController().setSetpoint(
+        targetAngle.in(Degrees),
+        ControlType.kPosition
+      );
     });
   }
 
@@ -127,9 +122,8 @@ public class Hood extends SubsystemBase {
   }
 
   public boolean getOnTarget(){
-    return MathUtil.isNear(targetAngle.in(Degrees), motor.getEncoder().getPosition(), tolerance.in(Degrees)+2.5);
+    return MathUtil.isNear(targetAngle.in(Degrees), motor.getEncoder().getPosition(), tolerance.in(Degrees) + 2.5);
   }
-
 
   private void setHomeableConfig(){
     SparkBaseConfig config = new SparkMaxConfig();
@@ -148,7 +142,7 @@ public class Hood extends SubsystemBase {
   public Command homingCommand(){
     return new FunctionalCommand(
       ()->{
-        homed=false;
+        homed = false;
         setHomeableConfig();
       }, 
       ()->motor.set(-0.1), 
