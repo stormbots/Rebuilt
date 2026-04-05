@@ -155,10 +155,9 @@ public class Autos {
   // TRIGGERS AND MAKES PATH CHOPPED, SUPER LAST RESORT AUTOS
   public Command basicShootInitial8() {
     return Commands.sequence(
-      swerve.turnToHeading(() -> {
-        return targeting.getHeadingToTarget(swerve.getSwervePose().getTranslation(), targeting.getHubTarget())
-          .plus(Rotation2d.k180deg);
-      }).until(() -> swerve.isOnTargetAngle()).withTimeout(1.0),
+      //   return targeting.getHeadingToTarget(swerve.getSwervePose().getTranslation(), targeting.getHubTarget())
+      //     .plus(Rotation2d.k180deg);
+      // }).until(() -> swerve.isOnTargetAngle()).withTimeout(1.0),
       shootAuto().withTimeout(1.5)
     );
   }
@@ -197,8 +196,9 @@ public class Autos {
 
   public Command CenterShootAutoRedLEFT() {
     return Commands.sequence(
-      pathing.followPathTeamFlipped(shootIntitialPath).withTimeout(3.0),
-      pathing.followPathTeamFlipped(centerShootPath).withTimeout(20)
+      basicShootInitial8(),
+      pathing.followPathTeamFlipped(centerShootPath).withTimeout(12),
+      climbAutoRed()
     );
   }
 
@@ -260,7 +260,11 @@ public class Autos {
 
   public Command climbAutoRed() {
     return Commands.sequence(
-      pathing.followPath(new Path("climbAuto"))
+      pathing.followPath(new Path("climbAuto")),
+      swerve.addSecondaryInputsTrueFielcentric(()->climber.generateSwerveInputs(swerve.getSwervePose())),
+      swerve.turnToHeading(()->new Rotation2d(Degrees.of(-90))),
+      climber.prepareForClimbL1().withTimeout(1.0),
+      climber.climbL1()
     );
   }
 
@@ -330,49 +334,49 @@ public class Autos {
 
   public Command stow() {
     return Commands.parallel(
-      shooter.stow(),
-      spindexer.stop(),
-      intake.stop()
+      shooter.stow().asProxy(),
+      spindexer.stop().asProxy(),
+      intake.stop().asProxy()
     );
   }
 
   public Command pass() {
     return new ParallelCommandGroup(
-      shooter.pass(),
-      spindexer.feedToShooterForce(),
-      intake.stop()
+      shooter.pass().asProxy(),
+      spindexer.feedToShooterForce().asProxy(),
+      intake.stop().asProxy()
     );
   }
 
   public Command shootAuto() {
     return new ParallelCommandGroup(
-      shooter.shootHubNoTur(),
-      spindexer.feedToShooterForce(),
-      intake.stop()
+      shooter.shootHubNoTur().asProxy(),
+      spindexer.feedToShooterForce().asProxy(),
+      intake.stop().asProxy()
     );
   }
 
   public Command intakeOnly() {
     return new ParallelCommandGroup(
-      shooter.stow(),
-      spindexer.stop(),
-      intake.intake()
+      shooter.stow().asProxy(),
+      spindexer.stop().asProxy(),
+      intake.intake().asProxy()
     );
   }
 
   public Command intakeWhilePassing() {
     return new ParallelCommandGroup(
-      shooter.pass(),
-      spindexer.feedToShooterForce(),
-      intake.intake()
+      shooter.pass().asProxy(),
+      spindexer.feedToShooterForce().asProxy(),
+      intake.intake().asProxy()
     );
   }
 
   public Command intakeWhileShooting() {
     return new ParallelCommandGroup(
-      shooter.shootHubVelComp(),
-      spindexer.feedToShooterForce(),
-      intake.intake()
+      shooter.shootHubVelComp().asProxy(),
+      spindexer.feedToShooterForce().asProxy(),
+      intake.intake().asProxy()
     );
   }
 }
