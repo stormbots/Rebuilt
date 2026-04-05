@@ -50,33 +50,33 @@ public class Photonvision extends SubsystemBase {
   private Transform3d rightCameraToCenter = new Transform3d(
     new Translation3d(
     //Translation measured on bot
-      Inch.of(-9.458).in(Meters), 
       Inch.of(9.458).in(Meters), 
+      Inch.of(-9.458).in(Meters), 
       Inch.of(21.122).in(Meters)), 
-    new Rotation3d(Math.toRadians(0.0), Math.toRadians(17.5), Math.toRadians(-45.0))
+    new Rotation3d(Math.toRadians(0.0), Math.toRadians(-17.5), Math.toRadians(-45.0))
   );
   private Transform3d frontLeftCameraToCenter = new Transform3d(
     new Translation3d(
       Inch.of(9.458).in(Meters), 
       Inch.of(9.458).in(Meters), 
       Inch.of(21.122).in(Meters)),
-    new Rotation3d(0.0, Math.toRadians(17.5), Math.toRadians(45.0))
+    new Rotation3d(0.0, Math.toRadians(-17.5), Math.toRadians(45.0))
   );
   private Transform3d backLeftCameraToCenter = new Transform3d(
     new Translation3d(
-      Inch.of(12.717).in(Meters),
       Inch.of(.359).in(Meters),
+      Inch.of(12.717).in(Meters),
       Inch.of(21.330).in(Meters)
     ),
-    new Rotation3d(0.0, 17.5, 137.5)
+    new Rotation3d(0.0, Math.toRadians(-17.5), Math.toRadians(137.5))
   );
   private Transform3d backRightCameraToCenter = new Transform3d(
     new Translation3d(
-      Inch.of(-12.717).in(Meters),
       Inch.of(.359).in(Meters),
+      Inch.of(-12.717).in(Meters),
       Inch.of(21.330).in(Meters)
     ),
-    new Rotation3d(0.0, 17.5, -137.5)
+    new Rotation3d(0.0, Math.toRadians(-17.5), Math.toRadians(-137.5))
   );
 
   private Field2d visionField2d = new Field2d();
@@ -95,15 +95,32 @@ public class Photonvision extends SubsystemBase {
     // TODO: Fix this! If one camera throws an error, we have no cameras
     try{
       rightCamera = Optional.of(new PhotonCamera("FrontRight"));
-      frontLeftCamera = Optional.of(new PhotonCamera("FrontLeft"));
-      backLeftCamera = Optional.of(new PhotonCamera("BackLeft"));
-      backRightCamera = Optional.of(new PhotonCamera("BackRight"));
     }
     catch(Error e){
       System.err.print(e);
       rightCamera = Optional.empty();
+    }
+
+    try{
+      frontLeftCamera = Optional.of(new PhotonCamera("FrontLeft"));
+    }
+    catch(Error e){
+      System.err.print(e);
       frontLeftCamera = Optional.empty();
+    }
+
+    try{
+      backLeftCamera = Optional.of(new PhotonCamera("BackLeft"));
+    }
+    catch(Error e){
+      System.err.print(e);
       backLeftCamera = Optional.empty();
+    }
+    try{
+      backRightCamera = Optional.of(new PhotonCamera("BackRight"));
+    }
+    catch(Error e){
+      System.err.print(e);
       backRightCamera = Optional.empty();
     }
 
@@ -228,6 +245,7 @@ public class Photonvision extends SubsystemBase {
     SmartDashboard.putBoolean("vision/rightCameraPresent", rightCamera.isPresent());
     SmartDashboard.putBoolean("vision/leftCameraPresent", frontLeftCamera.isPresent());
     SmartDashboard.putBoolean("vision/backLeftCameraPresent", backLeftCamera.isPresent());
+    SmartDashboard.putBoolean("vision/backRightCameraPresent", backRightCamera.isPresent());
 
     SmartDashboard.putBoolean("vision/hasTarget", hasTarget());
     SmartDashboard.putBoolean("vision/doesNotHaveTarget", doesNotHaveTarget());

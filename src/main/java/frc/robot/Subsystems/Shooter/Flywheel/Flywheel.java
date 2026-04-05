@@ -41,7 +41,7 @@ public class Flywheel extends SubsystemBase {
 
     leaderMotor.configure(getMotorConfig(), ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
     followerMotor.configure(followerConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
-    setDefaultCommand(Commands.waitSeconds(0.5).andThen(run(this::stop)));
+    setDefaultCommand(Commands.waitSeconds(2).andThen(run(this::stop)));
   }
 
   @Override

@@ -44,6 +44,7 @@ public class Shooter {
 
   public Shooter(TargetingSystem targeting) {
     this.targeting = targeting;
+    //TODO: Enable once we're happy with the turret not jamming
     turret.setDefaultCommand(turret.setAngle(targeting::getTurretTracking));
   }
 

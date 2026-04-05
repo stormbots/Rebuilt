@@ -12,6 +12,7 @@ import com.revrobotics.ResetMode;
 import com.revrobotics.spark.SparkAbsoluteEncoder;
 import com.revrobotics.spark.SparkBase.ControlType;
 import com.revrobotics.spark.SparkFlex;
+import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.SparkFlexConfig;
@@ -27,7 +28,7 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
 
 public class ClimberExtension extends SubsystemBase {
 
-  SparkFlex motor; //handled in constructor
+  SparkMax motor; //handled in constructor
   public ClimberExtensionSim sim; //handled in constructor
 
   private boolean isHomed = false;
@@ -49,7 +50,7 @@ public class ClimberExtension extends SubsystemBase {
     boolean inverted,
     Distance movementRange
   ) {
-    motor = new SparkFlex(motorID, MotorType.kBrushless);
+    motor = new SparkMax(motorID, MotorType.kBrushless);
     sim = new ClimberExtensionSim(motor);
     this.name = name;
 

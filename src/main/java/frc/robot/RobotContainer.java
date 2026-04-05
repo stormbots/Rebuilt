@@ -19,6 +19,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
+import edu.wpi.first.wpilibj2.command.ScheduleCommand;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
@@ -87,9 +88,17 @@ public class RobotContainer {
     configureDebugBindings();
 
 
-   
+    //Initial sync mayfail
     CRTAbsoluteEncoder.getInstance().sync();
-
+    //Rerun once it's happy and ready
+    Commands.sequence(
+      Commands.waitUntil(CRTAbsoluteEncoder.getInstance()::isReady),
+      Commands.runOnce(CRTAbsoluteEncoder.getInstance()::sync)
+    )
+    .ignoringDisable(true)
+    .schedule()
+    ;
+    
     //I DONT WANT TO GET RID OF THIS STUFF YET IDK WHATS GOING ON HERE
     // new Trigger(DriverStation::isEnabled)
     // .whileTrue(
@@ -142,8 +151,6 @@ public class RobotContainer {
     // .whileTrue(Commands.waitSeconds(1).andThen(spindexer.feedToShooter()))
     // ;
 
-    // debug.a()
-    // .whileTrue(shooter.testTurretVoltage(()->debug.getLeftY()*8));
   }
 
 
@@ -200,6 +207,9 @@ public class RobotContainer {
 
   private void configureOperatorBindings() {
 
+    operator.povRight()
+    .whileTrue(shooter.testTurretVoltage(()->operator.getLeftY()*3));
+
     operator.rightTrigger()
     .whileTrue(shootHub())
     .whileTrue(wled.signals.automaticShot().repeatedly());
@@ -255,16 +265,12 @@ public class RobotContainer {
     .whileTrue(Commands.parallel(
       // climber.prepareForClimbL1(),
       swerve.addSecondaryInputsTrueFielcentric(()->climber.generateSwerveInputs(swerve.getSwervePose())),
-
+      swerve.turnToHeading(()->new Rotation2d(Degrees.of(-90))),
       Commands.none()
     )
     // .until(climber::isLinedUpWithL1)
     // .andThen(climber.climbL1())
     );
-
-    operator.povRight()
-    .whileTrue(shootHub())
-    ;
 
     // //TALK TO ABBY MAKE THIS A DIFFERENT BUTTON
     // operator.povRight()

@@ -10,8 +10,8 @@ import static edu.wpi.first.units.Units.Meter;
 import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.MetersPerSecond;
 
-import com.revrobotics.sim.SparkFlexSim;
-import com.revrobotics.spark.SparkFlex;
+import com.revrobotics.sim.SparkMaxSim;
+import com.revrobotics.spark.SparkMax;
 
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.units.measure.Distance;
@@ -19,12 +19,12 @@ import edu.wpi.first.wpilibj.simulation.ElevatorSim;
 
 
 public class ClimberExtensionSim {
-  SparkFlex elevatorMotor;
-  SparkFlexSim simElevatorMotor;
+  SparkMax elevatorMotor;
+  SparkMaxSim simElevatorMotor;
   
-  public ClimberExtensionSim(SparkFlex elevatorMotor){
+  public ClimberExtensionSim(SparkMax elevatorMotor){
     this.elevatorMotor = elevatorMotor;
-    simElevatorMotor = new SparkFlexSim(this.elevatorMotor, DCMotor.getNeoVortex(1));
+    simElevatorMotor = new SparkMaxSim(this.elevatorMotor, DCMotor.getNeoVortex(1));
   }
   
 

@@ -36,8 +36,8 @@ public class Turret extends SubsystemBase {
   public static final double kGearing = (1.0 / 3.0) * (10.0 / 132.0) * (177.0 / 198.0) / (176.606 / 180.0);
 
   // How much in ONE direction, hence max range divided by 2
-  public static final double kMinRotation = -287.0;
-  public static final double kMaxRotation = -20.0;
+  public static final double kMinRotation = -288.0;
+  public static final double kMaxRotation = 20.0;
   private double outPut = 3 / 12.0 * 1.10;
 
   Angle targetPosition = Degrees.of(0);
@@ -79,7 +79,8 @@ public class Turret extends SubsystemBase {
   public Command setAngle(Supplier<Angle> position, Supplier<Angle> tolerance) {
     return run(()->{
       SmartDashboard.putNumber("shooter/turret/preClampedTarget", position.get().in(Degrees));
-      double normalizedPosition = position.get().in(Degrees) > 0 ? position.get().in(Degrees) - 360.0 : position.get().in(Degrees);
+      //ONLY WORKS ASSUMING TOTAL RANGE <360
+      double normalizedPosition = position.get().in(Degrees) > kMaxRotation ? position.get().in(Degrees) - 360.0 : position.get().in(Degrees);
       this.targetPosition = Degrees.of(MathUtil.clamp(normalizedPosition, kMinRotation, kMaxRotation));
       this.tolerance = tolerance.get();
       motor.getClosedLoopController().setSetpoint(
