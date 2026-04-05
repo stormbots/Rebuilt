@@ -27,13 +27,14 @@ import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Subsystems.Swerve.Swerve;
 
 public class Photonvision extends SubsystemBase {
   private Swerve swerve;
-  private boolean leftHasTarget = false;
-  private boolean rightHasTarget = false;
+  private boolean backLeftHasTarget = false;
+  private boolean backRightHasTarget = false;
+  private boolean frontLeftHasTarget = false;
+  private boolean frontRightHasTarget = false;
 
   private AprilTagFieldLayout aprilTagFieldLayout = AprilTagFieldLayout.loadField(AprilTagFields.k2026RebuiltWelded);
 
@@ -49,37 +50,37 @@ public class Photonvision extends SubsystemBase {
   private Transform3d rightCameraToCenter = new Transform3d(
     new Translation3d(
     //Translation measured on bot
-      Inch.of(-10.791).in(Meters), 
-      Inch.of(8.634).in(Meters), 
-      Inch.of(18.769).in(Meters)), 
-    new Rotation3d(Math.toRadians(0.0), Math.toRadians(5.0), Math.toRadians(-56.5))
+      Inch.of(-9.458).in(Meters), 
+      Inch.of(9.458).in(Meters), 
+      Inch.of(21.122).in(Meters)), 
+    new Rotation3d(Math.toRadians(0.0), Math.toRadians(17.5), Math.toRadians(-45.0))
   );
   private Transform3d frontLeftCameraToCenter = new Transform3d(
     new Translation3d(
-      Inch.of(12).in(Meters), 
-      Inch.of(9).in(Meters), 
-      Inch.of(18.65).in(Meters)),
-    new Rotation3d(0.0, Math.toRadians(5.0), Math.toRadians(56.5))
+      Inch.of(9.458).in(Meters), 
+      Inch.of(9.458).in(Meters), 
+      Inch.of(21.122).in(Meters)),
+    new Rotation3d(0.0, Math.toRadians(17.5), Math.toRadians(45.0))
   );
   private Transform3d backLeftCameraToCenter = new Transform3d(
     new Translation3d(
-      Inch.of(11.371).in(Meters),
-      Inch.of(-11.371).in(Meters),
-      Inch.of(9.452).in(Meters)
+      Inch.of(12.717).in(Meters),
+      Inch.of(.359).in(Meters),
+      Inch.of(21.330).in(Meters)
     ),
-    new Rotation3d(0.0, 25.0, 135.0)
+    new Rotation3d(0.0, 17.5, 137.5)
   );
   private Transform3d backRightCameraToCenter = new Transform3d(
     new Translation3d(
-      Inch.of(11.371).in(Meters),
-      Inch.of(-11.371).in(Meters),
-      Inch.of(9.452).in(Meters)
+      Inch.of(-12.717).in(Meters),
+      Inch.of(.359).in(Meters),
+      Inch.of(21.330).in(Meters)
     ),
-    new Rotation3d(0.0, 25.0, 135.0)
+    new Rotation3d(0.0, 17.5, -137.5)
   );
 
   private Field2d visionField2d = new Field2d();
-  private PhotonPoseEstimator rightEstimator = new PhotonPoseEstimator(aprilTagFieldLayout, rightCameraToCenter);
+  private PhotonPoseEstimator frontRightEstimator = new PhotonPoseEstimator(aprilTagFieldLayout, rightCameraToCenter);
   private PhotonPoseEstimator frontLeftEstimator = new PhotonPoseEstimator(aprilTagFieldLayout, frontLeftCameraToCenter);
   private PhotonPoseEstimator backLeftEstimator = new PhotonPoseEstimator(aprilTagFieldLayout, backLeftCameraToCenter);
   private PhotonPoseEstimator backRightEstimator = new PhotonPoseEstimator(aprilTagFieldLayout, backRightCameraToCenter);
@@ -91,9 +92,10 @@ public class Photonvision extends SubsystemBase {
     this.swerve = swerve;
     SmartDashboard.putData("visionfield", visionField2d);
 
+    // TODO: Fix this! If one camera throws an error, we have no cameras
     try{
-      rightCamera = Optional.of(new PhotonCamera("Right"));
-      frontLeftCamera = Optional.of(new PhotonCamera("Left"));
+      rightCamera = Optional.of(new PhotonCamera("FrontRight"));
+      frontLeftCamera = Optional.of(new PhotonCamera("FrontLeft"));
       backLeftCamera = Optional.of(new PhotonCamera("BackLeft"));
       backRightCamera = Optional.of(new PhotonCamera("BackRight"));
     }
@@ -109,7 +111,7 @@ public class Photonvision extends SubsystemBase {
 
   public void updateOdometry(){
     if(rightCamera.isPresent()){
-      updateCameraSideOdometry(rightEstimator, rightCamera.get());
+      updateCameraSideOdometry(frontRightEstimator, rightCamera.get());
     }
 
     if(frontLeftCamera.isPresent()){
@@ -131,55 +133,62 @@ public class Photonvision extends SubsystemBase {
       visionEstimate = poseEstimator.estimateCoprocMultiTagPose(result);
       if (visionEstimate.isEmpty()){
         visionEstimate = poseEstimator.estimateLowestAmbiguityPose(result);
-        if(poseEstimator.equals(rightEstimator)){
-          rightHasTarget = false;
+        if(poseEstimator.equals(frontRightEstimator)){
+          frontRightHasTarget = false;
         }
         else if(poseEstimator.equals(frontLeftEstimator)){
-          leftHasTarget = false;
+          frontLeftHasTarget = false;
+        }
+        else if(poseEstimator.equals(backRightEstimator)){
+          backRightHasTarget = false;
+        }
+        else if(poseEstimator.equals(backLeftEstimator)){
+          backLeftHasTarget = false;
         };
       }
       updateEstimationStdDevs(visionEstimate, result.getTargets());
     }
 
     visionEstimate.ifPresent(
-      
       est ->{
         var estimatedStdDevs = getEstimationStdDevs();
 
         swerve.swerveDrive.addVisionMeasurement(est.estimatedPose.toPose2d(),est.timestampSeconds, estimatedStdDevs);
         visionField2d.getObject(camera.getName()).setPose(est.estimatedPose.toPose2d());
-        if(poseEstimator.equals(rightEstimator)){
-          rightHasTarget = true;
+        if(poseEstimator.equals(frontRightEstimator)){
+          frontRightHasTarget = true;
         }
         else if(poseEstimator.equals(frontLeftEstimator)){
-          leftHasTarget = true;
+          frontLeftHasTarget = true;
+        }
+        else if(poseEstimator.equals(backRightEstimator)){
+          backRightHasTarget = true;
+        }
+        else if(poseEstimator.equals(backLeftEstimator)){
+          backLeftHasTarget = true;
         };
       }
-      
-      
     );
   }
 
   public boolean hasTarget(){
-    return leftHasTarget || rightHasTarget;
+    return frontLeftHasTarget || frontRightHasTarget || backLeftHasTarget || backRightHasTarget;
   }
 
   public boolean doesNotHaveTarget(){
     return !hasTarget();
   }
 
-
   public void updateEstimationStdDevs(Optional<EstimatedRobotPose> estimatedPose, List<PhotonTrackedTarget> targets){
     if( estimatedPose.isEmpty() ){
       currentStdDevs = singleTagStdDevs;
-    }
-    else{
+    } else{
       var estimatedStdDevs = singleTagStdDevs;
       int numTags = 0;
       double avgDistance = 0.0;
 
       for(var tag : targets){
-        var tagPose = rightEstimator.getFieldTags().getTagPose(tag.getFiducialId());
+        var tagPose = frontRightEstimator.getFieldTags().getTagPose(tag.getFiducialId());
         if( tagPose.isEmpty() ) continue;
         numTags++;
         avgDistance += tagPose
@@ -191,17 +200,15 @@ public class Photonvision extends SubsystemBase {
 
       if (numTags == 0){
         currentStdDevs = singleTagStdDevs;
-      }
-      else{
+      } else{
         avgDistance /= numTags;
 
-        if( numTags>1 ){ estimatedStdDevs = multiTagStdDevs; }
-        
-        if( numTags == 1 && avgDistance > 4 ){
+        if(numTags > 1){
+          estimatedStdDevs = multiTagStdDevs;
+        } else if(numTags == 1 && avgDistance > 4){
           estimatedStdDevs = VecBuilder.fill(Double.MAX_VALUE, Double.MAX_VALUE, Double.MAX_VALUE);
-        }
-        else{
-          estimatedStdDevs = estimatedStdDevs.times( 1+(avgDistance*avgDistance/30) );
+        } else{
+          estimatedStdDevs = estimatedStdDevs.times(1 + (avgDistance*avgDistance / 30));
         }
         currentStdDevs = estimatedStdDevs;
       }
@@ -226,8 +233,3 @@ public class Photonvision extends SubsystemBase {
     SmartDashboard.putBoolean("vision/doesNotHaveTarget", doesNotHaveTarget());
   }
 }
-
-
-
-
-

@@ -17,11 +17,9 @@ import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.SparkFlexConfig;
 
 import edu.wpi.first.units.measure.Angle;
-import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Command.InterruptionBehavior;
-import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.FunctionalCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
@@ -58,20 +56,20 @@ public class Grabber extends SubsystemBase {
     double conversionfactor = 360/9.0; 
 
 		config.encoder
-    .positionConversionFactor(conversionfactor)
-    .velocityConversionFactor(conversionfactor/60.0)
-    ;
+      .positionConversionFactor(conversionfactor)
+      .velocityConversionFactor(conversionfactor/60.0)
+      ;
 
     config.closedLoop
-    .p(12.0 / 90.0 *2.0)
-    ;
+      .p(12.0 / 90.0 *2.0)
+      ;
 
     config.softLimit
-    .forwardSoftLimit(kMaxPosition)
-    .reverseSoftLimit(kMinPosition)
-    .forwardSoftLimitEnabled(true)
-    .reverseSoftLimitEnabled(true)
-    ;
+      .forwardSoftLimit(kMaxPosition)
+      .reverseSoftLimit(kMinPosition)
+      .forwardSoftLimitEnabled(true)
+      .reverseSoftLimitEnabled(true)
+      ;
 
     motor.configure(
       config,
@@ -94,13 +92,12 @@ public class Grabber extends SubsystemBase {
     SmartDashboard.putBoolean("climber/grabber/isPossiblyConnected", isPossiblyConnected.getAsBoolean());
   }
 
-  // private Command setPosition(...)
   private Command setPosition(Angle angle){
     var degrees = angle.in(Degree);
     return run(()->{
-        motor
-        .getClosedLoopController()
-        .setSetpoint(degrees, ControlType.kPosition);
+      motor
+      .getClosedLoopController()
+      .setSetpoint(degrees, ControlType.kPosition);
     });
   }
 
@@ -123,13 +120,13 @@ public class Grabber extends SubsystemBase {
   public Command goHome(){
     return new FunctionalCommand(
       ()->{
-        isHomed=false;
+        isHomed = false;
         enableBottomLimit(false);
         setCurrentLimit(kHomeCurrentMaxOutput);
       },
       ()->{motor.setVoltage(-12);},
       (cancelled)->{
-        if(cancelled==false){
+        if(cancelled == false){
           isHomed = true;
           enableBottomLimit(true);
           setCurrentLimit(kGrabberCurrentMax);
@@ -169,14 +166,11 @@ public class Grabber extends SubsystemBase {
     );
   }
 
-  public Trigger isPossiblyConnected = new Trigger(() -> {
+  public Trigger isPossiblyConnected = new Trigger(()->{
     return getPosition().isNear(Degrees.of(kMaxPosition), Degrees.of(20));    
   });
 
-  public Trigger isRetracted = new Trigger(() -> {
+  public Trigger isRetracted = new Trigger(()->{
     return getPosition().isNear(Degrees.of(kMinPosition), Degrees.of(10));    
   });
-  
-
-
 }

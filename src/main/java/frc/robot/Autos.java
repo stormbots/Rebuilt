@@ -37,366 +37,342 @@ import frc.robot.lib.BLine.Path;
 
 /** Add your docs here. */
 public class Autos {
+  Swerve swerve;
+  Shooter shooter;
+  Intake intake;
+  QuestNavSubsystem questNav;
+  Spindexer spindexer;
+  Pathing pathing;
+  TargetingSystem targeting;
+  Climber climber;
 
+  SendableChooser<Supplier<Command>> autoChooser = new SendableChooser<>();
+  // private CompletableFuture<Command> selectedAutoFuture =
+  // CompletableFuture.supplyAsync(()->new InstantCommand());
 
-    Swerve swerve;
-    Shooter shooter;
-    Intake intake;
-    QuestNavSubsystem questNav;
-    Spindexer spindexer;
-    Pathing pathing;
-    TargetingSystem targeting;
-    Climber climber;
+  // EVIL trenchPoses, IN IS OUR STARTING TRENCH POSES
+  Pose2d preTrenchInBlueLeft = new Pose2d(4.0, 7.4, new Rotation2d());
+  Pose2d preTrenchInBlueRight = new Pose2d(4.0, 0.6, new Rotation2d());
+  Pose2d preTrenchOutBlueRight = new Pose2d(6.0, 0.6, new Rotation2d(Degrees.of(180)));
+  Pose2d preTrenchOutBlueLeft = new Pose2d(6.0, 7.4, new Rotation2d(Degrees.of(180)));
 
+  // EVIL HAlFWAY POSES
+  Pose2d neutralHalfWayRight = new Pose2d(8.6, 0.6, new Rotation2d(Degrees.of(120)));
+  Pose2d neutralHalfwayLeft = new Pose2d(); // TODO:Flip ts
 
-    SendableChooser<Supplier<Command>> autoChooser = new SendableChooser<>();
-    // private CompletableFuture<Command> selectedAutoFuture = CompletableFuture.supplyAsync(()->new InstantCommand());
+  // EVIL PRE INTAKE POSES
+  Pose2d neutralPreIntRight = new Pose2d(8.6, 1.2, new Rotation2d(Degrees.of(120)));
+  Pose2d neutralPreIntLeft = new Pose2d(8.6, 1.2, new Rotation2d(Degrees.of(120))); // TODO: Flip TS
 
-        //EVIL trenchPoses, IN IS OUR STARTING TRENCH POSES
-        Pose2d preTrenchInBlueLeft = new Pose2d(4.0, 7.4, new Rotation2d());
-        Pose2d preTrenchInBlueRight = new Pose2d(4.0, 0.6, new Rotation2d());
-        Pose2d preTrenchOutBlueRight = new Pose2d(6.0, 0.6, new Rotation2d(Degrees.of(180)));
-        Pose2d preTrenchOutBlueLeft = new Pose2d(6.0, 7.4, new Rotation2d(Degrees.of(180)));
-       
-        //EVIL HAlFWAY POSES
-        Pose2d neutralHalfWayRight = new Pose2d(8.6, 0.6, new Rotation2d(Degrees.of(120)));
-        Pose2d neutralHalfwayLeft = new Pose2d();   //TODO:Flip ts
+  // EVIL INTAKING POSE
+  Pose2d neutralIntRight = new Pose2d(8.6, 3.5, new Rotation2d(Degrees.of(120)));
+  Pose2d neutralIntLeft = new Pose2d(8.6, 3.5, new Rotation2d(Degrees.of(120))); // TODO: Flip TS
 
-        //EVIL PRE INTAKE POSES
-        Pose2d neutralPreIntRight = new Pose2d(8.6, 1.2, new Rotation2d(Degrees.of(120)));
-        Pose2d neutralPreIntLeft = new Pose2d(8.6, 1.2, new Rotation2d(Degrees.of(120))); //TODO: Flip TS
+  // EVIL SCOOPER THINGY
+  Pose2d scoopFuel = new Pose2d(7.64, 0.88, new Rotation2d(Degrees.of(120)));
 
-        //EVIL INTAKING POSE
-        Pose2d neutralIntRight = new Pose2d(8.6, 3.5, new Rotation2d(Degrees.of(120)));
-        Pose2d neutralIntLeft = new Pose2d(8.6, 3.5, new Rotation2d(Degrees.of(120))); //TODO: Flip TS
+  // SORT OF THE BEST SHOOTING POSE
+  Pose2d shotPoseBL = new Pose2d(3.6, 7.4, new Rotation2d(Degrees.of(180)));
+  Pose2d shotPoseRight = new Pose2d(3.6, 0.6, new Rotation2d(Degrees.of(180)));
 
-        //EVIL SCOOPER THINGY
-        Pose2d scoopFuel = new Pose2d(7.64, 0.88, new Rotation2d(Degrees.of(120)));
-       
-        //SORT OF THE BEST SHOOTING POSE
-        Pose2d shotPoseBL = new Pose2d(3.6, 7.4, new Rotation2d(Degrees.of(180)));
-        Pose2d shotPoseRight = new Pose2d(3.6, 0.6, new Rotation2d(Degrees.of(180)));
+  // Depot poses
+  Pose2d preIntDepot = new Pose2d(1.0, 6.0, new Rotation2d(Degrees.of(180)));
+  Pose2d preIntDepotRed = new Pose2d(15.5, 2.0, new Rotation2d());
+  Pose2d intDepot = new Pose2d(0.52, 6.0, new Rotation2d(Degrees.of(180 - 15)));
+  Pose2d intDepotRed = new Pose2d(16.02, 2.0, new Rotation2d(Degrees.of(15)));
 
-        //Depot poses
-        Pose2d preIntDepot = new Pose2d(1.0, 6.0, new Rotation2d(Degrees.of(180)));
-        Pose2d preIntDepotRed = new Pose2d(15.5, 2.0, new Rotation2d());
-        Pose2d intDepot = new Pose2d(0.52, 6.0, new Rotation2d(Degrees.of(180-15)));
-        Pose2d intDepotRed = new Pose2d(16.02, 2.0, new Rotation2d(Degrees.of(15)));
+  // FORCED POSES
+  Pose2d startRedLeft = new Pose2d(12.577 + 0.37465, 0.4445, new Rotation2d(Degrees.of(-180)));
+  Pose2d startRedRight = new Pose2d(12.577 + 0.37465, 7.6755, new Rotation2d(Degrees.of(-180)));
+  Pose2d startBlueLeft = new Pose2d(3.52535 + 0.8, 7.6755, new Rotation2d());
+  Pose2d startBlueRight = new Pose2d(3.52535 + 0.8, 0.4445, new Rotation2d());
 
-        //FORCED POSES
-        Pose2d startRedLeft = new Pose2d(12.577+0.37465, 0.4445, new Rotation2d(Degrees.of(-180)));
-        Pose2d startRedRight = new Pose2d(12.577+0.37465, 7.6755, new Rotation2d(Degrees.of(-180)));
-        Pose2d startBlueLeft = new Pose2d(3.52535+0.8, 7.6755, new Rotation2d());
-        Pose2d startBlueRight = new Pose2d(3.52535+0.8, 0.4445, new Rotation2d());
+  // Commonly used paths
+  Path centerShootPath = new Path("CenterShootAutoV2");
+  Path shootIntitialPath = new Path("shootInitial");
 
-    public Autos(
-        Swerve swerve,
-        Shooter shooter,
-        Intake intake,
-        QuestNavSubsystem questNav,
-        Spindexer spindexer,
-        Pathing pathing,
-        TargetingSystem targeting,
-        Climber climber
-    ){
-        this.swerve = swerve;
-        this.shooter = shooter;
-        this.intake = intake;
-        this.questNav = questNav;
-        this.spindexer = spindexer;
-        this.pathing = pathing;
-        this.targeting = targeting;
-        this.climber = climber;
+  public Autos(
+      Swerve swerve,
+      Shooter shooter,
+      Intake intake,
+      QuestNavSubsystem questNav,
+      Spindexer spindexer,
+      Pathing pathing,
+      TargetingSystem targeting,
+      Climber climber) {
+    this.swerve = swerve;
+    this.shooter = shooter;
+    this.intake = intake;
+    this.questNav = questNav;
+    this.spindexer = spindexer;
+    this.pathing = pathing;
+    this.targeting = targeting;
+    this.climber = climber;
 
-        SmartDashboard.putData("AutoSelector/chooser",autoChooser);
-        //FORCE SET POSE IS CHOPPED DO NOT USE, shouldn't even be on their dashboard, needs fixing and could still prove useful
-        SmartDashboard.putBoolean("ForceSetPose", SmartDashboard.getBoolean("ForceSetPose", false));
-        SmartDashboard.setPersistent("ForceSetPose");
+    SmartDashboard.putData("AutoSelector/chooser", autoChooser);
+    // FORCE SET POSE IS CHOPPED DO NOT USE, shouldn't even be on their dashboard,
+    // needs fixing and could still prove useful
+    SmartDashboard.putBoolean("ForceSetPose", SmartDashboard.getBoolean("ForceSetPose", false));
+    SmartDashboard.setPersistent("ForceSetPose");
 
+    // ACTUAL OPTIONS BELOW HERE
+    autoChooser.addOption("Red Depot", this::redDepot);
+    autoChooser.addOption("Blue Depot", this::blueDepot);
+    autoChooser.addOption("ShootOnlyEight", this::basicShootToEmpty);
 
-        //ACTUAL OPTIONS BELOW HERE
-        autoChooser.addOption("Red Depot", this::redDepot);
-        autoChooser.addOption("Blue Depot", this::blueDepot);
-        autoChooser.addOption("ShootOnlyEight", this::basicShootToEmpty);
+    autoChooser.addOption("RL Center Auto", this::CenterShootAutoRedLEFT);
+    autoChooser.addOption("BL Center Auto", this::CenterShootAutoBlueLEFT);
+    autoChooser.addOption("RR  Center Auto", this::CenterShootAutoRedRIGHT);
+    autoChooser.addOption("BR Center Auto", this::CenterShootAutoBlueRIGHT);
 
-        autoChooser.addOption("RL Center Auto", this::CenterShootAutoRedLEFT);
-        autoChooser.addOption("BL Center Auto", this::CenterShootAutoBlueLEFT);
-        autoChooser.addOption("RR  Center Auto", this::CenterShootAutoRedRIGHT);
-        autoChooser.addOption("BR Center Auto", this::CenterShootAutoBlueRIGHT);
+    autoChooser.addOption("RL Passing Auto", this::PassingAutoRedLEFT);
+    autoChooser.addOption("BL Passing Auto", this::PassingAutoBlueLEFT);
+    autoChooser.addOption("RR Passing Auto", this::PassingAutoRedRIGHT);
+    autoChooser.addOption("BR Passing Auto", this::PassingAutoBlueRIGHT);
 
-        autoChooser.addOption("RL Passing Auto", this::PassingAutoRedLEFT);
-        autoChooser.addOption("BL Passing Auto", this::PassingAutoBlueLEFT);
-        autoChooser.addOption("RR Passing Auto", this::PassingAutoRedRIGHT);
-        autoChooser.addOption("BR Passing Auto", this::PassingAutoBlueRIGHT);
+    autoChooser.setDefaultOption("Select Auto", () -> new InstantCommand());
+    autoChooser.addOption("VV UNTESTED VV", () -> new InstantCommand());
+    autoChooser.addOption("ClimbAutoChoppedWhyAreWeDoingThisIWannaShootSoBad", this::climbAutoRed); // best name ever
+  }
 
+  // Get Auto Command
+  public Command getAutonomousCommand() {
+    return autoChooser.getSelected().get();
+  }
 
-        autoChooser.setDefaultOption("Select Auto",()->new InstantCommand());
-        autoChooser.addOption("VV UNTESTED VV",()->new InstantCommand());
-        autoChooser.addOption("ClimbAutoChoppedWhyAreWeDoingThisIWannaShootSoBad", this::climbAutoRed);
-    }
+  private Pose2d autoTeamFlippedPose(double x, double y, double degrees) {
+    var pose = new Pose2d(x, y, new Rotation2d(Degree.of(degrees)));
+    if (DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Red)
+      pose = FlippingUtil.flipFieldPose(pose);
+    return pose;
+  }
 
-    //Get Auto Command
-    public Command getAutonomousCommand(){
-        return autoChooser.getSelected().get();
-    }
+  /////////////////////////
+  // ALL AUTOS BELLOW HERE sk was here!!!!!!!!!//
+  /////////////////////////
 
-    private Pose2d autoTeamFlippedPose(double x, double y, double degrees){
-        var pose = new Pose2d(x,y,new Rotation2d(Degree.of(degrees)));
-        if(DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Red ) pose = FlippingUtil.flipFieldPose(pose);
-        return pose;
-    }
+  // BASIC STUFF, DO NOT RUN AT THE START OF A BLINE AUTO, IT BREAKS EVENT
+  // TRIGGERS AND MAKES PATH CHOPPED, SUPER LAST RESORT AUTOS
+  public Command basicShootInitial8() {
+    return Commands.sequence(
+      swerve.turnToHeading(() -> {
+        return targeting.getHeadingToTarget(swerve.getSwervePose().getTranslation(), targeting.getHubTarget())
+          .plus(Rotation2d.k180deg);
+      }).until(() -> swerve.isOnTargetAngle()).withTimeout(1.0),
+      shootAuto().withTimeout(1.5)
+    );
+  }
 
-    /////////////////////////
-    //ALL AUTOS BELLOW HERE sk was here!!!!!!!!!//
-    /////////////////////////
-    
-    // BASIC STUFF, DO NOT RUN AT THE START OF A BLINE AUTO, IT BREAKS EVENT TRIGGERS AND MAKES PATH CHOPPED, SUPER LAST RESORT AUTOS
-    public Command basicShootInitial8(){
-        return Commands.sequence(
-            swerve.turnToHeading(()->{
-                return targeting.getHeadingToTarget(swerve.getSwervePose().getTranslation(), targeting.getHubTarget()).plus(Rotation2d.k180deg);
-            }).until(()->swerve.isOnTargetAngle()).withTimeout(1.0),
-            shootAuto().withTimeout(1.5)
-        );
-    }
-    public Command basicShootToEmpty(){
-        return Commands.sequence(
-            swerve.turnToHeadingWithinTurretRange(()->{
-                return targeting.getHeadingToTarget(swerve.getSwervePose().getTranslation(), targeting.getHubTarget()).plus(Rotation2d.k180deg);
-            }).until(()->swerve.isOnTargetAngle()).withTimeout(1.0),
-            shootAuto().withTimeout(5)
-        );
-    }
+  public Command basicShootToEmpty() {
+    return Commands.sequence(
+      swerve.turnToHeadingWithinTurretRange(() -> {
+        return targeting.getHeadingToTarget(swerve.getSwervePose().getTranslation(), targeting.getHubTarget())
+          .plus(Rotation2d.k180deg);
+      }).until(() -> swerve.isOnTargetAngle()).withTimeout(1.0),
+      shootAuto().withTimeout(5)
+    );
+  }
 
+  // THESE ARE PID AUTOS NOT BLINE, idk where we're gonna be at after today's
+  // practice so I will leave just this one for future
+  public Command depotAutoBlue() {
+    return Commands.sequence(
+      basicShootInitial8(),
+      swerve.pidToPose(() -> preIntDepot).alongWith(intake.intake()).until(() -> swerve.isOnTargetTranslate()),
+      driveToPose(intDepot, intakeWhileShooting()),
+      intakeWhileShooting()
+    );
+  }
 
-    //THESE ARE PID AUTOS NOT BLINE, idk where we're gonna be at after today's practice so I will leave just this one for future
-    public Command depotAutoBlue(){
-        return Commands.sequence(
-            basicShootInitial8(),
-            swerve.pidToPose(()->preIntDepot).alongWith(intake.intake()).until(()->swerve.isOnTargetTranslate()),
-            driveToPose(intDepot, intakeWhileShooting()),
-            intakeWhileShooting()
-            );
-    }
+  public Command depotAutoRed() {
+    return Commands.sequence(
+      basicShootInitial8(),
+      driveToPose(preIntDepot, stow()),
+      driveToPose(intDepot, intakeWhileShooting()),
+      intakeWhileShooting()
+    );
+  }
 
-    public Command depotAutoRed(){
-        return Commands.sequence(
-            basicShootInitial8(),
-            driveToPose(preIntDepot, stow()),
-            driveToPose(intDepot, intakeWhileShooting()),
-            intakeWhileShooting()
-        );
-    }
+  // ALL OF THESE AUTOS ARE THE GOOD BLINE TYPE
 
-    //ALL OF THESE AUTOS ARE THE GOOD BLINE TYPE
+  public Command CenterShootAutoRedLEFT() {
+    return Commands.sequence(
+      pathing.followPathTeamFlipped(shootIntitialPath).withTimeout(3.0),
+      pathing.followPathTeamFlipped(centerShootPath).withTimeout(20)
+    );
+  }
 
-    public Command CenterShootAutoRedLEFT(){
-        return Commands.sequence(
-            // forceSetPose(startRedLeft).withTimeout(0.1),
-            pathing.followPathTeamFlipped(new Path("shootInitial")).withTimeout(3.0),
-            pathing.followPathTeamFlipped(new Path("CenterShootAutoV2")).withTimeout(20)
-        );
-    }
+  public Command CenterShootAutoRedRIGHT() {
+    shootIntitialPath.mirror();
+    centerShootPath.mirror();
 
-    public Command CenterShootAutoRedRIGHT(){
-        Path startPath = new Path("shootInitial");
-        startPath.mirror();
-        Path path = new Path("CenterShootAutoV2");
-        path.mirror();
+    return Commands.sequence(
+      pathing.followPathTeamFlipped(shootIntitialPath).withTimeout(2.0),
+      pathing.followPathTeamFlipped(centerShootPath).withTimeout(20),
+      pathing.followPathTeamFlipped(centerShootPath).withTimeout(20)
+    );
+  }
 
-        return Commands.sequence(
-            // forceSetPose(startRedRight).withTimeout(0.1),
-            pathing.followPathTeamFlipped(startPath).withTimeout(2.0),
-            pathing.followPathTeamFlipped(path).withTimeout(20),
-            pathing.followPathTeamFlipped(path).withTimeout(20)
-        );
-    }
+  public Command CenterShootAutoBlueLEFT() {
+    return Commands.sequence(
+      pathing.followPath(shootIntitialPath).withTimeout(2.0),
+      pathing.followPath(centerShootPath).withTimeout(20),
+      pathing.followPath(centerShootPath).withTimeout(20)
+    );
+  }
 
-    public Command CenterShootAutoBlueLEFT(){
-        return Commands.sequence(
-            // forceSetPose(startBlueLeft).withTimeout(0.1),
-            pathing.followPath(new Path("shootInitial")).withTimeout(2.0),
-            pathing.followPath(new Path("CenterShootAutoV2")).withTimeout(20),
-            pathing.followPath(new Path("CenterShootAutoV2")).withTimeout(20)
-        );
-    }
+  public Command CenterShootAutoBlueRIGHT() {
+    shootIntitialPath.mirror();
+    centerShootPath.mirror();
+    return Commands.sequence(
+      pathing.followPath(shootIntitialPath).withTimeout(2.0),
+      pathing.followPath(centerShootPath).withTimeout(20),
+      pathing.followPath(centerShootPath).withTimeout(20)
+    );
+  }
 
-    public Command CenterShootAutoBlueRIGHT(){
-        Path startPath = new Path("shootInitial");
-        startPath.mirror();
-        Path path = new Path("CenterShootAutoV2");
-        path.mirror();
-        return Commands.sequence(
-            // forceSetPose(startBlueRight).withTimeout(0.1),
-            pathing.followPath(startPath).withTimeout(2.0),
-            pathing.followPath(path).withTimeout(20),
-            pathing.followPath(path).withTimeout(20)
-        );
-    }
+  public Command PassingAutoRedLEFT() {
+    return Commands.sequence(
+      pathing.followPathTeamFlipped(shootIntitialPath).withTimeout(3.0),
+      pathing.followPathTeamFlipped(new Path("testingStraightUnder")).withTimeout(20),
+      pathing.followPathTeamFlipped(new Path("testingStraightUnder")).withTimeout(20)
+    );
+  }
 
-    public Command PassingAutoRedLEFT(){
-        return Commands.sequence(
-            forceSetPose(startRedLeft).withTimeout(0.1),
-            pathing.followPathTeamFlipped(new Path("shootInitial")).withTimeout(3.0),
-            pathing.followPathTeamFlipped(new Path("testingStraightUnder")).withTimeout(20),
-            pathing.followPathTeamFlipped(new Path("testingStraightUnder")).withTimeout(20)
-        );
-    }
+  public Command PassingAutoRedRIGHT() {
+    shootIntitialPath.mirror();
+    Path path = new Path("testingStraightUnder");
+    path.mirror();
+    return Commands.sequence(
+      pathing.followPathTeamFlipped(shootIntitialPath).withTimeout(3.0),
+      pathing.followPathTeamFlipped(path).withTimeout(20),
+      pathing.followPathTeamFlipped(path).withTimeout(20)
+    );
+  }
 
-    public Command PassingAutoRedRIGHT(){
-        Path startPath = new Path("shootInitial");
-        startPath.mirror();
-        Path path = new Path("testingStraightUnder");
-        path.mirror();
-        return Commands.sequence(
-            forceSetPose(startRedRight).withTimeout(0.1),
-            pathing.followPathTeamFlipped(startPath).withTimeout(3.0),
-            pathing.followPathTeamFlipped(path).withTimeout(20),
-            pathing.followPathTeamFlipped(path).withTimeout(20)
-        );
-    }
+  public Command PassingAutoBlueLEFT() {
+    return Commands.sequence(
+      pathing.followPath(shootIntitialPath).withTimeout(3.0),
+      pathing.followPath(new Path("testingStraightUnder")),
+      pathing.followPath(new Path("testingStraightUnder"))
+    );
+  }
 
-    public Command PassingAutoBlueLEFT(){
-        return Commands.sequence(
-            forceSetPose(startBlueLeft).withTimeout(0.1),
-            pathing.followPath(new Path("shootInitial")).withTimeout(3.0),
-            pathing.followPath(new Path("testingStraightUnder")),
-            pathing.followPath(new Path("testingStraightUnder"))
-        );
-    }
+  public Command climbAutoRed() {
+    return Commands.sequence(
+      pathing.followPath(new Path("climbAuto"))
+    );
+  }
 
-    public Command climbAutoRed(){
-        return Commands.sequence(
-            pathing.followPath(new Path("climbAuto"))
-        );
-    }
+  public Command PassingAutoBlueRIGHT() {
+    shootIntitialPath.mirror();
+    Path path = new Path("testingStraightUnder");
+    path.mirror();
+    return Commands.sequence(
+      pathing.followPath(shootIntitialPath).withTimeout(3.0),
+      pathing.followPath(path).withTimeout(20.0),
+      pathing.followPath(path).withTimeout(20.0)
+    );
+  }
 
-    public Command PassingAutoBlueRIGHT(){
-        Path startPath = new Path("shootInitial");
-        startPath.mirror();
-        Path path = new Path("testingStraightUnder");
-        path.mirror();
-        return Commands.sequence(
-            forceSetPose(startBlueRight).withTimeout(0.1),
-            pathing.followPath(startPath).withTimeout(3.0),
-            pathing.followPath(path).withTimeout(20.0),
-            pathing.followPath(path).withTimeout(20.0)
-        );
-    }
+  public Command redDepot() {
+    return Commands.sequence(
+      pathing.followPathTeamFlipped(new Path("depotAuto")).withTimeout(12),
+      pathing.followPath(new Path("climbAuto")).withTimeout(3.0),
+      swerve.addSecondaryInputsTrueFielcentric(() -> climber.generateSwerveInputs(swerve.getSwervePose()))
+        .withTimeout(3.0),
+      climber.prepareForClimbL1().withTimeout(2.0),
+      climber.climbL1()
+    );
+  }
 
-    public Command redDepot(){
-        return Commands.sequence(
-            // basicShootInitial8().withTimeout(3.5),
-            // shooter.testSetHoodAngle(Degrees.of(0)).withTimeout(0.75),
-            // forceSetPose(new Pose2d(12.577+0.37465, 4.0, new Rotation2d(Degrees.of(-180)))).withTimeout(2.0),
-            // pathing.followPathTeamFlipped(new Path("depotstart")).withTimeout(5.0),
-            pathing.followPathTeamFlipped(new Path("depotAuto")).withTimeout(12),
-            pathing.followPath(new Path("climbAuto")).withTimeout(3.0),
-            swerve.addSecondaryInputsTrueFielcentric(()->climber.generateSwerveInputs(swerve.getSwervePose())).withTimeout(3.0),
-            climber.prepareForClimbL1().withTimeout(2.0),
-            climber.climbL1()
-           );
-    }
-    public Command blueDepot(){
-        return Commands.sequence(
-            // pathing.followPath(new Path("depotstart")).withTimeout(5.0),
-            pathing.followPath(new Path("depotAuto")).withTimeout(12),
-            pathing.followPathTeamFlipped(new Path("climbAuto")).withTimeout(3.0),
-            swerve.addSecondaryInputsTrueFielcentric(()->climber.generateSwerveInputs(swerve.getSwervePose())).withTimeout(3.0),
-            climber.prepareForClimbL1().withTimeout(2.0),
-            climber.climbL1()
+  public Command blueDepot() {
+    return Commands.sequence(
+      pathing.followPath(new Path("depotAuto")).withTimeout(12),
+      pathing.followPathTeamFlipped(new Path("climbAuto")).withTimeout(3.0),
+      swerve.addSecondaryInputsTrueFielcentric(() -> climber.generateSwerveInputs(swerve.getSwervePose()))
+        .withTimeout(3.0),
+      climber.prepareForClimbL1().withTimeout(2.0),
+      climber.climbL1()
+    );
+  }
 
-        );
-    }
+  //////////////////////////////////////////
+  /// SuperStructure State Commands ///////
+  ////////////////////////////////////////
 
+  // THESE PID COMMANDS ARE CHOPPED AND NOT TUNED THERE IS A REASON WE RUNNING
+  // BLINE, DO NOT USE IN MOST CASES
+  public Command driveToPose(double x, double y, double degrees, Command superState) {
+    return driveToPose(new Pose2d(x, y, new Rotation2d(Degrees.of(degrees))), superState);
+  }
 
-    //////////////////////////////////////////
-    /// SuperStructure State Commands ///////
-    ////////////////////////////////////////
-    
+  public Command driveToPoseSlowly(double x, double y, double degrees, Command superState, double maxVelocityMPS) {
+    return driveToPoseSlowly(new Pose2d(x, y, new Rotation2d(Degrees.of(degrees))), superState, maxVelocityMPS);
+  }
 
-    //THESE PID COMMANDS ARE CHOPPED AND NOT TUNED THERE IS A REASON WE RUNNING BLINE, DO NOT USE IN MOST CASES
-    public Command driveToPose(double x, double y, double degrees, Command superState){
-        return driveToPose(new Pose2d(x, y, new Rotation2d(Degrees.of(degrees))), superState);
-    }
+  public Command driveToPose(Pose2d targetPose, Command superState) {
+    return swerve
+      .pidToPoseInterpolated(
+        () -> autoTeamFlippedPose(targetPose.getX(), targetPose.getY(), targetPose.getRotation().getDegrees()))
+      .alongWith(superState)
+    ;
+  }
 
-    public Command driveToPoseSlowly(double x, double y, double degrees, Command superState, double maxVelocityMPS){
-        return driveToPoseSlowly(new Pose2d(x, y, new Rotation2d(Degrees.of(degrees))), superState, maxVelocityMPS);
-    }
-    
-    public Command driveToPose(Pose2d targetPose, Command superState){
-        return swerve.pidToPoseInterpolated(()->autoTeamFlippedPose(targetPose.getX(), targetPose.getY(), targetPose.getRotation().getDegrees()))
-        .alongWith(superState)
-        // .until(()->swerve.isOnTargetTranslate())
-        ;
-    }
+  public Command driveToPoseSlowly(Pose2d targetPose, Command superState, double maxVelocityMPS) {
+    return swerve
+      .pidToPose(
+        () -> autoTeamFlippedPose(targetPose.getX(), targetPose.getY(), targetPose.getRotation().getDegrees()),
+        maxVelocityMPS, Inches.of(5))
+      .alongWith(superState)
+      .until(() -> swerve.isOnTargetTranslate());
+  }
 
-    public Command forceSetPose(Pose2d pose){
-        // SmartDashboard.putBoolean("ForceSetPose", SmartDashboard.getBoolean("ForceSetPose", false));
-        // SmartDashboard.setPersistent("ForceSetPose");
-        // return Commands.either(
-        //     Commands.sequence(
-        //         swerve.setInitialPose(pose),
-        //         questNav.setQuestPoseCommand(new Pose3d(pose)), 
-        //         new WaitCommand(2.0)
-        //     ),
-        //     new InstantCommand(), 
-        //     ()->SmartDashboard.getBoolean("ForceSetPose", false));
-        return new InstantCommand();
-    }
+  public Command stow() {
+    return Commands.parallel(
+      shooter.stow(),
+      spindexer.stop(),
+      intake.stop()
+    );
+  }
 
-    public Command driveToPoseSlowly(Pose2d targetPose, Command superState, double maxVelocityMPS){
-        return swerve.pidToPose(()->autoTeamFlippedPose(targetPose.getX(), targetPose.getY(), targetPose.getRotation().getDegrees()), maxVelocityMPS, Inches.of(5))
-        .alongWith(superState)
-        .until(()->swerve.isOnTargetTranslate())
-        ;
-    }
+  public Command pass() {
+    return new ParallelCommandGroup(
+      shooter.pass(),
+      spindexer.feedToShooterForce(),
+      intake.stop()
+    );
+  }
 
-    public Command stow(){
-        return Commands.parallel(
-            shooter.stow(),
-            spindexer.stop(),
-            intake.stop()
-        );
-    }
+  public Command shootAuto() {
+    return new ParallelCommandGroup(
+      shooter.shootHubNoTur(),
+      spindexer.feedToShooterForce(),
+      intake.stop()
+    );
+  }
 
-    public Command pass(){
-        return new ParallelCommandGroup(
-            shooter.pass(),
-            spindexer.feedToShooterForce(),
-            intake.stop()
-        );
-    }
+  public Command intakeOnly() {
+    return new ParallelCommandGroup(
+      shooter.stow(),
+      spindexer.stop(),
+      intake.intake()
+    );
+  }
 
-    public Command shootAuto(){
-        return new ParallelCommandGroup(
-            shooter.shootHubNoTur(),
-            spindexer.feedToShooterForce(),
-            intake.stop()
-        );
-    }
+  public Command intakeWhilePassing() {
+    return new ParallelCommandGroup(
+      shooter.pass(),
+      spindexer.feedToShooterForce(),
+      intake.intake()
+    );
+  }
 
-    public Command intakeOnly(){
-        return new ParallelCommandGroup(
-            shooter.stow(),
-            spindexer.stop(),
-            intake.intake()
-        );
-    }
-
-    public Command intakeWhilePassing(){
-        return new ParallelCommandGroup(
-            shooter.pass(),
-            spindexer.feedToShooterForce(),
-            intake.intake()
-        );
-    }
-
-    public Command intakeWhileShooting(){
-        return new ParallelCommandGroup(
-            shooter.shootHubVelComp(),
-            spindexer.feedToShooterForce(),
-            intake.intake()
-        );
-    }    
+  public Command intakeWhileShooting() {
+    return new ParallelCommandGroup(
+      shooter.shootHubVelComp(),
+      spindexer.feedToShooterForce(),
+      intake.intake()
+    );
+  }
 }

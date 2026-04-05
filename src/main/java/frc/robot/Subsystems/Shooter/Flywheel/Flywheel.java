@@ -9,27 +9,19 @@ import java.util.function.Supplier;
 
 import com.revrobotics.PersistMode;
 import com.revrobotics.ResetMode;
-import com.revrobotics.spark.ClosedLoopSlot;
 import com.revrobotics.spark.FeedbackSensor;
 import com.revrobotics.spark.SparkBase;
 import com.revrobotics.spark.SparkFlex;
-import com.revrobotics.spark.SparkClosedLoopController.ArbFFUnits;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.config.SparkBaseConfig;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
-import com.stormbots.Clamp;
 import com.revrobotics.spark.config.SparkFlexConfig;
 
 import edu.wpi.first.math.MathUtil;
-import edu.wpi.first.math.controller.SimpleMotorFeedforward;
-import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
-import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import edu.wpi.first.wpilibj2.command.WaitCommand;
-import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Subsystems.TargetingSystem.TargetingSystem;
 
 public class Flywheel extends SubsystemBase {
@@ -41,40 +33,25 @@ public class Flywheel extends SubsystemBase {
 
   private double targetRPM = 0.0;
   private double tolerance = 150.0;
-  // public double p = 0.0025;
-  // public double i = 0.0;
-  // public double d = 0.0;
-
-
-
-
-  // SimpleMotorFeedforward ff = new SimpleMotorFeedforward(0.0, 0.0);
 
   /** Creates a new Flywheel. */
   public Flywheel() {
     SparkBaseConfig followerConfig = getMotorConfig();
     followerConfig.follow(leaderMotor, true);
 
-    // SmartDashboard.putNumber("/shooter/flyweel/p", p);
-    // SmartDashboard.putNumber("/shooter/flyweel/i", i);
-
     leaderMotor.configure(getMotorConfig(), ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
     followerMotor.configure(followerConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
     setDefaultCommand(Commands.waitSeconds(0.5).andThen(run(this::stop)));
-
   }
-
 
   @Override
   public void periodic() {
     SmartDashboard.putNumber("shooter/flywheel/targetrpm", targetRPM);
     SmartDashboard.putNumber("shooter/flywheel/rpm", leaderMotor.getEncoder().getVelocity());
     SmartDashboard.putNumber("shooter/flywheel/rpmSetpoint", leaderMotor.getClosedLoopController().getSetpoint());
-    // SmartDashboard.putNumber("shooter/flywheel/rotations", leaderMotor.getEncoder().getPosition());
     SmartDashboard.putNumber("shooter/flywheel/voltage", leaderMotor.getAppliedOutput()*leaderMotor.getBusVoltage());
     SmartDashboard.putNumber("shooter/flywheel/current", leaderMotor.getOutputCurrent());
   }
-
 
   public double getRPM(){
     return leaderMotor.getEncoder().getVelocity();
@@ -93,9 +70,6 @@ public class Flywheel extends SubsystemBase {
       leaderMotor.getClosedLoopController().setSetpoint(
         targetRPM, 
         SparkBase.ControlType.kVelocity
-        // ClosedLoopSlot.kSlot0,
-        // ff.calculate(targetRPM),
-        // ArbFFUnits.kVoltage
       );
     });
   }
@@ -103,11 +77,6 @@ public class Flywheel extends SubsystemBase {
   public Command setRPM(Supplier<TargetingSystem.ShooterState> targetSupplier){
     return setRPM(()->targetSupplier.get().flywheelRPM,()->targetSupplier.get().flywheelRPM);
   }
-
-  //Remove this once not needed
-  // public Command setVoltageCommand(double volts){
-  //   return run(()->leaderMotor.setVoltage(volts));
-  // }
 
   public boolean getOnTarget(){
     return MathUtil.isNear(targetRPM, leaderMotor.getEncoder().getVelocity(), tolerance*6);
@@ -130,7 +99,6 @@ public class Flywheel extends SubsystemBase {
       .d(0.0)
     .feedForward
       .kV(0.0024309 * 4000 / 5174.083984 * 2725 / 2516.0)
-      // .kV(0.0024309/12.0)
     ;
 
     config.encoder
@@ -143,5 +111,4 @@ public class Flywheel extends SubsystemBase {
 
     return config;
   }
-
 }

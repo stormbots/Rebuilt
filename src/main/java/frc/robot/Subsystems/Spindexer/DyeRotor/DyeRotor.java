@@ -20,101 +20,92 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
-public class DyeRotor extends SubsystemBase{
-    SparkFlex motor = new SparkFlex(12, MotorType.kBrushless);
-    DyeRotorSim sim = new DyeRotorSim(motor);
-    int maxCurrent = 30;
-    int lowCurrentLimit = 25;
-    
-    public DyeRotor(){
-        var config = new SparkFlexConfig();
+public class DyeRotor extends SubsystemBase {
+  SparkFlex motor = new SparkFlex(12, MotorType.kBrushless);
+  DyeRotorSim sim = new DyeRotorSim(motor);
+  int maxCurrent = 30;
+  int lowCurrentLimit = 25;
 
-        var conversionfactor = 57.0;
-        config.encoder.positionConversionFactor(1/conversionfactor);
-        config.encoder.velocityConversionFactor(1/conversionfactor/60);
+  public DyeRotor() {
+    var config = new SparkFlexConfig();
 
-        config
-        .idleMode(IdleMode.kCoast)
-        .inverted(false)
-        .smartCurrentLimit(maxCurrent)
-        ;
+    var conversionfactor = 57.0;
+    config.encoder.positionConversionFactor(1 / conversionfactor);
+    config.encoder.velocityConversionFactor(1 / conversionfactor / 60);
 
-        // config.closedLoop
-        // .p(0)
-        // ;
-        config.closedLoop.feedForward
-        .kV(12/(7600.0/conversionfactor)*3)
-        ;
+    config
+      .idleMode(IdleMode.kCoast)
+      .inverted(false)
+      .smartCurrentLimit(maxCurrent);
 
-        motor.configure(config , ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+    config.closedLoop.feedForward
+      .kV(12 / (7600.0 / conversionfactor) * 3);
 
-        motor.getEncoder().setPosition(0);
-        setDefaultCommand(stop());
-    }
+    motor.configure(config, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
 
-    @Override
-    public void periodic(){
-        SmartDashboard.putNumber("Spindexer/DyeRotor/Output", motor.getAppliedOutput());
-        // SmartDashboard.putNumber("DyeRotor/Position",motor.getEncoder().getPosition());
-        // SmartDashboard.putNumber("DyeRotor/Velocity",motor.getEncoder().getVelocity());
-        SmartDashboard.putNumber("Spindexer/DyeRotor/Current",motor.getOutputCurrent());
-    }
+    motor.getEncoder().setPosition(0);
+    setDefaultCommand(stop());
+  }
 
-    @Override
-    public void simulationPeriodic(){
-        sim.update();
-    }
+  @Override
+  public void periodic() {
+    SmartDashboard.putNumber("Spindexer/DyeRotor/Output", motor.getAppliedOutput());
+    SmartDashboard.putNumber("Spindexer/DyeRotor/Current", motor.getOutputCurrent());
+  }
 
-    public Command setVelocity(double targetVelocity){
-        return run(()->{ 
-            motor.getClosedLoopController().setSetpoint(targetVelocity, ControlType.kVelocity);
-        });
-    }
+  @Override
+  public void simulationPeriodic() {
+    sim.update();
+  }
 
-    public Command setVoltage(double volt){
-        return run(() ->{
-            motor.setVoltage(volt);
-        });
-    }
+  public Command setVelocity(double targetVelocity) {
+    return run(() -> {
+      motor.getClosedLoopController().setSetpoint(targetVelocity, ControlType.kVelocity);
+    });
+  }
 
-    public Command stop(){
-        return run(motor::stopMotor);
-    }
+  public Command setVoltage(double volt) {
+    return run(() -> {
+      motor.setVoltage(volt);
+    });
+  }
 
-    public Command feed(){
-        //return setVelocity(2);
-        return setVoltage(7);
-    }
+  public Command stop() {
+    return run(motor::stopMotor);
+  }
 
-    public Command intake(){
-        return setVoltage(8).beforeStarting(runOnce(()-> setCurrentLimits(lowCurrentLimit))).finallyDo(()->setCurrentLimits(maxCurrent));
-    }
+  public Command feed() {
+    return setVoltage(7);
+  }
 
-    public Command unclog(){
-        return Commands.sequence(
-            setVoltage(-4).withTimeout(0.5),
-            setVoltage(4).withTimeout(0.5),
-            setVoltage(-4).withTimeout(0.5),
-            setVoltage(4)
-        );
+  public Command intake() {
+    return setVoltage(8).beforeStarting(runOnce(() -> setCurrentLimits(lowCurrentLimit)))
+      .finallyDo(() -> setCurrentLimits(maxCurrent));
+  }
 
-    }
+  public Command unclog() {
+    return Commands.sequence(
+      setVoltage(-4).withTimeout(0.5),
+      setVoltage(4).withTimeout(0.5),
+      setVoltage(-4).withTimeout(0.5),
+      setVoltage(4)
+    );
+  }
 
-    public AngularVelocity getVelocity(){
-        return DegreesPerSecond.of(motor.getEncoder().getVelocity());
-    }
+  public AngularVelocity getVelocity() {
+    return DegreesPerSecond.of(motor.getEncoder().getVelocity());
+  }
 
-    public double getPosition(){ 
-        return motor.getEncoder().getPosition();
-    }
+  public double getPosition() {
+    return motor.getEncoder().getPosition();
+  }
 
-    public double getCurrent(){
-        return motor.getOutputCurrent();
-    }
+  public double getCurrent() {
+    return motor.getOutputCurrent();
+  }
 
-    private void setCurrentLimits(int amps){
-        var config = new SparkFlexConfig();
-        motor.configureAsync(config.smartCurrentLimit(amps), ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
-    }
-    
+  private void setCurrentLimits(int amps) {
+    var config = new SparkFlexConfig();
+    motor.configureAsync(config.smartCurrentLimit(amps), ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+  }
 }
