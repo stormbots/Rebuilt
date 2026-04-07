@@ -86,7 +86,7 @@ public class Signals extends SubsystemBase {
     left.solidColor(CustomColor.kWhite),
     Commands.runOnce(()->left.setBrightness(200),left),
     Commands.waitSeconds(1)
-  );
+  ).withName("ShiftChange");
  }
 
  public Command shiftEnd(){
@@ -98,7 +98,7 @@ public class Signals extends SubsystemBase {
     left.blinkSmooth(128,CustomColor.kWhite),
     Commands.runOnce(()->left.setBrightness(200),left),
     Commands.waitSeconds(1)
-  );
+  ).withName("ShiftChange");
  }
 
 

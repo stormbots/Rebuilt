@@ -67,10 +67,11 @@ public class Flywheel extends SubsystemBase {
     return run(()->{
       this.targetRPM = rpm.getAsDouble();
       this.tolerance = tolerance.getAsDouble();
-      leaderMotor.getClosedLoopController().setSetpoint(
-        targetRPM, 
-        SparkBase.ControlType.kVelocity
-      );
+      // leaderMotor.getClosedLoopController().setSetpoint(
+      //   targetRPM, 
+      //   SparkBase.ControlType.kVelocity
+      // );
+      leaderMotor.setVoltage(rpm.getAsDouble()*0.0024309 * 4000 / 5174.083984 * 2725 / 2516.0);
     });
   }
 
@@ -89,7 +90,7 @@ public class Flywheel extends SubsystemBase {
       .smartCurrentLimit(100)
       .inverted(true)
       .idleMode(IdleMode.kCoast)
-      .voltageCompensation(10.5)
+      // .voltageCompensation(10.5)
       ;
 
     config.closedLoop

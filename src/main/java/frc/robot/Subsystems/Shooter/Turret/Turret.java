@@ -5,14 +5,17 @@
 package frc.robot.Subsystems.Shooter.Turret;
 
 import static edu.wpi.first.units.Units.Degrees;
+import static edu.wpi.first.units.Units.DegreesPerSecond;
 
 import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
 
 import com.revrobotics.PersistMode;
 import com.revrobotics.ResetMode;
+import com.revrobotics.spark.ClosedLoopSlot;
 import com.revrobotics.spark.FeedbackSensor;
 import com.revrobotics.spark.SparkBase.ControlType;
+import com.revrobotics.spark.SparkClosedLoopController.ArbFFUnits;
 import com.revrobotics.spark.SparkFlex;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.config.SparkBaseConfig;
@@ -21,7 +24,10 @@ import com.revrobotics.spark.config.SparkFlexConfig;
 import com.stormbots.CRTAbsoluteEncoder;
 
 import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.controller.SimpleMotorFeedforward;
+import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.units.measure.Angle;
+import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -43,9 +49,26 @@ public class Turret extends SubsystemBase {
   Angle targetPosition = Degrees.of(0);
   Angle tolerance = Degrees.of(3);
 
+  //TODO: TUNE: some really weird overshoot problems
+  //1. it hits the target, stops, then overshoots seemingly
+  //2. with the wrapping done in the start of the startrun command for the trap profile (i assume)
+  // it will sometimes pass the boundary and then try to wrap out of our range
+  // I assume this is because the statement is >20 -=360, and since the trap profile is especially vulnerable to overshooting
+  //it gets over 20, resets the current state, and tries to wrap the wrong way
+  // does this also speak to our defaults for setAngle?
+  //however, this trap profile runs extremely smoothly without pid. it just needs to be tuned. so this is relatively high priority
+  //fixes many of our sotm problems
+  private final TrapezoidProfile trapProfile = new TrapezoidProfile(new TrapezoidProfile.Constraints(700, 1000));
+
   SparkFlex motor = new SparkFlex(14, MotorType.kBrushless);
   TurretSim sim = new TurretSim(motor);
 
+  TrapezoidProfile.State goalState =  new TrapezoidProfile.State(0,0);
+  TrapezoidProfile.State currentState =  new TrapezoidProfile.State(-180,0);
+
+  SimpleMotorFeedforward feedforward = new SimpleMotorFeedforward(0.2, 0.0143);
+
+  
   /** Creates a new Turret. */
   public Turret() {
 
@@ -67,6 +90,7 @@ public class Turret extends SubsystemBase {
     SmartDashboard.putNumber("shooter/turret/CRTpos", CRTAbsoluteEncoder.getInstance().getPosition().in(Degrees));
     SmartDashboard.putNumber("shooter/turret/e1", motor.getAbsoluteEncoder().getPosition());
     SmartDashboard.putNumber("shooter/turret/relPos", motor.getEncoder().getPosition());
+    SmartDashboard.putNumber("shooter/turret/velocity", motor.getEncoder().getVelocity());
   }
 
   /**
@@ -74,6 +98,10 @@ public class Turret extends SubsystemBase {
    */
   public Angle getAngle() {
     return Degrees.of(motor.getEncoder().getPosition());
+  }
+  
+  public AngularVelocity getVelocity() {
+    return DegreesPerSecond.of(motor.getEncoder().getVelocity());
   }
 
   public Command setAngle(Supplier<Angle> position, Supplier<Angle> tolerance) {
@@ -99,9 +127,36 @@ public class Turret extends SubsystemBase {
     return setAngle(()->targetSupplier.get().turretAngle, ()->targetSupplier.get().turretTolerance);
   }
 
+  public Command setAngleTrap(Supplier<Angle> position, Supplier<Angle> tolerance) {
+    return startRun(()->{
+        double normalizedPosition = position.get().in(Degrees) > kMaxRotation ? position.get().in(Degrees) - 360.0 : position.get().in(Degrees);
+        goalState = new TrapezoidProfile.State(normalizedPosition, 0);
+        currentState = new TrapezoidProfile.State(getAngle().in(Degrees), getVelocity().in(DegreesPerSecond));
+        this.targetPosition = Degrees.of(MathUtil.clamp(normalizedPosition, kMinRotation, kMaxRotation));
+        this.tolerance = tolerance.get();
+      },
+      ()->{
+        currentState = trapProfile.calculate(0.02, currentState, goalState);
+        double ff = feedforward.calculate(currentState.velocity);
+        SmartDashboard.putNumber("shooter/turret/trapposition", currentState.position);
+        SmartDashboard.putNumber("shooter/turret/trapvelocity", currentState.velocity);
+        motor.getClosedLoopController().setSetpoint(
+          goalState.position,
+          ControlType.kPosition,
+          ClosedLoopSlot.kSlot0,
+          ff,
+          ArbFFUnits.kVoltage
+        );
+      });
+  }
+
+  public Command setAngleTrap(Supplier<TargetingSystem.ShooterState> targetSupplier) {
+    return setAngleTrap(()->targetSupplier.get().turretAngle, ()->targetSupplier.get().turretTolerance);
+  }
+
   public boolean getOnTarget() {
     if (targetPosition.in(Degrees) < kMaxRotation && targetPosition.in(Degrees) > kMinRotation) {
-      return MathUtil.isNear(targetPosition.in(Degrees), motor.getEncoder().getPosition(), tolerance.in(Degrees) + 2.0);
+      return MathUtil.isNear(targetPosition.in(Degrees), motor.getEncoder().getPosition(), tolerance.in(Degrees));
     }
     return false;
   }
@@ -121,10 +176,12 @@ public class Turret extends SubsystemBase {
 
     config.closedLoop
       .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
-      .p(0.3 * 12 * 2.5 / 90.0 * 1.5)
+      .p(0.3 * 2.5 * 12 / 90.0 )
+      // .p(0)
       .positionWrappingEnabled(false)
       .maxOutput(outPut)
       .minOutput(-outPut);
+      
 
     config.softLimit
       .forwardSoftLimit(kMaxRotation)

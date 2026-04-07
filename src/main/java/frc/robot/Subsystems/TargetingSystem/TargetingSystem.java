@@ -207,7 +207,7 @@ public class TargetingSystem extends SubsystemBase {
     var entry = lut.get(magnitude.in(Inches));   
     var tof = entry[3];
 
-    Translation2d botVelocityTranslation = new Translation2d(botVelocity.get().vxMetersPerSecond*1.2, botVelocity.get().vyMetersPerSecond*1.2);
+    Translation2d botVelocityTranslation = new Translation2d(botVelocity.get().vxMetersPerSecond*1.2, botVelocity.get().vyMetersPerSecond*1.0);
 
     //Bot velocity * Time of Flight = how much impact in the unit of distance the bots velocity will have on the shot
     //Since we want to compensate for this, find the inverse of this vector and apply to our target

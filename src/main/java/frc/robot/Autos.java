@@ -266,9 +266,7 @@ public class Autos {
 
   public Command climbAutoRedLeft() {
     return Commands.sequence(
-      new ParallelCommandGroup(
       pathing.followPath(climbAutoRedSide).withTimeout(4.0),
-      climber.prePrepareForClimbL1()),
       new ParallelCommandGroup(
         swerve.addSecondaryInputsTrueFielcentric(()->climber.generateSwerveInputs(swerve.getSwervePose())),
         swerve.turnToHeading(()->new Rotation2d(Degrees.of(-90)))).withTimeout(2.0),
