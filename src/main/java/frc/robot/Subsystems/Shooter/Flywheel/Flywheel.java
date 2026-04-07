@@ -86,7 +86,7 @@ public class Flywheel extends SubsystemBase {
     SparkBaseConfig config = new SparkFlexConfig();
 
     config
-      .smartCurrentLimit(60)
+      .smartCurrentLimit(100)
       .inverted(true)
       .idleMode(IdleMode.kCoast)
       .voltageCompensation(10.5)

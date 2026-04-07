@@ -31,8 +31,8 @@
     },
     {
       "type": "translation",
-      "x_meters": 0.34999999999999987,
-      "y_meters": 5.953711426188491,
+      "x_meters": 0.45240200166805655,
+      "y_meters": 6.0853711426188495,
       "intermediate_handoff_radius_meters": 0.45
     },
     {
@@ -49,31 +49,19 @@
     },
     {
       "type": "translation",
-      "x_meters": 0.30925027522935733,
-      "y_meters": 5.912828256880736,
-      "intermediate_handoff_radius_meters": 0.2
+      "x_meters": 0.9968065721434518,
+      "y_meters": 6.702786555462889,
+      "intermediate_handoff_radius_meters": 0.4
     },
     {
       "type": "waypoint",
       "translation_target": {
-        "x_meters": 1.1440162726205545,
-        "y_meters": 6.73032501268036,
+        "x_meters": 1.246418274288611,
+        "y_meters": 6.613294153631153,
         "intermediate_handoff_radius_meters": 0.5
       },
       "rotation_target": {
         "rotation_radians": -1.5707963267948966,
-        "profiled_rotation": true
-      }
-    },
-    {
-      "type": "waypoint",
-      "translation_target": {
-        "x_meters": 1.0582542632412426,
-        "y_meters": 5.135838082473045,
-        "intermediate_handoff_radius_meters": 0.4
-      },
-      "rotation_target": {
-        "rotation_radians": -2.0943951023931953,
         "profiled_rotation": true
       }
     },
@@ -85,12 +73,12 @@
     {
       "type": "waypoint",
       "translation_target": {
-        "x_meters": 1.2141951626355292,
-        "y_meters": 5.078839949958298,
-        "intermediate_handoff_radius_meters": 0.6
+        "x_meters": 1.2045428370527524,
+        "y_meters": 5.179724654616498,
+        "intermediate_handoff_radius_meters": 0.4
       },
       "rotation_target": {
-        "rotation_radians": 2.705260340591211,
+        "rotation_radians": -3.839724354387525,
         "profiled_rotation": true
       }
     }
@@ -103,7 +91,7 @@
         "end_ordinal": 3
       },
       {
-        "value": 0.1,
+        "value": 0.25,
         "start_ordinal": 0,
         "end_ordinal": 1
       },
@@ -113,9 +101,9 @@
         "end_ordinal": 4
       },
       {
-        "value": 0.1,
+        "value": 0.3,
         "start_ordinal": 5,
-        "end_ordinal": 7
+        "end_ordinal": 6
       }
     ]
   }

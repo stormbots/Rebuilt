@@ -90,6 +90,8 @@ public class Autos {
   // Commonly used paths
   Path centerShootPath = new Path("CenterShootAutoV2");
   Path shootIntitialPath = new Path("shootInitial");
+  Path postShootToClimb = new Path("postShootingToClimb");
+  Path climbAutoRedSide = new Path("climbAuto");
 
   public Autos(
       Swerve swerve,
@@ -132,7 +134,7 @@ public class Autos {
 
     autoChooser.setDefaultOption("Select Auto", () -> new InstantCommand());
     autoChooser.addOption("VV UNTESTED VV", () -> new InstantCommand());
-    autoChooser.addOption("ClimbAutoChoppedWhyAreWeDoingThisIWannaShootSoBad", this::climbAutoRed); // best name ever
+    autoChooser.addOption("ClimbAutoChoppedWhyAreWeDoingThisIWannaShootSoBad", this::climbAutoRedLeft); // best name ever
   }
 
   // Get Auto Command
@@ -198,30 +200,34 @@ public class Autos {
     return Commands.sequence(
       basicShootInitial8(),
       pathing.followPathTeamFlipped(centerShootPath).withTimeout(12),
-      climbAutoRed()
+      pathing.followPathTeamFlipped(postShootToClimb).withTimeout(2.0),
+      climbAutoRedLeft()
     );
   }
 
   public Command CenterShootAutoRedRIGHT() {
     shootIntitialPath.mirror();
     centerShootPath.mirror();
+    postShootToClimb.mirror();
 
     return Commands.sequence(
-      pathing.followPathTeamFlipped(shootIntitialPath).withTimeout(2.0),
-      pathing.followPathTeamFlipped(centerShootPath).withTimeout(20),
-      pathing.followPathTeamFlipped(centerShootPath).withTimeout(20)
+      basicShootInitial8(),
+      pathing.followPathTeamFlipped(centerShootPath).withTimeout(12),
+      pathing.followPathTeamFlipped(postShootToClimb).withTimeout(2.0),
+      climbAutoRedRight()
     );
   }
 
   public Command CenterShootAutoBlueLEFT() {
     return Commands.sequence(
-      pathing.followPath(shootIntitialPath).withTimeout(2.0),
-      pathing.followPath(centerShootPath).withTimeout(20),
-      pathing.followPath(centerShootPath).withTimeout(20)
+      basicShootInitial8(),
+      pathing.followPath(centerShootPath).withTimeout(12),
+      pathing.followPath(postShootToClimb).withTimeout(2.0),
+      climbAutoBlueLeft()
     );
   }
 
-  public Command CenterShootAutoBlueRIGHT() {
+  public Command CenterShootAutoBlueRIGHT() { 
     shootIntitialPath.mirror();
     centerShootPath.mirror();
     return Commands.sequence(
@@ -258,15 +264,43 @@ public class Autos {
     );
   }
 
-  public Command climbAutoRed() {
+  public Command climbAutoRedLeft() {
     return Commands.sequence(
-      pathing.followPath(new Path("climbAuto")),
-      swerve.addSecondaryInputsTrueFielcentric(()->climber.generateSwerveInputs(swerve.getSwervePose())),
-      swerve.turnToHeading(()->new Rotation2d(Degrees.of(-90))),
-      climber.prepareForClimbL1().withTimeout(1.0),
+      new ParallelCommandGroup(
+      pathing.followPath(climbAutoRedSide).withTimeout(4.0),
+      climber.prePrepareForClimbL1()),
+      new ParallelCommandGroup(
+        swerve.addSecondaryInputsTrueFielcentric(()->climber.generateSwerveInputs(swerve.getSwervePose())),
+        swerve.turnToHeading(()->new Rotation2d(Degrees.of(-90)))).withTimeout(2.0),
+      climber.prepareForClimbL1().withTimeout(4.5),
       climber.climbL1()
     );
   }
+
+  public Command climbAutoBlueLeft() {
+    return Commands.sequence(
+      pathing.followPathTeamFlipped(climbAutoRedSide).withTimeout(3.0),
+      new ParallelCommandGroup(
+        swerve.addSecondaryInputsTrueFielcentric(()->climber.generateSwerveInputs(swerve.getSwervePose())),
+        swerve.turnToHeading(()->new Rotation2d(Degrees.of(90)))).withTimeout(2.0),
+      climber.prepareForClimbL1().withTimeout(4.5),
+      climber.climbL1()
+    );
+  }
+
+  public Command climbAutoRedRight() {
+    climbAutoRedSide.mirror();
+    return Commands.sequence(
+      pathing.followPath(climbAutoRedSide),
+      new ParallelCommandGroup(
+        swerve.addSecondaryInputsTrueFielcentric(()->climber.generateSwerveInputs(swerve.getSwervePose())),
+        swerve.turnToHeading(()->new Rotation2d(Degrees.of(90))))
+      // climber.prepareForClimbL1().withTimeout(1.0),
+      // climber.climbL1()
+    );
+  }
+
+
 
   public Command PassingAutoBlueRIGHT() {
     shootIntitialPath.mirror();
@@ -281,12 +315,9 @@ public class Autos {
 
   public Command redDepot() {
     return Commands.sequence(
+      // basicShootInitial8().withTimeout(2.0),
       pathing.followPathTeamFlipped(new Path("depotAuto")).withTimeout(12),
-      pathing.followPath(new Path("climbAuto")).withTimeout(3.0),
-      swerve.addSecondaryInputsTrueFielcentric(() -> climber.generateSwerveInputs(swerve.getSwervePose()))
-        .withTimeout(3.0),
-      climber.prepareForClimbL1().withTimeout(2.0),
-      climber.climbL1()
+      climbAutoRedLeft()
     );
   }
 
@@ -350,7 +381,15 @@ public class Autos {
 
   public Command shootAuto() {
     return new ParallelCommandGroup(
-      shooter.shootHubNoTur().asProxy(),
+      shooter.shootHub().asProxy(),
+      spindexer.feedToShooterForce().asProxy(),
+      intake.stop().asProxy()
+    );
+  }
+
+  public Command shootAutoNotBline() {
+    return new ParallelCommandGroup(
+      shooter.shootHub().asProxy(),
       spindexer.feedToShooterForce().asProxy(),
       intake.stop().asProxy()
     );

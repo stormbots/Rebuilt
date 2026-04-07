@@ -36,8 +36,8 @@ public class Turret extends SubsystemBase {
   public static final double kGearing = (1.0 / 3.0) * (10.0 / 132.0) * (177.0 / 198.0) / (176.606 / 180.0);
 
   // How much in ONE direction, hence max range divided by 2
-  public static final double kMinRotation = -288.0;
-  public static final double kMaxRotation = 20.0;
+  public static final double kMinRotation = -310.0;
+  public static final double kMaxRotation = 12.5;
   private double outPut = 3 / 12.0 * 1.10;
 
   Angle targetPosition = Degrees.of(0);
@@ -101,7 +101,7 @@ public class Turret extends SubsystemBase {
 
   public boolean getOnTarget() {
     if (targetPosition.in(Degrees) < kMaxRotation && targetPosition.in(Degrees) > kMinRotation) {
-      return MathUtil.isNear(targetPosition.in(Degrees), motor.getEncoder().getPosition(), tolerance.in(Degrees) + 1.0);
+      return MathUtil.isNear(targetPosition.in(Degrees), motor.getEncoder().getPosition(), tolerance.in(Degrees) + 2.0);
     }
     return false;
   }

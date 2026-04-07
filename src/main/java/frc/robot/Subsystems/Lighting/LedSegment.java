@@ -523,6 +523,7 @@ public class LedSegment extends LedBase {
 
       patternMap.put(17, Commands.runOnce(()->{
         setEffect(74);
+        setColor(colorSupplier.get());
         setPalette(4);
         setSpeed(128);
         setIntensity(128);

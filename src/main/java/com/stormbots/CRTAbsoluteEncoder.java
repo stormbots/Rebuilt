@@ -109,7 +109,7 @@ public class CRTAbsoluteEncoder {
 
         
         //If not, fall back to the CRT as a safety measure
-        relativeEncoder.setPosition(getPosition().in(Degrees));
+        // relativeEncoder.setPosition(getPosition().in(Degrees));
     }
 
 }

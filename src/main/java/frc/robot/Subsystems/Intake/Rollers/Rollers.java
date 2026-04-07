@@ -40,22 +40,25 @@ public class Rollers extends SubsystemBase {
       .velocityConversionFactor(factor);
 
     config.closedLoop.feedForward
-      .sva(0, 12/6000.0/factor, 0);
+      // .sva(0, 12/6000.0/factor, 0);
+      .sva(0, 0, 0);
 
     config.closedLoop
-      .p(1/350.0*0.5*0.5*1.2);
+      // .p(1/350.0*0.5*0.5*1.2);
+      .p(0);
 
-    config.closedLoop.maxMotion
-      .maxAcceleration(20)
-      .cruiseVelocity(6000/60)
-      .allowedProfileError(50)
-      ;
+    // config.closedLoop.maxMotion
+    //   .maxAcceleration(20)
+    //   .cruiseVelocity(6000/60)
+    //   .allowedProfileError(50)
+    //   ;
 
     config
       .idleMode(IdleMode.kCoast)
       .inverted(false)
       .smartCurrentLimit(30)
-      .voltageCompensation(11);
+      // .voltageCompensation(11)
+    ;
 
     motor.configure(config, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
     
@@ -70,6 +73,7 @@ public class Rollers extends SubsystemBase {
 
   @Override
   public void periodic() {
+    SmartDashboard.putNumber("Intake/Rollers/voltage", motor.getBusVoltage()*motor.getAppliedOutput());
     SmartDashboard.putNumber("Intake/Rollers/DutyCycle", motor.getAppliedOutput());
     SmartDashboard.putNumber("Intake/Rollers/Current", motor.getOutputCurrent());
     SmartDashboard.putNumber("Intake/Rollers/Follower/Current", follower.getOutputCurrent());
@@ -93,7 +97,8 @@ public class Rollers extends SubsystemBase {
   }
 
   public Command intake(){
-    return setVelocity(8.0/12.0 *6000.0);
+    // return setVelocity(8.0/12.0 *6000.0);
+    return setVoltage(8);
   }
 
  public Command eject(){
