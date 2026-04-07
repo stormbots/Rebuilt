@@ -35,7 +35,7 @@ public class WLED extends SubsystemBase{
   private static int calls;
   private static int defaultPattern = -1;
   private static int indivualRoll = -1;
-  public static final int numPatterns = 23;
+  public static final int numPatterns = 28;
   private static int chanceIndividual = 8;
   private static boolean auraMode = false;
   public WLED(SerialPort serialPort, Photonvision vision) {

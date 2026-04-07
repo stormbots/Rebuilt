@@ -80,18 +80,24 @@ public class Signals extends SubsystemBase {
  public Command shiftStart(){
   return Commands.sequence(
     right.solidColor(CustomColor.kWhite),
+    Commands.runOnce(()->right.setBrightness(200),right),
     center.solidColor(CustomColor.kWhite),
+    Commands.runOnce(()->center.setBrightness(200),center),
     left.solidColor(CustomColor.kWhite),
-    Commands.waitSeconds(0.5)
+    Commands.runOnce(()->left.setBrightness(200),left),
+    Commands.waitSeconds(1)
   );
  }
 
  public Command shiftEnd(){
   return Commands.sequence(
     right.blinkSmooth(128,CustomColor.kWhite),
+    Commands.runOnce(()->right.setBrightness(200),right),
     center.blinkSmooth(128,CustomColor.kWhite),
+    Commands.runOnce(()->center.setBrightness(200),center),
     left.blinkSmooth(128,CustomColor.kWhite),
-    Commands.waitSeconds(0.5)
+    Commands.runOnce(()->left.setBrightness(200),left),
+    Commands.waitSeconds(1)
   );
  }
 

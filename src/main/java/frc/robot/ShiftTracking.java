@@ -29,7 +29,7 @@ public class ShiftTracking {
     }
 
     private Boolean isScoringShift(){
-        double offset = 3.0;
+        double offset = 3.5;
         double time = Timer.getMatchTime();
         if(DriverStation.isTeleopEnabled()){
             //endgame period

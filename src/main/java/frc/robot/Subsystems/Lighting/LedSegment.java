@@ -75,6 +75,7 @@ public class LedSegment extends LedBase {
         data.setColor(color);
         setFreeze(false); //if individual control is set, it freezes the segment, this is called to automatically acount for that
         setPalette(0);
+        setBrightness(128);
       }
     }
 
@@ -83,6 +84,7 @@ public class LedSegment extends LedBase {
         this.fx = Optional.of(effect);
         data.setEffect(effect);
         setFreeze(false);
+        setBrightness(128);
       }
     }
 
@@ -91,6 +93,7 @@ public class LedSegment extends LedBase {
         this.sx = Optional.of(speed);
         data.setSpeed(speed);
         setFreeze(false);
+        setBrightness(128);
       }
     }
 
@@ -99,6 +102,7 @@ public class LedSegment extends LedBase {
         this.ix = Optional.of(intensity);
         data.setIntensity(intensity);
         setFreeze(false);
+        setBrightness(128);
       }
     }
     
@@ -107,6 +111,7 @@ public class LedSegment extends LedBase {
         this.c1 = Optional.of(custom1);
         data.setCustomSlider1(custom1);
         setFreeze(false);
+        setBrightness(128);
       }
     }
 
@@ -115,6 +120,7 @@ public class LedSegment extends LedBase {
         this.c2 = Optional.of(custom2);
         data.setCustomSlider2(custom2);
         setFreeze(false);
+        setBrightness(128);
       }
     }
 
@@ -123,6 +129,7 @@ public class LedSegment extends LedBase {
         this.c3 = Optional.of(custom3);
         data.setCustomSlider3(custom3);
         setFreeze(false);
+        setBrightness(128);
       }
     }
 
@@ -131,6 +138,7 @@ public class LedSegment extends LedBase {
         this.rev = Optional.of(reverse);
         data.setReverse(reverse);
         setFreeze(false);
+        setBrightness(128);
       }
     }
 
@@ -139,6 +147,7 @@ public class LedSegment extends LedBase {
         this.on = Optional.of(setOn);
         data.setOn(setOn);
         setFreeze(false);
+        setBrightness(128);
       }
     }
 
@@ -155,6 +164,7 @@ public class LedSegment extends LedBase {
         this.pal = Optional.of(palette);
         data.setPalette(palette);
         setFreeze(false);
+        setBrightness(128);
       }
     }
 
@@ -430,8 +440,8 @@ public class LedSegment extends LedBase {
       patternMap.put(5, Commands.runOnce(()->{
         setEffect(111);
         setColor(colorSupplier.get());
-        setSpeed(25);
-        setIntensity(128);
+        setSpeed(255);
+        setIntensity(54);
       }, this));
 
       patternMap.put(6, Commands.runOnce(()->{
@@ -505,15 +515,15 @@ public class LedSegment extends LedBase {
       }, this));
 
       patternMap.put(16, Commands.runOnce(()->{
-        setEffect(135);
+        setEffect(50);
         setColor(colorSupplier.get());
         setSpeed(128);
         setIntensity(128);
       }, this));
 
       patternMap.put(17, Commands.runOnce(()->{
-        setEffect(133);
-        setColor(colorSupplier.get());
+        setEffect(74);
+        setPalette(4);
         setSpeed(128);
         setIntensity(128);
       }, this));
@@ -529,6 +539,7 @@ public class LedSegment extends LedBase {
         setEffect(16);
         setColor(colorSupplier.get());
         setSpeed(128);
+        setIntensity(128);
       }, this));
 
       patternMap.put(20, Commands.runOnce(()->{
@@ -543,7 +554,7 @@ public class LedSegment extends LedBase {
         setColor(colorSupplier.get());
         setPalette(4);
         setSpeed(128);
-        setSpeed(128);
+        setSpeed(32);
       }, this));
 
       patternMap.put(22, Commands.runOnce(()->{
@@ -551,6 +562,41 @@ public class LedSegment extends LedBase {
         setColor(colorSupplier.get());
         setSpeed(32);
         setIntensity(0);
+      }, this));
+
+      patternMap.put(23, Commands.runOnce(()->{
+        setEffect(96);
+        setColor(colorSupplier.get());
+        setSpeed(128);
+        setIntensity(128);
+      }, this));
+
+      patternMap.put(24, Commands.runOnce(()->{
+        setEffect(130);
+        setColor(colorSupplier.get());
+        setSpeed(128);
+        setIntensity(128);
+      }, this));
+
+      patternMap.put(25, Commands.runOnce(()->{
+        setEffect(3);
+        setColor(colorSupplier.get());
+        setSpeed(210);
+        setIntensity(128);
+      }, this));
+
+      patternMap.put(26, Commands.runOnce(()->{
+        setEffect(50);
+        setColor(colorSupplier.get());
+        setSpeed(128);
+        setIntensity(128);
+      }, this));
+
+      patternMap.put(27, Commands.runOnce(()->{
+        setEffect(51);
+        setColor(CustomColor.kBlack, colorSupplier.get());
+        setSpeed(128);
+        setIntensity(128);
       }, this));
 
       patternMap.put(WLED.numPatterns, pride());
