@@ -67,9 +67,18 @@ public class CRTAbsoluteEncoder {
         this.encoder2 = encoder;
     }
 
+    public boolean isReady(){
+        if(encoder1==null || encoder2==null) return false;
+        return true;
+    }
+
     /** Return the absolute rotation of the system, derived from the CRT process */
     public Angle getPosition(){
+        if(isReady()==false) return Degrees.of(-180);
+
         double difference = encoder2.getPosition() - encoder1.getPosition();
+        //Slight scaling issue that needs to be resolved
+        double kFudgefactor = 180.0/192.0;
         
         if(kInverted){
             difference*=-1;
@@ -86,12 +95,21 @@ public class CRTAbsoluteEncoder {
         
         //Difference increases linearly with turret angle
         //Multiply by slope to get turret angle from difference
-        return Degrees.of(difference * kSlope);
+        return Degrees.of(difference * kSlope * kFudgefactor);
     }
 
     public void sync(){
-        // relativeEncoder.setPosition(getPosition().in(Degrees));
+        //Assume the bot was set correctly.
         relativeEncoder.setPosition(-180);
+
+        if(isReady()==false) return;
+
+        var crt = getPosition();
+        if(crt.isNear(Degrees.of(-180), Degrees.of(-10))) return;
+
+        
+        //If not, fall back to the CRT as a safety measure
+        relativeEncoder.setPosition(getPosition().in(Degrees));
     }
 
 }

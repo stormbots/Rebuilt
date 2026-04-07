@@ -21,154 +21,130 @@ import frc.robot.Subsystems.Shooter.Turret.TurretVisual;
 import frc.robot.Subsystems.TargetingSystem.TargetingSystem;
 
 public class Shooter {
-    Flywheel flywheel = new Flywheel();
-    Turret turret = new Turret();
-    Hood hood = new Hood();
+  Flywheel flywheel = new Flywheel();
+  Turret turret = new Turret();
+  Hood hood = new Hood();
 
-    TargetingSystem targeting;
+  TargetingSystem targeting;
 
-    /** Represent the hood being suppressed for the trench, and block fuel in that case */
-    private boolean stowed=false;
+  /**
+   * Represent the hood being suppressed for the trench, and block fuel in that
+   * case
+   */
+  private boolean stowed = false;
 
-    //TODO: Sync this method/concept with shooter code
-    public Trigger isReadyToAcceptFuel = new Trigger(()->flywheel.getOnTarget() && hood.getOnTarget() && turret.getOnTarget() && stowed==false).debounce(0.05);
+  // TODO: Sync this method/concept with shooter code
+  public Trigger isReadyToAcceptFuel = new Trigger(() -> flywheel.getOnTarget() && hood.getOnTarget() && turret.getOnTarget() && stowed == false).debounce(0.05);
 
+  /** Just set up the mechanism2d so we can visualize the system all at once */
+  // ShooterVisual visual = new ShooterVisual(flywheel, hood, turret);
+  TurretVisual visual = new TurretVisual(turret);
+  Trigger visualUpdater = new Trigger(DriverStation::isEnabled).onTrue(
+      Commands.run(() -> visual.update(turret.getAngle())));
 
-    /** Just set up the mechanism2d so we can visualize the system all at once */
-    // ShooterVisual visual = new ShooterVisual(flywheel, hood, turret);
-    TurretVisual visual = new TurretVisual(turret);
-    Trigger visualUpdater = new Trigger(DriverStation::isEnabled).onTrue(
-        Commands.run(()->visual.update(turret.getAngle()))
+  public Shooter(TargetingSystem targeting) {
+    this.targeting = targeting;
+    //TODO: Enable once we're happy with the turret not jamming
+    turret.setDefaultCommand(turret.setAngle(targeting::getTurretTracking));
+  }
+
+  public Command shoot(Supplier<TargetingSystem.ShooterState> targets) {
+    return Commands.parallel(
+      flywheel.setRPM(targets),
+      hood.setAngle(targets),
+      turret.setAngle(targets)
     );
+  }
 
+  public Command shootNoTurret(Supplier<TargetingSystem.ShooterState> targets) {
+    return Commands.parallel(
+      flywheel.setRPM(targets),
+      hood.setAngle(targets),
+      turret.setAngle(()->Degrees.of(-180.0), ()->Degrees.of(5.0))
+    );
+  }
 
-    //TODO create helpful commands and/or logic
-    //Note, this is not a subsystem, but we can turn it into one
-    //There's some considerations in doing so worth working through
+  public Command testSetTurretAngle(Angle angle) {
+    return turret.setAngle(()->angle, ()->Degrees.of(3));
+  }
 
+  public Command testSetHoodAngle(Angle angle) {
+    return hood.setAngle(()->angle, ()->Degrees.of(3));
+  }
 
-    public Shooter(TargetingSystem targeting) {
-        this.targeting=targeting;
+  public Command testSetFlywheelRPM(double rpm) {
+    return flywheel.setRPM(()->rpm, ()->300);
+  }
+
+  public Command testHome() {
+    return hood.homingCommand();
+  }
+
+  public Command simGetLaunchCommand() {
+    // Don't do anything on a normal bot
+    if (Robot.isReal()){
+      return Commands.idle();
     }
 
-    // public TargetingSystem.ShooterState getCurrentState(){
-    //     return new TargetingSystem.ShooterState(turret.getAngle(), hood.getAngle(), flywheel.getRPM());
-    // }
+    double fuelPerSecond = 8;
 
-    public Command shoot(Supplier<TargetingSystem.ShooterState> targets){
-        return Commands.parallel(
-            flywheel.setRPM(targets),
-            hood.setAngle(targets),
-            turret.setAngle(targets)
-        );
-        // return shootNoTurret(targets);
-    }
+    var shot = Commands.runOnce(() -> {
+      if (HopperSensors.getInstance().fuelInHopper <= 0){
+        return;
+      }
 
-    public Command shootNoTurret(Supplier<TargetingSystem.ShooterState> targets){
-        return Commands.parallel(
-            flywheel.setRPM(targets),
-            hood.setAngle(targets),
-            turret.setAngle(()->Degrees.of(-180.0), ()->Degrees.of(5.0))
-        );
-    }
+      HopperSensors.getInstance().fuelInHopper--;
 
-    public Command testSetTurretAngle(Angle angle){
-        return turret.setAngle(()->angle, ()->Degrees.of(3));
-    }
+      var initialPosition = targeting.getTurretCenterpoint();
+      var velocity = targeting.simGenerateIdealShot();
 
-    public Command testSetHoodAngle(Angle angle){
-        return hood.setAngle(()->angle, ()->Degrees.of(3));
-    }
+      FuelSim.getInstance().spawnFuel(initialPosition, velocity);
+    });
 
-    public Command testSetFlywheelRPM(double rpm){
-        return flywheel.setRPM(()->rpm, ()->300);
-    }
-    
-    // public Command testFlywheelVoltage(double volts){
-    //     return flywheel.setVoltageCommand(volts);
-    // }
+    return Commands.sequence(
+      shot,
+      Commands.waitSeconds(1 / fuelPerSecond))
+      .repeatedly();
+  }
 
-    public Command testHome(){
-        return hood.homingCommand();
-    }
+  public Command shootHub() {
+    return shoot(targeting::getHub);
+  }
 
-    public Command simGetLaunchCommand(){
-        //Don't do anything on a normal bot
-        if(Robot.isReal())return Commands.idle();
+  public Command shootHubNoTur() {
+    return shootNoTurret(targeting::getHubBotVelCompensated);
+  }
 
-        double fuelPerSecond=8;
+  public Command shootHubVelComp() {
+    return shoot(targeting::getHubBotVelCompensated);
+  }
 
-        var shot=Commands.runOnce(()->{
-            if (HopperSensors.getInstance().fuelInHopper <= 0) return;
-            HopperSensors.getInstance().fuelInHopper--;
+  public Command pass() {
+    return shoot(targeting::getPassBotVelCompensated);
+  }
 
-            var initialPosition = targeting.getTurretCenterpoint();
-            var velocity=targeting.simGenerateIdealShot();
+  /** Bring the hood down for trench purposes */
+  public Command stow() {
+    return Commands.parallel(
+      hood.stow()
+    )
+    .beforeStarting(()->stowed = true)
+    .finallyDo(()->stowed = false);
+  }
 
-            FuelSim.getInstance().spawnFuel(initialPosition, velocity);
-        });
+  public Command testTurretVoltage(DoubleSupplier voltage) {
+    return turret.setVoltage(voltage);
+  }
 
-        return Commands.sequence(
-        shot,
-        Commands.waitSeconds(1/fuelPerSecond)
-        )
-        .repeatedly();
-    }
-
-    public Command shootHub(){
-        return shoot(targeting::getHub);
-    }
-    public Command shootHubNoTur(){
-        return shootNoTurret(targeting::getHubBotVelCompensated);
-    }
-    public Command shootHubVelComp(){
-        return shoot(targeting::getHubBotVelCompensated);
-    }
-
-    public Command pass(){
-        return shoot(targeting::getPassBotVelCompensated);
-    }
-
-    /** Bring the hood down for trench purposes */
-    public Command stow(){
-        return Commands.parallel(
-            // flywheel.setRPM(targets), //Leave uncommanded
-            hood.stow()
-            // turret.setAngle(targets) //Leave uncommanded
-        )
-        .beforeStarting(()->stowed=true)
-        .finallyDo(()->stowed=false)
-        ;
-    }
-
-    public Command testTurretVoltage(DoubleSupplier voltage){
-        return turret.setVoltage(voltage);
-    }
-
-
-    // For tuning LUTs, read 
-    public Command shootWithDashboardValues(){
+  // For tuning LUTs, read
+  public Command shootWithDashboardValues() {
     // return Commands.none();
     // SmartDashboard.putNumber("robotContainer/hoodAngle", 0);
     // SmartDashboard.putNumber("robotContainer/flywheelrpm", 0);
-    return this.shoot(()->new TargetingSystem.ShooterState(
-      Degrees.of(-180), 
-      Degrees.of(SmartDashboard.getNumber("robotContainer/hoodAngle", hood.getAngle().in(Degrees))), 
-      SmartDashboard.getNumber("robotContainer/flywheelrpm", flywheel.getRPM())));
-    }
-
-    //Not implimented
-    // public Command doTheObviousThingDriversWant(){
-    //     Supplier<TargetingSystem.ShooterState> bestState = ()->{
-
-    //         //some logic. not in.
-    //         var target = targeting.getBestTarget();
-    //         targeting.getHub();
-    //         return targeting.getPass();
-            
-    //     };
-
-    //     return shoot(bestState);
-    // }
-    
+    return this.shoot(() -> new TargetingSystem.ShooterState(
+      Degrees.of(-180),
+      Degrees.of(SmartDashboard.getNumber("robotContainer/hoodAngle", hood.getAngle().in(Degrees))),
+      SmartDashboard.getNumber("robotContainer/flywheelrpm", flywheel.getRPM()))
+    );
+  }
 }

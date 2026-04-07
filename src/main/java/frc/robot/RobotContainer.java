@@ -12,7 +12,6 @@ import com.stormbots.CRTAbsoluteEncoder;
 
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.SerialPort;
 import edu.wpi.first.wpilibj.SerialPort.Port;
@@ -20,6 +19,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
+import edu.wpi.first.wpilibj2.command.ScheduleCommand;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
@@ -88,9 +88,17 @@ public class RobotContainer {
     configureDebugBindings();
 
 
-   
+    //Initial sync mayfail
     CRTAbsoluteEncoder.getInstance().sync();
-
+    //Rerun once it's happy and ready
+    Commands.sequence(
+      Commands.waitUntil(CRTAbsoluteEncoder.getInstance()::isReady),
+      Commands.runOnce(CRTAbsoluteEncoder.getInstance()::sync)
+    )
+    .ignoringDisable(true)
+    .schedule()
+    ;
+    
     //I DONT WANT TO GET RID OF THIS STUFF YET IDK WHATS GOING ON HERE
     // new Trigger(DriverStation::isEnabled)
     // .whileTrue(
@@ -143,8 +151,6 @@ public class RobotContainer {
     // .whileTrue(Commands.waitSeconds(1).andThen(spindexer.feedToShooter()))
     // ;
 
-    // debug.a()
-    // .whileTrue(shooter.testTurretVoltage(()->debug.getLeftY()*8));
   }
 
 
@@ -154,24 +160,6 @@ public class RobotContainer {
       ()->-driver.getLeftX()*2.0,
       ()->-driver.getRightX()*2.0
     ));
-
-
-
-
-    //TODO: PROGRAMMING DEBUG BUTTONS CODE REMOVE ME
-
-
-    // driver.start().onTrue(
-    //   Commands.sequence(
-    //     new InstantCommand(()->questnav.wantToTrack(false)),
-    //     swerve.zeroGyro(),
-    //     //    IFFFF QUEST IS GOOD BUT CAMS AREN'T, UNCOMMENT THIS AND HAVE JACOB GO TO CORNER FOR ZERO
-    //     new InstantCommand(()->questnav.setQuestPose(new Pose3d(swerve.getSwervePose()))),
-    //     new WaitCommand(0.5),
-    //     new InstantCommand(()->questnav.wantToTrack(true)),
-    //     Commands.none()
-    //   ).withTimeout(0.1)
-    // );
 
     driver.start().onTrue(
       Commands.sequence(
@@ -190,16 +178,12 @@ public class RobotContainer {
       )
     );
      
-
-
     driver.rightTrigger()
       .whileTrue(swerve.turnToHeading(()->new Rotation2d(Degrees.of(-90)))
     );
     driver.leftTrigger()
       .whileTrue(swerve.turnToHeading(()->new Rotation2d(Degrees.of(90)))
     );
-   
-    // END PROGRAMMING DEBUG BUTTONS
 
     driver.leftBumper().whileTrue(
       swerve.setPrimaryInputs(
@@ -210,38 +194,30 @@ public class RobotContainer {
     );
 
     driver.a().whileTrue(swerve.turnToHeading(()->new Rotation2d())); // face swerve away from driver
-    // driver.b() //TODO: face any 45 to prepare for bump crossing
 
-    driver.x() // extend intake // This button is useless and will never be used
+    driver.x() // extend intake
     .whileTrue(intake.intake())
-
     .whileFalse(intake.stop());
 
-    driver.y().whileTrue(intake.eject()); //intake eject //also will never be used
-
-    // driver.(back left paddle) //global stow/defense mode
+    driver.y().whileTrue(intake.eject()); //intake eject
 
     driver.povUp().whileTrue(shooter.testHome());
-    //  driver.y().whileTrue(shooter.testSetHoodAngle(Degrees.of(30)));
-
   }
 
 
   private void configureOperatorBindings() {
 
-    // operator.a()
-    // .whileTrue(shooter.testTurretVoltage(()->operator.getLeftY()*3));
+    operator.povRight()
+    .whileTrue(shooter.testTurretVoltage(()->operator.getLeftY()*3));
 
     operator.rightTrigger()
     .whileTrue(shootHub())
     .whileTrue(wled.signals.automaticShot().repeatedly());
-    // .whileTrue(intake.shootingStow());
     ;
 
     operator.rightBumper()
     .whileTrue(fixedShot())
     .whileTrue(wled.signals.manualShot().repeatedly());
-    // .whileTrue(intake.shootingStow());
     ;
 
     operator.povLeft()
@@ -252,19 +228,13 @@ public class RobotContainer {
     operator.leftTrigger()
     .whileTrue(pass())
     .whileTrue(wled.signals.automaticShot().repeatedly());
-    // .whileTrue(intake.shootingStow());
     ;
 
     //Simple Climber Lineup
     operator.leftBumper()
     .whileTrue(fixedPass())
     .whileTrue(wled.signals.manualShot().repeatedly());
-    // .whileTrue(intake.shootingStow());
     ;
-    
-    //DO TS LATER
-    // operator.povDown()
-    // .whileTrue(globalStow());
 
     operator.povUp()
     .whileTrue(spindexer.unclog());
@@ -281,14 +251,13 @@ public class RobotContainer {
     .whileTrue(shooter.shootWithDashboardValues())
     .whileTrue(Commands.waitSeconds(1).andThen(spindexer.feedToShooterForce()))
     .whileTrue(wled.signals.wrongShot().repeatedly())
-    // .whileTrue(intake.shootingStow());
     ;
 
     operator.a()
     .whileTrue(fixedPassOpp())
     .whileTrue(wled.signals.manualShot().repeatedly());
-    // .whileTrue(intake.shootingStow());
     ;
+
     //Operator Climber Lineup command
     //NOTE: Driver may want a swerve.turnToHeading() for this; 
     //Omitted due to prior odometry issues proving to be a risk factor
@@ -296,65 +265,16 @@ public class RobotContainer {
     .whileTrue(Commands.parallel(
       // climber.prepareForClimbL1(),
       swerve.addSecondaryInputsTrueFielcentric(()->climber.generateSwerveInputs(swerve.getSwervePose())),
-
+      swerve.turnToHeading(()->new Rotation2d(Degrees.of(-90))),
       Commands.none()
     )
     // .until(climber::isLinedUpWithL1)
     // .andThen(climber.climbL1())
     );
 
-
-    // operator.povUp().whileTrue(spindexer.unclog()); // shake dye rotor / unclog
-
-    //MAN GRABBER DO TS
-    // operator.y()
-    // .whileTrue(grabberstuffs);
-    // STAGE 2 STUFFS
-    // operator.x()
-    // .whileTrue(command);
-    // operator.leftBumper()
-    //   .whileTrue(climber.prepareForClimbL1())
-    //   .onFalse(climber.climbL1())
-    // ;
-
-    // operator.rightBumper()
-    // .whileTrue(fixedPassOpp());
-    // operator.y()
-    // .whileTrue(fixedPass())
-    // ;
-
-    // //  CLIMBER STUFFS, OBVIOUSLY MASSIVE COMMENTED CODE IS CHOPPED BUT NEEDS TO STAY FOR NOW
-    // // operator.rightBumper() stage2 hook up, lock out if not end of match  
-    // // operator.rightBumper().whileTrue(climber.setStage2Voltage(12));
-    // // // operator.rightTrigger() stage2 hook down, lock out if not end of match
-    // // operator.rightTrigger().whileTrue(climber.setStage2Voltage(-12));
-    // operator.povUp().whileTrue(spindexer.unclog()); // shake dye rotor / unclog
-
-    // operator.povDown().whileTrue(intake.eject()); // intake.eject()
-
-    operator.povRight()
-    .whileTrue(shootHub())
-    ;
-
-    // operator.povRight()
-    // .whileTrue(pathing.followPathTeamFlipped(new Path("CenterShootAuto")));
-    // operator.povLeft()
-    // .whileTrue(swerve.pidToPose(()->new Pose2d(2.0, 2.6, new Rotation2d(Degrees.of(180)))));
-
     // //TALK TO ABBY MAKE THIS A DIFFERENT BUTTON
     // operator.povRight()
     // .whileTrue(fixedShot());
-
-    // operator.a().whileTrue(climber.stow()); // global stow (unnecessary, this is default)
-    // operator.povLeft().whileTrue(climber.goHome());
-
-
-    // operator.b()// passing: Face driver station wall and launch at fixed rpm/angle/distance
-    // .whileTrue(pass())
-    // ;
-
-    // // operator.back() // re-home intake, hood, turret? hood? not doing this rn
-
   }
 
   //BUTTON FUNCTIONS/STATES
@@ -366,41 +286,36 @@ public class RobotContainer {
       shooter.pass(),
       spindexer.feedToShooter()
     );
-    }
-    public Command shootHub(){
-      return new ParallelCommandGroup(
-        swerve.turnToHeadingWithinTurretRange(()->{
-          return targeting.getHeadingToTarget(swerve.getSwervePose().getTranslation(), targeting.getHubTarget()).plus(new Rotation2d(Degrees.of(-153.5)));
-        }),
-        shooter.shootHubVelComp(),
-        spindexer.feedToShooter()
-        );
-    }
-    public Command fixedShot(){
-      return new ParallelCommandGroup(
-        shooter.shoot(()->targeting.fixedShot()),
-        new WaitCommand(0.5).andThen(spindexer.feedToShooterForce())
-      );
-    }
-    public Command fixedPass(){
-      return new ParallelCommandGroup(
-        shooter.shoot(()->targeting.fixedPassNeutral()),
-        new WaitCommand(0.5).andThen(spindexer.feedToShooterForce())
-      );
-    }
-    public Command fixedPassOpp(){
-      return new ParallelCommandGroup(
-        shooter.shoot(()->targeting.fixedPassOppAlliance()),
-        new WaitCommand(0.5).andThen(spindexer.feedToShooterForce())
-      );
-    }
+  }
 
-  
-  
+  public Command shootHub(){
+    return new ParallelCommandGroup(
+      swerve.turnToHeadingWithinTurretRange(()->{
+        return targeting.getHeadingToTarget(swerve.getSwervePose().getTranslation(), targeting.getHubTarget()).plus(new Rotation2d(Degrees.of(-153.5)));
+      }),
+      shooter.shootHubVelComp(),
+      spindexer.feedToShooter()
+    );
+  }
 
-  public Command getAutonomousCommand() {
-    //TODO: Get this from Autos.java instead
-   
-    return Commands.print("No autonomous command configured");
+  public Command fixedShot(){
+    return new ParallelCommandGroup(
+      shooter.shoot(()->targeting.fixedShot()),
+      new WaitCommand(0.5).andThen(spindexer.feedToShooterForce())
+    );
+  }
+
+  public Command fixedPass(){
+    return new ParallelCommandGroup(
+      shooter.shoot(()->targeting.fixedPassNeutral()),
+      new WaitCommand(0.5).andThen(spindexer.feedToShooterForce())
+    );
+  }
+
+  public Command fixedPassOpp(){
+    return new ParallelCommandGroup(
+      shooter.shoot(()->targeting.fixedPassOppAlliance()),
+      new WaitCommand(0.5).andThen(spindexer.feedToShooterForce())
+    );
   }
 }

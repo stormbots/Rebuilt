@@ -113,5 +113,4 @@ public class Intake extends SubsystemBase {
       rollers.setVoltage(2)
     );
   }
-  
 }
