@@ -28,12 +28,13 @@ public class ShiftTracking {
         }
     }
 
-    private Boolean isScoringShift(){
+
+    public Boolean isScoringShift(){
         double offset = 3.5;
         double time = Timer.getMatchTime();
         if(DriverStation.isTeleopEnabled()){
             //endgame period
-            if (time <= 30+offset){
+            if (time <= 30){
                 return true;
             }
             //transition shift
@@ -42,15 +43,41 @@ public class ShiftTracking {
             }
             //alliance shifts
             else if (didWeWinAuto()){
-                return (((time < 105+offset) && (time > 80-offset)) || ((time < 55+offset) && (time > 30-offset)));
+                return (((time < 105) && (time > 80-offset)) || ((time < 55) && (time > 30-offset)));
             }
             else{
-                return !(((time < 105+offset) && (time > 80-offset)) || ((time < 55+offset) && (time > 30-offset)));
+                return !(((time < 105-offset) && (time > 80)) || ((time < 55-offset) && (time > 30)));
             }
         }
         else{
             return false;
         }
+    }
+
+
+    public double timeRemainingTillSwitch(){
+        double time = Timer.getMatchTime();
+        double offset = 3.0;
+        if (time <= 30+offset){
+            return time;
+        }
+        else if(time >= 130)
+        {
+            return time-130.0;
+        }
+        else if((time <= 130) && (time > 105)){
+            return time-105;
+        }
+        else if((time <= 105) && (time > 80)){
+            return time-80.0;
+        }
+        else if((time <= 80) && (time > 55)){
+            return time-55.0;
+        }
+        else if((time <= 55) && (time > 30)){
+            return time-30.0;
+        }
+        return time;
     }
     
 }

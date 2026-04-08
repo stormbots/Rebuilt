@@ -60,7 +60,10 @@ public class Robot extends TimedRobot {
   }
 
   @Override
-  public void disabledInit() {}
+  public void disabledInit() {
+    SmartDashboard.putBoolean("ShiftTracker", robotContainer.shiftTracking.isScoringShift());
+    SmartDashboard.putNumber("TimeRemaing", robotContainer.shiftTracking.timeRemainingTillSwitch());
+  }
 
   @Override
   public void disabledPeriodic() {
@@ -99,7 +102,10 @@ public class Robot extends TimedRobot {
   }
 
   @Override
-  public void teleopPeriodic() {}
+  public void teleopPeriodic() {
+    SmartDashboard.putBoolean("ShiftTracker", robotContainer.shiftTracking.isScoringShift());
+    SmartDashboard.putNumber("TimeRemaing", robotContainer.shiftTracking.timeRemainingTillSwitch());
+  }
 
   @Override
   public void teleopExit() {}
