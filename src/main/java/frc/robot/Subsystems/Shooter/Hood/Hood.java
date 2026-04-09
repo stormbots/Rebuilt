@@ -51,9 +51,12 @@ public class Hood extends SubsystemBase {
 
   Trigger isAtHome = new Trigger(()->!homed && motor.getOutputCurrent() > kHomeCurrentThreshold).debounce(0.1);
 
+  Trigger isInTrench;
+
   /** Creates a new Hood. */
-  public Hood() {
+  public Hood(Trigger isInTrench) {
     motor.configure(getMotorConfig(), ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+    this.isInTrench = isInTrench;
 
     setDefaultCommand(setAngle(()->Degrees.of(0.0), ()->Degrees.of(0.5)));
   }
@@ -104,13 +107,17 @@ public class Hood extends SubsystemBase {
 
   public Command setAngle(Supplier<Angle> angle, Supplier<Angle> tolerance){
     return run(()->{
+      if(!isInTrench.getAsBoolean()){
       this.targetAngle = angle.get();
       this.tolerance = tolerance.get();
       motor.getClosedLoopController().setSetpoint(
         targetAngle.in(Degrees),
         ControlType.kPosition
       );
-    });
+      }
+      else{
+      stow();
+      }});
   }
 
   public void stop(){

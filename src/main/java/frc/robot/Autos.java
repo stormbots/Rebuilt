@@ -313,7 +313,7 @@ public class Autos {
 
   public Command redDepot() {
     return Commands.sequence(
-      // basicShootInitial8().withTimeout(2.0),
+      basicShootInitial8().withTimeout(2.0),
       pathing.followPathTeamFlipped(new Path("depotAuto")).withTimeout(12),
       climbAutoRedLeft()
     );
@@ -321,12 +321,9 @@ public class Autos {
 
   public Command blueDepot() {
     return Commands.sequence(
+      basicShootInitial8().withTimeout(2.0),
       pathing.followPath(new Path("depotAuto")).withTimeout(12),
-      pathing.followPathTeamFlipped(new Path("climbAuto")).withTimeout(3.0),
-      swerve.addSecondaryInputsTrueFielcentric(() -> climber.generateSwerveInputs(swerve.getSwervePose()))
-        .withTimeout(3.0),
-      climber.prepareForClimbL1().withTimeout(2.0),
-      climber.climbL1()
+      climbAutoBlueLeft()
     );
   }
 

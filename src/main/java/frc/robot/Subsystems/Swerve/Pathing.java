@@ -11,6 +11,7 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import edu.wpi.first.wpilibj2.command.WaitCommand;
 import frc.robot.Subsystems.Intake.Intake;
 import frc.robot.Subsystems.Shooter.Shooter;
 import frc.robot.Subsystems.Spindexer.Spindexer;
@@ -98,7 +99,7 @@ public class Pathing extends SubsystemBase {
   public Command shootAuto(){
     return new ParallelCommandGroup(
       shooter.shootHubVelComp(),
-      spindexer.feedToShooter()
+      spindexer.feedToShooterForce()
     );
   }
 
@@ -106,7 +107,7 @@ public class Pathing extends SubsystemBase {
     return new ParallelCommandGroup(
       intake.intake(),
       shooter.pass(),
-      spindexer.feedToShooter()
+      spindexer.feedToShooterForce()
     );
   }
 
@@ -114,7 +115,7 @@ public class Pathing extends SubsystemBase {
     return new ParallelCommandGroup(
       intake.intake(),
       shooter.shootHubVelComp(),
-      spindexer.feedToShooter()
+      spindexer.feedToShooterForce()
     );
   }
 }

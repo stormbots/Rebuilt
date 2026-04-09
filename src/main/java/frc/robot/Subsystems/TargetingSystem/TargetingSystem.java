@@ -72,8 +72,7 @@ public class TargetingSystem extends SubsystemBase {
   // double timescalar = 1.0;
   // double distanceoffset = 0.0;
   double fudgeFactor = 0.0;
-  double fudgeScalar = 0.95;
-  double distFactor = 10.0;
+  double distFactor = -3.0;
   // distance, hoodangle, flywheel rpm, TOF
   LUT hubLUT = new LUT(new double[][]{
     //EVERYTHING UNDER THIS IS PROBABLY ACTUALLY CORRECT
@@ -102,7 +101,8 @@ public class TargetingSystem extends SubsystemBase {
     {156+distFactor, 23, 2540+fudgeFactor, 135/fps },
     {180+distFactor, 25, 2670+fudgeFactor, 142/fps },
     {204+distFactor, 25, 2770+fudgeFactor, 156/fps },
-    {216+distFactor, 25, 2800+fudgeFactor, 160/fps } //observed TOF: +/-3 frames
+    {216+distFactor, 25, 2800+fudgeFactor, 160/fps }, //observed TOF: +/-3 frames
+    {230+distFactor, 25, 2875+fudgeFactor, 160/fps }
   });
 
   //distance, hoodangle, flywheel rpm

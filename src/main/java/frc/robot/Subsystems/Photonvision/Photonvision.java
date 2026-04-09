@@ -27,6 +27,7 @@ import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Subsystems.Swerve.Swerve;
 
 public class Photonvision extends SubsystemBase {
@@ -46,6 +47,8 @@ public class Photonvision extends SubsystemBase {
   private Matrix<N3, N1> currentStdDevs = VecBuilder.fill(Double.MAX_VALUE, Double.MAX_VALUE, Double.MAX_VALUE);
   private Matrix<N3, N1> singleTagStdDevs = VecBuilder.fill(.75, .75, 4);
   private Matrix<N3, N1> multiTagStdDevs = VecBuilder.fill(0.5, 0.5, 1);
+
+  public Trigger shouldNotTrack;
 
   private Transform3d rightCameraToCenter = new Transform3d(
     new Translation3d(
@@ -88,7 +91,8 @@ public class Photonvision extends SubsystemBase {
   /** Creates a new Photonvision.
    *  @param swerve 
    */
-  public Photonvision(Swerve swerve) {
+  public Photonvision(Swerve swerve, Trigger shouldNotTrack) {
+    this.shouldNotTrack = shouldNotTrack;
     this.swerve = swerve;
     SmartDashboard.putData("visionfield", visionField2d);
 
@@ -127,20 +131,22 @@ public class Photonvision extends SubsystemBase {
   }
 
   public void updateOdometry(){
-    if(rightCamera.isPresent()){
-      updateCameraSideOdometry(frontRightEstimator, rightCamera.get());
-    }
+    if(!shouldNotTrack.getAsBoolean()){
+      if(rightCamera.isPresent()){
+        updateCameraSideOdometry(frontRightEstimator, rightCamera.get());
+      }
 
-    if(frontLeftCamera.isPresent()){
-      updateCameraSideOdometry(frontLeftEstimator, frontLeftCamera.get());
-    }
+      if(frontLeftCamera.isPresent()){
+        updateCameraSideOdometry(frontLeftEstimator, frontLeftCamera.get());
+      }
 
-    if(backLeftCamera.isPresent()){
-      updateCameraSideOdometry(backLeftEstimator, backLeftCamera.get());
-    }
-    
-    if(backRightCamera.isPresent()){
-      updateCameraSideOdometry(backRightEstimator, backRightCamera.get());
+      if(backLeftCamera.isPresent()){
+        updateCameraSideOdometry(backLeftEstimator, backLeftCamera.get());
+      }
+      
+      if(backRightCamera.isPresent()){
+        updateCameraSideOdometry(backRightEstimator, backRightCamera.get());
+      }
     }
   }
 

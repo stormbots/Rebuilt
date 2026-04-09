@@ -18,13 +18,16 @@ import frc.robot.Subsystems.Shooter.Flywheel.Flywheel;
 import frc.robot.Subsystems.Shooter.Hood.Hood;
 import frc.robot.Subsystems.Shooter.Turret.Turret;
 import frc.robot.Subsystems.Shooter.Turret.TurretVisual;
+import frc.robot.Subsystems.Swerve.Swerve;
 import frc.robot.Subsystems.TargetingSystem.TargetingSystem;
 
 public class Shooter {
+  Swerve swerve;
   Flywheel flywheel = new Flywheel();
+  Hood hood = new Hood(new Trigger(()->(
+    (swerve.getSwervePose().getX() >= 4.3 && swerve.getSwervePose().getX() <= 5.08) 
+    || (swerve.getSwervePose().getX() >= 11.47 && swerve.getSwervePose().getX() <= 12.43))));
   Turret turret = new Turret();
-  Hood hood = new Hood();
-
   TargetingSystem targeting;
 
   /**
@@ -42,16 +45,18 @@ public class Shooter {
   Trigger visualUpdater = new Trigger(DriverStation::isEnabled).onTrue(
       Commands.run(() -> visual.update(turret.getAngle())));
 
-  public Shooter(TargetingSystem targeting) {
+  public Shooter(TargetingSystem targeting, Swerve swerve) {
+    this.swerve = swerve;
     this.targeting = targeting;
     //TODO: Enable once we're happy with the turret not jamming
-    // turret.setDefaultCommand(turret.setAngle(targeting::getTurretTracking));
+    turret.setDefaultCommand(turret.setAngle(targeting::getTurretTracking));
   }
 
   public Command shoot(Supplier<TargetingSystem.ShooterState> targets) {
     return Commands.parallel(
       flywheel.setRPM(targets),
       hood.setAngle(targets),
+      
       // turret.setAngle(targets)
       //TODO: fix settrap so we can use it instead.
       turret.setAngleTrap(targets) 
@@ -107,6 +112,10 @@ public class Shooter {
       shot,
       Commands.waitSeconds(1 / fuelPerSecond))
       .repeatedly();
+  }
+
+  public double getFlywheelRpm(){
+    return flywheel.getRPM();
   }
 
   public Command shootHub() {

@@ -19,7 +19,6 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
-import edu.wpi.first.wpilibj2.command.ScheduleCommand;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
@@ -42,14 +41,24 @@ public class RobotContainer {
 
 
   Swerve swerve = new Swerve();
-  Photonvision photonvision = new Photonvision(swerve);
   TargetingSystem targeting = new TargetingSystem(swerve);
-  Shooter shooter = new Shooter(targeting);
+  Shooter shooter = new Shooter(targeting, swerve);
   Intake intake = new Intake();
   Climber climber = new Climber();
   Spindexer spindexer = new Spindexer(shooter.isReadyToAcceptFuel.and(swerve::isOnTargetAngle));
   QuestNavSubsystem questnav = new QuestNavSubsystem(swerve);
   Pathing pathing = new Pathing(swerve, shooter, intake, spindexer, targeting);
+  Photonvision photonvision = new Photonvision(swerve, (
+    new Trigger(()->shooter.getFlywheelRpm()>=1000.0)
+    // shooter.isReadyToAcceptFuel
+    // .and(()->shooter.getFlywheelRpm()>=100.0)
+    // .and(
+    //   ()->Math.hypot(
+    //       swerve.getFieldRelativeChassisSpeeds().vxMetersPerSecond, 
+    //       swerve.getFieldRelativeChassisSpeeds().vyMetersPerSecond
+    //     )>=1.0
+    //   )
+      ));
   WLED wled = new WLED(new SerialPort(115200, Port.kUSB1),photonvision);
   Autos autos = new Autos(swerve, shooter, intake, questnav, spindexer, pathing, targeting, climber);
   ShiftTracking shiftTracking = new ShiftTracking();
@@ -284,7 +293,7 @@ public class RobotContainer {
         return targeting.getHeadingToTarget(swerve.getSwervePose().getTranslation(), targeting.getPassTarget()).plus(new Rotation2d(Degrees.of(-153.5)));
       }),
       shooter.pass(),
-      spindexer.feedToShooter()
+      new WaitCommand(0.5).andThen(spindexer.feedToShooterForce())
     );
   }
 
@@ -294,7 +303,7 @@ public class RobotContainer {
         return targeting.getHeadingToTarget(swerve.getSwervePose().getTranslation(), targeting.getHubTarget()).plus(new Rotation2d(Degrees.of(-153.5)));
       }),
       shooter.shootHubVelComp(),
-      spindexer.feedToShooter()
+      new WaitCommand(0.5).andThen(spindexer.feedToShooterForce())
     );
   }
 

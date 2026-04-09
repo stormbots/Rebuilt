@@ -32,7 +32,7 @@ public class Flywheel extends SubsystemBase {
   SparkFlex followerMotor = new SparkFlex(18, MotorType.kBrushless);
 
   private double targetRPM = 0.0;
-  private double tolerance = 150.0;
+  private double tolerance = 250.0;
 
   /** Creates a new Flywheel. */
   public Flywheel() {

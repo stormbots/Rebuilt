@@ -138,7 +138,7 @@ public class Signals extends SubsystemBase {
       left.solidColor(CustomColor.kGreen)
     );
     }
-    else return reboot();
+    else return Commands.none();
     
   }
 
@@ -150,7 +150,7 @@ public class Signals extends SubsystemBase {
       left.solidColor(CustomColor.kPurple)
     );
     }
-    else return reboot();
+    else return Commands.none();
   }
 
   public Command wrongShot(){
