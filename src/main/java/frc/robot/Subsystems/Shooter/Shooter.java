@@ -45,16 +45,16 @@ public class Shooter {
   public Shooter(TargetingSystem targeting) {
     this.targeting = targeting;
     //TODO: Enable once we're happy with the turret not jamming
-    turret.setDefaultCommand(turret.setAngle(targeting::getTurretTracking));
+    // turret.setDefaultCommand(turret.setAngle(targeting::getTurretTracking));
   }
 
   public Command shoot(Supplier<TargetingSystem.ShooterState> targets) {
     return Commands.parallel(
       flywheel.setRPM(targets),
       hood.setAngle(targets),
-      turret.setAngle(targets)
+      // turret.setAngle(targets)
       //TODO: fix settrap so we can use it instead.
-      // turret.setAngleTrap(targets) 
+      turret.setAngleTrap(targets) 
     );
   }
 

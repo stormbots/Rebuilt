@@ -131,19 +131,26 @@ public class Signals extends SubsystemBase {
   }
 
   public Command automaticShot(){
-    return Commands.sequence(
-    right.solidColor(CustomColor.kGreen),
-    center.solidColor(CustomColor.kGreen),
-    left.solidColor(CustomColor.kGreen)
-  );
+    if (right.col == null || !right.col[0].equals(CustomColor.kWhite)){
+      return Commands.sequence(
+      right.solidColor(CustomColor.kGreen),
+      center.solidColor(CustomColor.kGreen),
+      left.solidColor(CustomColor.kGreen)
+    );
+    }
+    else return reboot();
+    
   }
 
   public Command manualShot(){
-    return Commands.sequence(
-    right.solidColor(CustomColor.kPurple),
-    center.solidColor(CustomColor.kPurple),
-    left.solidColor(CustomColor.kPurple)
-  );
+    if (right.col == null || !right.col[0].equals(CustomColor.kWhite)){
+      return Commands.sequence(
+      right.solidColor(CustomColor.kPurple),
+      center.solidColor(CustomColor.kPurple),
+      left.solidColor(CustomColor.kPurple)
+    );
+    }
+    else return reboot();
   }
 
   public Command wrongShot(){

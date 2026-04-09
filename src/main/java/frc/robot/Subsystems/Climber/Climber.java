@@ -62,7 +62,7 @@ public class Climber extends SubsystemBase {
       stage1.setPrepareCurrentLimit(),
       new WaitCommand(0.25),
       Commands.parallel(
-          stage1.setHeight(Inches.of(8.25)),
+          stage1.setHeight(Inches.of(7.5)),
           grabber.retractPartial()))
     .finallyDo(stage1::stopMotor)
     .withName("PrepareToClimb");

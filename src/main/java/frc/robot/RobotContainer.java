@@ -61,7 +61,7 @@ public class RobotContainer {
 
   CommandXboxController driver = new CommandXboxController(0);
   CommandXboxController operator = new CommandXboxController(1);
-  // CommandXboxController debug = new CommandXboxController(3);
+  CommandXboxController debug = new CommandXboxController(3);
   Path testingPath = new Path("goCollect");
   Double rpm = 2600.0;
   Double hoodAngle = 25.0;
@@ -146,7 +146,7 @@ public class RobotContainer {
     // debug.y().whileTrue(swerve.pidToPose(()->new Pose2d(7.7, 7.4, new Rotation2d(Math.PI/2))));
     // debug.povRight().whileTrue(swerve.pidToPose(()->new Pose2d(12.5, 7.4, new Rotation2d())));
     // debug.povLeft().whileTrue(swerve.pidToPose(()->new Pose2d(12.5, 0.6, new Rotation2d())));
-    // debug.x()
+    debug.x().whileTrue(spindexer.setVoltages(3, 5));
     // .whileTrue(shooter.shootWithDashboardValues())
     // .whileTrue(Commands.waitSeconds(1).andThen(spindexer.feedToShooter()))
     // ;
@@ -220,10 +220,10 @@ public class RobotContainer {
     .whileTrue(wled.signals.manualShot().repeatedly());
     ;
 
-    operator.povLeft()
-    .whileTrue(shooter.shootWithDashboardValues())
-    .whileTrue(Commands.waitSeconds(1).andThen(spindexer.feedToShooter()))
-    ;
+    // operator.povLeft()
+    // .whileTrue(shooter.shootWithDashboardValues())
+    // .whileTrue(Commands.waitSeconds(1).andThen(spindexer.feedToShooter()))
+    // ;
 
     operator.leftTrigger()
     .whileTrue(pass())
@@ -247,11 +247,11 @@ public class RobotContainer {
     .whileTrue(climber.prepareForClimbL1())
     .onFalse(climber.climbL1());
 
-    operator.x()
-    .whileTrue(shooter.shootWithDashboardValues())
-    .whileTrue(Commands.waitSeconds(1).andThen(spindexer.feedToShooterForce()))
-    .whileTrue(wled.signals.wrongShot().repeatedly())
-    ;
+    // operator.x()
+    // .whileTrue(shooter.shootWithDashboardValues())
+    // .whileTrue(Commands.waitSeconds(1).andThen(spindexer.feedToShooterForce()))
+    // .whileTrue(wled.signals.wrongShot().repeatedly())
+    // ;
 
     operator.a()
     .whileTrue(fixedPassOpp())
