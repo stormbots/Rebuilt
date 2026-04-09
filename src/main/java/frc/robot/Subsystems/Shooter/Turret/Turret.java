@@ -131,21 +131,23 @@ public class Turret extends SubsystemBase {
 
   public Command setAngleTrap(Supplier<Angle> position, Supplier<Angle> tolerance) {
     return startRun(()->{
-        double normalizedPosition = MathUtil.clamp(
-          position.get().in(Degrees) > kMaxRotation ? position.get().in(Degrees) - 360.0 : position.get().in(Degrees),
+        double normalizedPosition = position.get().in(Degrees) > kMaxRotation ? position.get().in(Degrees) - 360.0 : position.get().in(Degrees);
+        double clampedPosition = MathUtil.clamp(
+          normalizedPosition,
           kMinRotation+3, kMaxRotation-3
         );
-        goalState = new TrapezoidProfile.State(normalizedPosition, 0);
+        goalState = new TrapezoidProfile.State(clampedPosition, 0);
         currentState = new TrapezoidProfile.State(getAngle().in(Degrees), getVelocity().in(DegreesPerSecond));
         this.targetPosition = Degrees.of(normalizedPosition);
         this.tolerance = tolerance.get();
       },
       ()->{
-        double normalizedPosition = MathUtil.clamp(
-          position.get().in(Degrees) > kMaxRotation ? position.get().in(Degrees) - 360.0 : position.get().in(Degrees),
+        double normalizedPosition = position.get().in(Degrees) > kMaxRotation ? position.get().in(Degrees) - 360.0 : position.get().in(Degrees);
+        double clampedPosition = MathUtil.clamp(
+          normalizedPosition,
           kMinRotation+3, kMaxRotation-3
         );
-        goalState = new TrapezoidProfile.State(normalizedPosition, 0);
+        goalState = new TrapezoidProfile.State(clampedPosition, 0);
         this.targetPosition = Degrees.of(normalizedPosition);
         this.tolerance = tolerance.get();
         currentState = trapProfile.calculate(0.02, currentState, goalState);
@@ -153,7 +155,7 @@ public class Turret extends SubsystemBase {
         SmartDashboard.putNumber("shooter/turret/trapposition", currentState.position);
         SmartDashboard.putNumber("shooter/turret/trapvelocity", currentState.velocity);
         motor.getClosedLoopController().setSetpoint(
-          goalState.position,
+          currentState.position,
           ControlType.kPosition,
           ClosedLoopSlot.kSlot0,
           ff,

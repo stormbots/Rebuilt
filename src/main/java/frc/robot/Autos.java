@@ -111,7 +111,7 @@ public class Autos {
     this.targeting = targeting;
     this.climber = climber;
 
-    SmartDashboard.putData("AutoSelector/chooser", autoChooser);
+    
     // FORCE SET POSE IS CHOPPED DO NOT USE, shouldn't even be on their dashboard,
     // needs fixing and could still prove useful
     SmartDashboard.putBoolean("ForceSetPose", SmartDashboard.getBoolean("ForceSetPose", false));
@@ -135,6 +135,7 @@ public class Autos {
     autoChooser.setDefaultOption("Select Auto", () -> new InstantCommand());
     autoChooser.addOption("VV UNTESTED VV", () -> new InstantCommand());
     autoChooser.addOption("ClimbAutoChoppedWhyAreWeDoingThisIWannaShootSoBad", this::climbAutoRedLeft); // best name ever
+    SmartDashboard.putData("AutoSelector/chooser", autoChooser);
   }
 
   // Get Auto Command
@@ -269,7 +270,8 @@ public class Autos {
       pathing.followPath(climbAutoRedSide).withTimeout(4.0),
       new ParallelCommandGroup(
         swerve.addSecondaryInputsTrueFielcentric(()->climber.generateSwerveInputs(swerve.getSwervePose())),
-        swerve.turnToHeading(()->new Rotation2d(Degrees.of(-90)))).withTimeout(2.0),
+        swerve.turnToHeading(()->new Rotation2d(Degrees.of(-90))),
+        intake.stop().asProxy()).withTimeout(3.0),
       climber.prepareForClimbL1().withTimeout(4.5),
       climber.climbL1()
     );
@@ -280,7 +282,9 @@ public class Autos {
       pathing.followPathTeamFlipped(climbAutoRedSide).withTimeout(3.0),
       new ParallelCommandGroup(
         swerve.addSecondaryInputsTrueFielcentric(()->climber.generateSwerveInputs(swerve.getSwervePose())),
-        swerve.turnToHeading(()->new Rotation2d(Degrees.of(90)))).withTimeout(2.0),
+        swerve.turnToHeading(()->new Rotation2d(Degrees.of(90))),
+        intake.stop().asProxy()
+        ).withTimeout(3.0),
       climber.prepareForClimbL1().withTimeout(4.5),
       climber.climbL1()
     );
@@ -292,7 +296,8 @@ public class Autos {
       pathing.followPath(climbAutoRedSide),
       new ParallelCommandGroup(
         swerve.addSecondaryInputsTrueFielcentric(()->climber.generateSwerveInputs(swerve.getSwervePose())),
-        swerve.turnToHeading(()->new Rotation2d(Degrees.of(90))))
+        swerve.turnToHeading(()->new Rotation2d(Degrees.of(90))),
+        intake.stop().asProxy())
       // climber.prepareForClimbL1().withTimeout(1.0),
       // climber.climbL1()
     );

@@ -72,7 +72,7 @@ public class TargetingSystem extends SubsystemBase {
   // double timescalar = 1.0;
   // double distanceoffset = 0.0;
   double fudgeFactor = 0.0;
-  double distFactor = -3.0;
+  double distFactor = 3.0;
   // distance, hoodangle, flywheel rpm, TOF
   LUT hubLUT = new LUT(new double[][]{
     //EVERYTHING UNDER THIS IS PROBABLY ACTUALLY CORRECT
