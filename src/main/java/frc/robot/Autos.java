@@ -267,13 +267,13 @@ public class Autos {
 
   public Command climbAutoRedLeft() {
     return Commands.sequence(
-      pathing.followPath(climbAutoRedSide).withTimeout(5.0).until(()->climber.rangefinders.isDetectable()),
+      pathing.followPath(climbAutoRedSide).withTimeout(5.0).until(climber.rangefinders.isDetectableTrigger),
       new ParallelCommandGroup(
         swerve.addSecondaryInputsTrueFielcentric(()->climber.generateSwerveInputs(swerve.getSwervePose())),
         swerve.turnToHeading(()->new Rotation2d(Degrees.of(-90))),
         intake.stop().asProxy()
       )
-      .until(()->climber.rangefinders.isLinedUpL1())
+      .until(climber.rangefinders.isLinedupL1Trigger)
       .withTimeout(6.0),
       climber.prepareForClimbL1().withTimeout(4.5)
       .alongWith(swerve.addSecondaryInputsTrueFielcentric(()->climber.generateSwerveInputs(swerve.getSwervePose()))),
@@ -283,13 +283,13 @@ public class Autos {
 
   public Command climbAutoBlueLeft() {
     return Commands.sequence(
-      pathing.followPathTeamFlipped(climbAutoRedSide).withTimeout(5.0).until(()->climber.rangefinders.isDetectable()),
+      pathing.followPathTeamFlipped(climbAutoRedSide).withTimeout(5.0).until(climber.rangefinders.isDetectableTrigger),
       new ParallelCommandGroup(
         swerve.addSecondaryInputsTrueFielcentric(()->climber.generateSwerveInputs(swerve.getSwervePose())),
         swerve.turnToHeading(()->new Rotation2d(Degrees.of(90))),
         intake.stow().asProxy()
         )
-      .until(()->climber.rangefinders.isLinedUpL1())
+      .until(climber.rangefinders.isLinedupL1Trigger)
       .withTimeout(6.0),
       climber.prepareForClimbL1().withTimeout(4.5)
       .alongWith(swerve.addSecondaryInputsTrueFielcentric(()->climber.generateSwerveInputs(swerve.getSwervePose()))),

@@ -8,6 +8,7 @@ import static edu.wpi.first.units.Units.Inches;
 
 import com.stormbots.LaserCanWrapper;
 
+import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Subsystems.Swerve.Swerve.SwerveInputs;
 
 /** Add your docs here. */
@@ -22,11 +23,15 @@ public class Rangefinders {
    */
   public SwerveInputs generateInputs(double facingAngleDegrees) {
     swerveInputs.clear();
+    swerveInputs.ty = 0.05; //Alwyas scoot forward in case we lose it for a moment
+
     if (left.isBreakBeamTripped.getAsBoolean() && right.isBreakBeamTripped.getAsBoolean()) {
       swerveInputs.ty = 0.05;
     } else if (left.isBreakBeamTripped.getAsBoolean()) {
+      swerveInputs.clear();
       swerveInputs.tx = -0.05;
     } else if (right.isBreakBeamTripped.getAsBoolean()) {
+      swerveInputs.clear();
       swerveInputs.tx = 0.05;
     }
 
@@ -50,6 +55,8 @@ public class Rangefinders {
     return leftOk || rightOk;
   }
 
+  public Trigger isDetectableTrigger = new Trigger(this::isDetectable).debounce(0.1); 
+  public Trigger isLinedupL1Trigger = new Trigger(this::isLinedUpL1).debounce(0.1); 
 
 
 }
