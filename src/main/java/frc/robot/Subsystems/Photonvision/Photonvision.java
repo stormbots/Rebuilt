@@ -9,6 +9,7 @@ import static edu.wpi.first.units.Units.Meters;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import org.photonvision.EstimatedRobotPose;
 import org.photonvision.PhotonCamera;
@@ -203,6 +204,12 @@ public class Photonvision extends SubsystemBase {
   }
 
   public void updateEstimationStdDevs(Optional<EstimatedRobotPose> estimatedPose, List<PhotonTrackedTarget> targets){
+
+    //avoid checking trench tags: 23,22,1,12,28,17,6,7
+    for(var badtarget: Set.of(23,22,1,12,28,17,6,7)) {
+      targets.removeIf((t)->t.getFiducialId() == badtarget);
+    }
+
     if( estimatedPose.isEmpty() ){
       currentStdDevs = singleTagStdDevs;
     } else{

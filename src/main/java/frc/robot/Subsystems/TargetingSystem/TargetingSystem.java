@@ -71,7 +71,6 @@ public class TargetingSystem extends SubsystemBase {
   double fps=240.0;
   // double timescalar = 1.0;
   // double distanceoffset = 0.0;
-  double fudgeFactor = -20.0;
   double distFactor = -3.0;
   // distance, hoodangle, flywheel rpm, TOF
   LUT hubLUT = new LUT(new double[][]{
@@ -92,17 +91,19 @@ public class TargetingSystem extends SubsystemBase {
     // {16*12+24+distanceoffset, 23, 2850+fudgeFactor+15, 0.8*timescalar}
 
     //Quinn doesn't seem to want to delete things so adding new lines
-    { 41,  5, 2045+fudgeFactor, 129/fps },
-    { 41+distFactor,  5, 2245+fudgeFactor, 129/fps },
-    { 60+distFactor, 10, 2245+fudgeFactor, 127/fps },
-    { 84+distFactor, 20, 2345+fudgeFactor, 114/fps },
-    {108+distFactor, 23, 2345+fudgeFactor, 117/fps },
-    {132+distFactor, 23, 2490+fudgeFactor, 129/fps },
-    {156+distFactor, 23, 2540+fudgeFactor, 135/fps },
-    {180+distFactor, 25, 2670+fudgeFactor, 142/fps },
-    {204+distFactor, 25, 2770+fudgeFactor, 156/fps },
-    {216+distFactor, 25, 2800+fudgeFactor, 160/fps }, //observed TOF: +/-3 frames
-    {230+distFactor, 25, 2875+fudgeFactor, 160/fps }
+    { 41,  5, 2045, 129/fps },
+    { 41+distFactor,  5, 2245, 129/fps },
+    { 60+distFactor, 10, 2245, 127/fps },
+    { 84+distFactor, 20, 2345, 114/fps },
+    {108+distFactor, 23, 2345, 117/fps },
+    {132+distFactor, 23, 2490, 129/fps },
+    {156+distFactor, 23, 2540, 135/fps },
+    {180+distFactor, 25, 2670, 142/fps },
+    {204+distFactor, 25, 2770, 156/fps },
+    {216+distFactor, 25, 2800, 160/fps }, //observed TOF: +/-3 frames
+    {230+distFactor, 25, 2875, 160/fps }
+
+    //far corner
   });
 
   //distance, hoodangle, flywheel rpm
@@ -207,7 +208,7 @@ public class TargetingSystem extends SubsystemBase {
     var entry = lut.get(magnitude.in(Inches));   
     var tof = entry[3];
 
-    Translation2d botVelocityTranslation = new Translation2d(botVelocity.get().vxMetersPerSecond*1.3, botVelocity.get().vyMetersPerSecond*1.2);
+    Translation2d botVelocityTranslation = new Translation2d(botVelocity.get().vxMetersPerSecond*1.0, botVelocity.get().vyMetersPerSecond*1.0);
 
     //Bot velocity * Time of Flight = how much impact in the unit of distance the bots velocity will have on the shot
     //Since we want to compensate for this, find the inverse of this vector and apply to our target
