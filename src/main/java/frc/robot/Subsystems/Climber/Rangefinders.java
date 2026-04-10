@@ -39,8 +39,8 @@ public class Rangefinders {
   }
 
   public boolean isLinedUpL1() {
-    var leftOk = left.getDistanceOptional().orElse(Inches.of(12)).lt(Inches.of(5));
-    var rightOk = right.getDistanceOptional().orElse(Inches.of(12)).lt(Inches.of(5));
+    var leftOk = left.getDistanceOptional().orElse(Inches.of(12)).lt(Inches.of(5.25));
+    var rightOk = right.getDistanceOptional().orElse(Inches.of(12)).lt(Inches.of(5.25));
     return leftOk && rightOk;
   }
 

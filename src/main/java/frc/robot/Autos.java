@@ -267,25 +267,32 @@ public class Autos {
 
   public Command climbAutoRedLeft() {
     return Commands.sequence(
-      pathing.followPath(climbAutoRedSide).withTimeout(4.0).until(()->climber.rangefinders.isDetectable()),
+      pathing.followPath(climbAutoRedSide).withTimeout(5.0).until(()->climber.rangefinders.isDetectable()),
       new ParallelCommandGroup(
         swerve.addSecondaryInputsTrueFielcentric(()->climber.generateSwerveInputs(swerve.getSwervePose())),
         swerve.turnToHeading(()->new Rotation2d(Degrees.of(-90))),
-        intake.stop().asProxy()).withTimeout(3.0),
-      climber.prepareForClimbL1().withTimeout(4.5),
+        intake.stop().asProxy()
+      )
+      .until(()->climber.rangefinders.isLinedUpL1())
+      .withTimeout(6.0),
+      climber.prepareForClimbL1().withTimeout(4.5)
+      .alongWith(swerve.addSecondaryInputsTrueFielcentric(()->climber.generateSwerveInputs(swerve.getSwervePose()))),
       climber.climbL1()
     );
   }
 
   public Command climbAutoBlueLeft() {
     return Commands.sequence(
-      pathing.followPathTeamFlipped(climbAutoRedSide).withTimeout(4.0).until(()->climber.rangefinders.isDetectable()),
+      pathing.followPathTeamFlipped(climbAutoRedSide).withTimeout(5.0).until(()->climber.rangefinders.isDetectable()),
       new ParallelCommandGroup(
         swerve.addSecondaryInputsTrueFielcentric(()->climber.generateSwerveInputs(swerve.getSwervePose())),
         swerve.turnToHeading(()->new Rotation2d(Degrees.of(90))),
-        intake.stop().asProxy()
-        ).withTimeout(3.0),
-      climber.prepareForClimbL1().withTimeout(4.5),
+        intake.stow().asProxy()
+        )
+      .until(()->climber.rangefinders.isLinedUpL1())
+      .withTimeout(6.0),
+      climber.prepareForClimbL1().withTimeout(4.5)
+      .alongWith(swerve.addSecondaryInputsTrueFielcentric(()->climber.generateSwerveInputs(swerve.getSwervePose()))),
       climber.climbL1()
     );
   }
@@ -297,13 +304,11 @@ public class Autos {
       new ParallelCommandGroup(
         swerve.addSecondaryInputsTrueFielcentric(()->climber.generateSwerveInputs(swerve.getSwervePose())),
         swerve.turnToHeading(()->new Rotation2d(Degrees.of(90))),
-        intake.stop().asProxy())
+        intake.stow().asProxy())
       // climber.prepareForClimbL1().withTimeout(1.0),
       // climber.climbL1()
     );
   }
-
-
 
   public Command PassingAutoBlueRIGHT() {
     shootIntitialPath.mirror();

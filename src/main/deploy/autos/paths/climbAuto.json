@@ -13,6 +13,11 @@
       }
     },
     {
+      "type": "event_trigger",
+      "t_ratio": 0.0,
+      "lib_key": "intakeStow"
+    },
+    {
       "type": "waypoint",
       "translation_target": {
         "x_meters": 15.435,
