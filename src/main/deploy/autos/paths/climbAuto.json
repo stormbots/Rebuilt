@@ -11,6 +11,18 @@
         "rotation_radians": -1.5707963267948966,
         "profiled_rotation": true
       }
+    },
+    {
+      "type": "waypoint",
+      "translation_target": {
+        "x_meters": 15.435,
+        "y_meters": 4.395412844036699,
+        "intermediate_handoff_radius_meters": 0.2
+      },
+      "rotation_target": {
+        "rotation_radians": -1.5707963267948966,
+        "profiled_rotation": true
+      }
     }
   ],
   "constraints": {
@@ -19,6 +31,11 @@
         "value": 0.09,
         "start_ordinal": 0,
         "end_ordinal": 0
+      },
+      {
+        "value": 0.05,
+        "start_ordinal": 1,
+        "end_ordinal": 1
       }
     ]
   }

@@ -8,6 +8,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Subsystems.Spindexer.DyeRotor.DyeRotor;
 import frc.robot.Subsystems.Spindexer.UpGoer.UpGoer;
@@ -38,8 +39,8 @@ public class Spindexer extends SubsystemBase{
 
   public Command feedToShooter(){
     var feed = Commands.parallel(
-      dyeRotor.feed(),
-      upGoer.feed()
+      upGoer.feed(),
+      new WaitCommand(0.25).andThen(dyeRotor.feed())
     );
 
     return Commands.repeatingSequence(
@@ -50,8 +51,8 @@ public class Spindexer extends SubsystemBase{
 
   public Command feedToShooterForce(){
     var feed = Commands.parallel(
-      dyeRotor.feed(),
-      upGoer.feed()
+    upGoer.feed(),
+    new WaitCommand(0.25).andThen(dyeRotor.feed())
     );
 
     return feed;

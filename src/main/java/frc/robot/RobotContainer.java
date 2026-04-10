@@ -49,7 +49,7 @@ public class RobotContainer {
   QuestNavSubsystem questnav = new QuestNavSubsystem(swerve);
   Pathing pathing = new Pathing(swerve, shooter, intake, spindexer, targeting);
   Photonvision photonvision = new Photonvision(swerve, (
-    new Trigger(()->shooter.getFlywheelRpm()>=1000.0)
+    new Trigger(()->shooter.getFlywheelRpm()>=1000.0).and(()->(!DriverStation.isAutonomous()))
     // shooter.isReadyToAcceptFuel
     // .and(()->shooter.getFlywheelRpm()>=100.0)
     // .and(

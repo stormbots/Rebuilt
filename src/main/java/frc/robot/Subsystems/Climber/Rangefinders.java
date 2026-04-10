@@ -43,4 +43,13 @@ public class Rangefinders {
     var rightOk = right.getDistanceOptional().orElse(Inches.of(12)).lt(Inches.of(5));
     return leftOk && rightOk;
   }
+
+  public boolean isDetectable() {
+    var leftOk = left.getDistanceOptional().orElse(Inches.of(24)).lt(Inches.of(11));
+    var rightOk = right.getDistanceOptional().orElse(Inches.of(24)).lt(Inches.of(11));
+    return leftOk || rightOk;
+  }
+
+
+
 }

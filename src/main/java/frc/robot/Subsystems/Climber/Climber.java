@@ -23,7 +23,7 @@ public class Climber extends SubsystemBase {
   public static Distance kStage1Range = Inches.of(8.25);
   public static Distance kStage2Range = Inches.of(20);
 
-  private Rangefinders rangefinders = new Rangefinders();
+  public Rangefinders rangefinders = new Rangefinders();
 
   ClimberExtension stage1 = new ClimberExtension("Stage1", 19, true, kStage1Range);
 

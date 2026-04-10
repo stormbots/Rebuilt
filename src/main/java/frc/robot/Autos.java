@@ -267,7 +267,7 @@ public class Autos {
 
   public Command climbAutoRedLeft() {
     return Commands.sequence(
-      pathing.followPath(climbAutoRedSide).withTimeout(4.0),
+      pathing.followPath(climbAutoRedSide).withTimeout(4.0).until(()->climber.rangefinders.isDetectable()),
       new ParallelCommandGroup(
         swerve.addSecondaryInputsTrueFielcentric(()->climber.generateSwerveInputs(swerve.getSwervePose())),
         swerve.turnToHeading(()->new Rotation2d(Degrees.of(-90))),
@@ -279,7 +279,7 @@ public class Autos {
 
   public Command climbAutoBlueLeft() {
     return Commands.sequence(
-      pathing.followPathTeamFlipped(climbAutoRedSide).withTimeout(3.0),
+      pathing.followPathTeamFlipped(climbAutoRedSide).withTimeout(4.0).until(()->climber.rangefinders.isDetectable()),
       new ParallelCommandGroup(
         swerve.addSecondaryInputsTrueFielcentric(()->climber.generateSwerveInputs(swerve.getSwervePose())),
         swerve.turnToHeading(()->new Rotation2d(Degrees.of(90))),
