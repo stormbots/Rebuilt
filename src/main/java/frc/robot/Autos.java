@@ -92,7 +92,7 @@ public class Autos {
   Path shootIntitialPath = new Path("shootInitial");
   Path postShootToClimb = new Path("postShootingToClimb");
   Path climbAutoRedSide = new Path("climbAuto");
-  Path defensePrep = new Path("defensePrep");
+  // Path defensePrep = new Path("defensePrep");
 
   public Autos(
       Swerve swerve,
@@ -138,6 +138,9 @@ public class Autos {
 
     autoChooser.addOption("BL Defense Prep", this::thisIsStupidBlueLeft);
     autoChooser.addOption("BR Defense Prep", this::thisIsStupidBlueRight);
+
+    ///THESE ARENT RIGHT
+    /// Now they are >:)
     autoChooser.addOption("RL Defense Prep", this::thisIsStupidRedLeft);
     autoChooser.addOption("RR Defense Prep", this::thisIsStupidRedRight);
 
@@ -279,37 +282,41 @@ public class Autos {
   public Command thisIsStupidBlueLeft(){
     return Commands.sequence(
       basicShootInitial8().withTimeout(2.25),
-      pathing.followPath(defensePrep)
+      pathing.followPath(new Path("defensePrep"))
     )
     // .withName("DefenseBlueLeft")
     ;
   }
 
   public Command thisIsStupidBlueRight(){
-    defensePrep.mirror();
+    Path defenseFlipped = new Path("defensePrep");
+    defenseFlipped.mirror();
     return Commands.sequence(
       basicShootInitial8().withTimeout(2.25),
-      pathing.followPath(defensePrep)
+      pathing.followPath(defenseFlipped)
     )
     // .withName("DefenseBlueRight")
     ;
 
   }
 
+  //actually runs right, fixme
   public Command thisIsStupidRedLeft(){
     return Commands.sequence(
       basicShootInitial8().withTimeout(2.25),
-      pathing.followPathTeamFlipped(defensePrep)
+      pathing.followPathTeamFlipped(new Path("defensePrep"))
     )
     // .withName("DefenseRedLeft")
     ;
   }
 
+  //actually runs left, fixme
   public Command thisIsStupidRedRight(){
-    defensePrep.mirror();
+    Path defenseFlipper = new Path("defensePrep");
+    defenseFlipper.mirror();
     return Commands.sequence(
       basicShootInitial8().withTimeout(2.25),
-      pathing.followPathTeamFlipped(defensePrep)
+      pathing.followPathTeamFlipped(defenseFlipper)
     )
     // .withName("DefenseRedRight")
     ;
