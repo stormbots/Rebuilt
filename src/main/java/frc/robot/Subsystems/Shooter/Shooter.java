@@ -37,7 +37,7 @@ public class Shooter {
   private boolean stowed = false;
 
   // TODO: Sync this method/concept with shooter code
-  public Trigger isReadyToAcceptFuel = new Trigger(() -> flywheel.getOnTarget() && hood.getOnTarget() && turret.getOnTarget() && stowed == false).debounce(0.05);
+  public Trigger isReadyToAcceptFuel = new Trigger(() -> flywheel.getOnTarget() && hood.getOnTarget() && turret.getOnTarget() && stowed == false).debounce(0.1);
 
   /** Just set up the mechanism2d so we can visualize the system all at once */
   // ShooterVisual visual = new ShooterVisual(flywheel, hood, turret);

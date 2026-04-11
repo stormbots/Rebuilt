@@ -25,16 +25,6 @@ public class Rangefinders {
     swerveInputs.clear();
     swerveInputs.ty = 0.05; //Alwyas scoot forward in case we lose it for a moment
 
-    if (left.isBreakBeamTripped.getAsBoolean() && right.isBreakBeamTripped.getAsBoolean()) {
-      swerveInputs.ty = 0.05;
-    } else if (left.isBreakBeamTripped.getAsBoolean()) {
-      swerveInputs.clear();
-      swerveInputs.tx = -0.05;
-    } else if (right.isBreakBeamTripped.getAsBoolean()) {
-      swerveInputs.clear();
-      swerveInputs.tx = 0.05;
-    }
-
     if (facingAngleDegrees == 90) {
       // flip outputs for going the other field direction
       swerveInputs.tx *= -1;
@@ -50,8 +40,8 @@ public class Rangefinders {
   }
 
   public boolean isDetectable() {
-    var leftOk = left.getDistanceOptional().orElse(Inches.of(24)).lt(Inches.of(11));
-    var rightOk = right.getDistanceOptional().orElse(Inches.of(24)).lt(Inches.of(11));
+    var leftOk = left.getDistanceOptional().orElse(Inches.of(24)).lt(Inches.of(6));
+    var rightOk = right.getDistanceOptional().orElse(Inches.of(24)).lt(Inches.of(6));
     return leftOk || rightOk;
   }
 

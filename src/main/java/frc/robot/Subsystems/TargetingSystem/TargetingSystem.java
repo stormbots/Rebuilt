@@ -44,7 +44,7 @@ public class TargetingSystem extends SubsystemBase {
 
     public Angle turretTolerance = Degrees.of(1.5);
     public Angle hoodTolerance = Degrees.of(0.5);
-    public double flywheelTolerance = 75;
+    public double flywheelTolerance = 1000;
 
     public ShooterState(Angle turretAngle, Angle hoodAngle, double flywheelRPM){
       this.turretAngle = turretAngle;
@@ -71,7 +71,7 @@ public class TargetingSystem extends SubsystemBase {
   double fps=240.0;
   // double timescalar = 1.0;
   // double distanceoffset = 0.0;
-  double distFactor = -3.0;
+  double distFactor = 10.0;
   // distance, hoodangle, flywheel rpm, TOF
   LUT hubLUT = new LUT(new double[][]{
     //EVERYTHING UNDER THIS IS PROBABLY ACTUALLY CORRECT
@@ -356,12 +356,12 @@ public class TargetingSystem extends SubsystemBase {
   }
 
   public ShooterState fixedShot(){
-    return new ShooterState(Degrees.of(180), Degrees.of(10),2210 );
+    return new ShooterState(Degrees.of(-180), Degrees.of(10),2210 );
   }
   public ShooterState fixedPassNeutral(){
-    return new ShooterState(Degrees.of(180), Degrees.of(45),3200 );
+    return new ShooterState(Degrees.of(-180), Degrees.of(45),3200 );
   }
   public ShooterState fixedPassOppAlliance(){
-    return new ShooterState(Degrees.of(180), Degrees.of(40),3600 );
+    return new ShooterState(Degrees.of(-180), Degrees.of(40),3600 );
   }
 }

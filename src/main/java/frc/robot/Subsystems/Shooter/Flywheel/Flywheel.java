@@ -67,11 +67,11 @@ public class Flywheel extends SubsystemBase {
     return run(()->{
       this.targetRPM = rpm.getAsDouble();
       this.tolerance = tolerance.getAsDouble();
-      // leaderMotor.getClosedLoopController().setSetpoint(
-      //   targetRPM, 
-      //   SparkBase.ControlType.kVelocity
-      // );
-      leaderMotor.setVoltage(rpm.getAsDouble()*0.0024309 * 4000 / 5174.083984 * 2725 / 2516.0);
+      leaderMotor.getClosedLoopController().setSetpoint(
+        targetRPM, 
+        SparkBase.ControlType.kVelocity
+      );
+      // leaderMotor.setVoltage(rpm.getAsDouble()*0.0024309 * 4000 / 5174.083984 * 2725 / 2516.0);
     });
   }
 
@@ -80,7 +80,7 @@ public class Flywheel extends SubsystemBase {
   }
 
   public boolean getOnTarget(){
-    return MathUtil.isNear(targetRPM, leaderMotor.getEncoder().getVelocity(), tolerance*6);
+    return MathUtil.isNear(targetRPM, leaderMotor.getEncoder().getVelocity(), tolerance);
   }
 
   private SparkBaseConfig getMotorConfig(){
@@ -95,17 +95,17 @@ public class Flywheel extends SubsystemBase {
 
     config.closedLoop
       .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
-      .p(0.0)
+      .p(0.0/200.0)
       .i(0.000000)
       .d(0.0)
     .feedForward
-      .kV(0.0024309 * 4000 / 5174.083984 * 2725 / 2516.0)
+      .kV(0.0024309 * 4000 / 5174.083984 * 2725 / 2516.0 * 2210 / 2290)
     ;
 
     config.encoder
-      .uvwMeasurementPeriod(8)
-      .quadratureAverageDepth(2)
-      .quadratureMeasurementPeriod(8)
+      // .uvwMeasurementPeriod(8)
+      // .quadratureAverageDepth(2)
+      // .quadratureMeasurementPeriod(8)
       .positionConversionFactor(kGearing)
       .velocityConversionFactor(kGearing) //Do NOT divide by 60, rpm is desired, not rps
     ;

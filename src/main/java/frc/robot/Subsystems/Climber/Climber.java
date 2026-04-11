@@ -14,6 +14,7 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Subsystems.Climber.ClimberExtension.ClimberExtension;
 import frc.robot.Subsystems.Climber.Grabber.Grabber;
 import frc.robot.Subsystems.Swerve.Swerve.SwerveInputs;
@@ -22,6 +23,8 @@ import frc.robot.Subsystems.Swerve.Swerve.SwerveInputs;
 public class Climber extends SubsystemBase {
   public static Distance kStage1Range = Inches.of(8.25);
   public static Distance kStage2Range = Inches.of(20);
+  
+  double l1Height = 7.95;
 
   public Rangefinders rangefinders = new Rangefinders();
 
@@ -39,6 +42,8 @@ public class Climber extends SubsystemBase {
   @Override
   public void periodic() {
     SmartDashboard.putNumber("climber/position", (stage1.getHeight().in(Inches)));
+    SmartDashboard.putBoolean("climber/isAtl1", isAboveL1Rung.getAsBoolean());
+    SmartDashboard.putBoolean("climber/linedupl1", isLinedUpWithL1());
   }
 
   public Command goHome() {
@@ -62,7 +67,7 @@ public class Climber extends SubsystemBase {
       stage1.setPrepareCurrentLimit(),
       new WaitCommand(0.25),
       Commands.parallel(
-          stage1.setHeight(Inches.of(7.95)),
+          stage1.setHeight(Inches.of(l1Height)),
           grabber.retractPartial()))
     .finallyDo(stage1::stopMotor)
     .withName("PrepareToClimb");
@@ -77,6 +82,7 @@ public class Climber extends SubsystemBase {
     .finallyDo(stage1::stopMotor)
     .withName("Climb");
   }
+
 
   public Command prePrepareForClimbL1(){
     return Commands.sequence(
@@ -117,4 +123,6 @@ public class Climber extends SubsystemBase {
   public boolean isLinedUpWithL1() {
     return rangefinders.isLinedUpL1();
   }
+
+  public Trigger isAboveL1Rung = new Trigger(()->stage1.getHeight().gt(Inches.of(l1Height-0.05))).debounce(0.4);
 }

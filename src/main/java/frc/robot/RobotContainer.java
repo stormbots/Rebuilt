@@ -18,6 +18,7 @@ import edu.wpi.first.wpilibj.SerialPort.Port;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
@@ -49,7 +50,7 @@ public class RobotContainer {
   QuestNavSubsystem questnav = new QuestNavSubsystem(swerve);
   Pathing pathing = new Pathing(swerve, shooter, intake, spindexer, targeting);
   Photonvision photonvision = new Photonvision(swerve, (
-    new Trigger(()->shooter.getFlywheelRpm()>=1000.0).and(()->(!DriverStation.isAutonomous()))
+    new Trigger(()->shooter.getFlywheelRpm()>=10000.0).and(()->(!DriverStation.isAutonomous()))
     // shooter.isReadyToAcceptFuel
     // .and(()->shooter.getFlywheelRpm()>=100.0)
     // .and(
@@ -271,11 +272,28 @@ public class RobotContainer {
     //NOTE: Driver may want a swerve.turnToHeading() for this; 
     //Omitted due to prior odometry issues proving to be a risk factor
     operator.y()
-    .whileTrue(Commands.parallel(
-      // climber.prepareForClimbL1(),
-      swerve.addSecondaryInputsTrueFielcentric(()->climber.generateSwerveInputs(swerve.getSwervePose())),
-      swerve.turnToHeading(()->new Rotation2d(Degrees.of(-90))),
-      Commands.none()
+    .whileTrue(
+      Commands.sequence(
+      new InstantCommand(()->System.out.println("0000000bruhbruh0")),
+      pathing.followPath(new Path("climbAuto"))
+      .withTimeout(5.0)
+      .until(climber.rangefinders.isLinedupL1Trigger),
+      new InstantCommand(()->System.out.println("11111111111111bruhbruhbruh1")),
+      new ParallelCommandGroup(
+        swerve.addSecondaryInputsTrueFielcentric(()->climber.generateSwerveInputs(swerve.getSwervePose())),
+        swerve.turnToHeading(()->new Rotation2d(Degrees.of(-90))),
+        intake.stow().asProxy(),
+        climber.prePrepareForClimbL1().asProxy(),
+        wled.signals.climbOkay()
+        )
+      .withTimeout(2.0),
+      new InstantCommand(()->System.out.println("222222222222bruhbruhbruh2")),
+      // .withTimeout(3.0),
+      climber.prepareForClimbL1()
+      .alongWith(swerve.addSecondaryInputsTrueFielcentric(()->climber.generateSwerveInputs(swerve.getSwervePose())))
+      .alongWith(wled.signals.manualShot()),
+      // .withTimeout(4.5),
+      climber.climbL1()
     )
     // .until(climber::isLinedUpWithL1)
     // .andThen(climber.climbL1())
@@ -293,7 +311,8 @@ public class RobotContainer {
         return targeting.getHeadingToTarget(swerve.getSwervePose().getTranslation(), targeting.getPassTarget()).plus(new Rotation2d(Degrees.of(-153.5)));
       }),
       shooter.pass(),
-      new WaitCommand(0.5).andThen(spindexer.feedToShooterForce())
+      new WaitCommand(1.0).andThen(spindexer.feedToShooterForce())
+      // spindexer.feedToShooter()
     );
   }
 
@@ -303,28 +322,32 @@ public class RobotContainer {
         return targeting.getHeadingToTarget(swerve.getSwervePose().getTranslation(), targeting.getHubTarget()).plus(new Rotation2d(Degrees.of(-153.5)));
       }),
       shooter.shootHubVelComp(),
-      new WaitCommand(0.5).andThen(spindexer.feedToShooterForce())
+      new WaitCommand(1.0).andThen(spindexer.feedToShooterForce())
+      // spindexer.feedToShooter()
     );
   }
 
   public Command fixedShot(){
     return new ParallelCommandGroup(
       shooter.shoot(()->targeting.fixedShot()),
-      new WaitCommand(0.5).andThen(spindexer.feedToShooterForce())
+      new WaitCommand(1.0).andThen(spindexer.feedToShooterForce())
+      // spindexer.feedToShooter()
     );
   }
 
   public Command fixedPass(){
     return new ParallelCommandGroup(
       shooter.shoot(()->targeting.fixedPassNeutral()),
-      new WaitCommand(0.5).andThen(spindexer.feedToShooterForce())
+      new WaitCommand(1.0).andThen(spindexer.feedToShooterForce())
+      // spindexer.feedToShooter()
     );
   }
 
   public Command fixedPassOpp(){
     return new ParallelCommandGroup(
       shooter.shoot(()->targeting.fixedPassOppAlliance()),
-      new WaitCommand(0.5).andThen(spindexer.feedToShooterForce())
+      // new WaitCommand(0.5).andThen(spindexer.feedToShooterForce())
+      spindexer.feedToShooter()
     );
   }
 }

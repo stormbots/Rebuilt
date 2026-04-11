@@ -92,6 +92,7 @@ public class Autos {
   Path shootIntitialPath = new Path("shootInitial");
   Path postShootToClimb = new Path("postShootingToClimb");
   Path climbAutoRedSide = new Path("climbAuto");
+  Path defensePrep = new Path("defensePrep");
 
   public Autos(
       Swerve swerve,
@@ -118,27 +119,37 @@ public class Autos {
     SmartDashboard.setPersistent("ForceSetPose");
 
     // ACTUAL OPTIONS BELOW HERE
-    autoChooser.addOption("Red Depot", this::redDepot);
-    autoChooser.addOption("Blue Depot", this::blueDepot);
-    autoChooser.addOption("ShootOnlyEight", this::basicShootToEmpty);
+    // autoChooser.addOption("Red Depot", this::redDepotNoSOTM);
+    // autoChooser.addOption("Blue Depot", this::blueDepotNoSOTM);
+    // autoChooser.addOption("Red Depot V2", this::redDepotButBetter);
+    // autoChooser.addOption("Blue Depot V2", this::blueDepotButBetter);
 
-    autoChooser.addOption("RL Center Auto", this::CenterShootAutoRedLEFT);
-    autoChooser.addOption("BL Center Auto", this::CenterShootAutoBlueLEFT);
-    autoChooser.addOption("RR  Center Auto", this::CenterShootAutoRedRIGHT);
-    autoChooser.addOption("BR Center Auto", this::CenterShootAutoBlueRIGHT);
+    // autoChooser.addOption("ShootOnlyEight", this::basicShootToEmpty);
 
-    autoChooser.addOption("RL Passing Auto", this::PassingAutoRedLEFT);
-    autoChooser.addOption("BL Passing Auto", this::PassingAutoBlueLEFT);
-    autoChooser.addOption("RR Passing Auto", this::PassingAutoRedRIGHT);
-    autoChooser.addOption("BR Passing Auto", this::PassingAutoBlueRIGHT);
+    // autoChooser.addOption("RL Center Auto", this::CenterShootAutoRedLEFT);
+    // autoChooser.addOption("BL Center Auto", this::CenterShootAutoBlueLEFT);
+    // autoChooser.addOption("RR  Center Auto", this::CenterShootAutoRedRIGHT);
+    // autoChooser.addOption("BR Center Auto", this::CenterShootAutoBlueRIGHT);
+
+    // autoChooser.addOption("RL Passing Auto", this::PassingAutoRedLEFT);
+    // autoChooser.addOption("BL Passing Auto", this::PassingAutoBlueLEFT);
+    // autoChooser.addOption("RR Passing Auto", this::PassingAutoRedRIGHT);
+    // autoChooser.addOption("BR Passing Auto", this::PassingAutoBlueRIGHT);
+
+    autoChooser.addOption("BL Defense Prep", this::thisIsStupidBlueLeft);
+    autoChooser.addOption("BR Defense Prep", this::thisIsStupidBlueRight);
+    autoChooser.addOption("RL Defense Prep", this::thisIsStupidRedLeft);
+    autoChooser.addOption("RR Defense Prep", this::thisIsStupidRedRight);
 
     autoChooser.setDefaultOption("Select Auto", () -> new InstantCommand());
-    autoChooser.addOption("VV UNTESTED VV", () -> new InstantCommand());
-    autoChooser.addOption("ClimbAutoChoppedWhyAreWeDoingThisIWannaShootSoBad", this::climbAutoRedLeft); // best name ever
+    // autoChooser.addOption("VV UNTESTED VV", () -> new InstantCommand());
+    // autoChooser.addOption("ClimbAutoChoppedWhyAreWeDoingThisIWannaShootSoBad", this::climbAutoBlueLeft); // best name ever
+
+    // autoChooser.onChange((cs)->System.out.print("Running selected auto " +cs.get().getName()));
     SmartDashboard.putData("AutoSelector/chooser", autoChooser);
   }
 
-  // Get Auto Command
+  // Get Auto Commandx
   public Command getAutonomousCommand() {
     return autoChooser.getSelected().get();
   }
@@ -265,36 +276,78 @@ public class Autos {
     );
   }
 
+  public Command thisIsStupidBlueLeft(){
+    return Commands.sequence(
+      basicShootInitial8().withTimeout(2.25),
+      pathing.followPath(defensePrep)
+    )
+    // .withName("DefenseBlueLeft")
+    ;
+  }
+
+  public Command thisIsStupidBlueRight(){
+    defensePrep.mirror();
+    return Commands.sequence(
+      basicShootInitial8().withTimeout(2.25),
+      pathing.followPath(defensePrep)
+    )
+    // .withName("DefenseBlueRight")
+    ;
+
+  }
+
+  public Command thisIsStupidRedLeft(){
+    return Commands.sequence(
+      basicShootInitial8().withTimeout(2.25),
+      pathing.followPathTeamFlipped(defensePrep)
+    )
+    // .withName("DefenseRedLeft")
+    ;
+  }
+
+  public Command thisIsStupidRedRight(){
+    defensePrep.mirror();
+    return Commands.sequence(
+      basicShootInitial8().withTimeout(2.25),
+      pathing.followPathTeamFlipped(defensePrep)
+    )
+    // .withName("DefenseRedRight")
+    ;
+  }
+
+
   public Command climbAutoRedLeft() {
     return Commands.sequence(
-      pathing.followPath(climbAutoRedSide).withTimeout(5.0).until(climber.rangefinders.isDetectableTrigger),
+      pathing.followPath(climbAutoRedSide).withTimeout(3.0),
       new ParallelCommandGroup(
         swerve.addSecondaryInputsTrueFielcentric(()->climber.generateSwerveInputs(swerve.getSwervePose())),
         swerve.turnToHeading(()->new Rotation2d(Degrees.of(-90))),
-        intake.stop().asProxy()
+        intake.stop().asProxy(),
+        climber.prePrepareForClimbL1().asProxy()
       )
-      .until(climber.rangefinders.isLinedupL1Trigger)
-      .withTimeout(6.0),
-      climber.prepareForClimbL1().withTimeout(4.5)
-      .alongWith(swerve.addSecondaryInputsTrueFielcentric(()->climber.generateSwerveInputs(swerve.getSwervePose()))),
+      .withTimeout(3.5),
+      climber.prepareForClimbL1().withTimeout(3.5),
       climber.climbL1()
-    );
+    )
+    // .withName("ClimbRedLeft")
+    ;
   }
 
   public Command climbAutoBlueLeft() {
     return Commands.sequence(
-      pathing.followPathTeamFlipped(climbAutoRedSide).withTimeout(5.0).until(climber.rangefinders.isDetectableTrigger),
+      pathing.followPathTeamFlipped(climbAutoRedSide).withTimeout(3.0),
       new ParallelCommandGroup(
         swerve.addSecondaryInputsTrueFielcentric(()->climber.generateSwerveInputs(swerve.getSwervePose())),
         swerve.turnToHeading(()->new Rotation2d(Degrees.of(90))),
-        intake.stow().asProxy()
+        intake.stow().asProxy(),
+        climber.prePrepareForClimbL1().asProxy()
         )
-      .until(climber.rangefinders.isLinedupL1Trigger)
-      .withTimeout(6.0),
-      climber.prepareForClimbL1().withTimeout(4.5)
-      .alongWith(swerve.addSecondaryInputsTrueFielcentric(()->climber.generateSwerveInputs(swerve.getSwervePose()))),
+      .withTimeout(3.5),
+      climber.prepareForClimbL1().withTimeout(3.5),
       climber.climbL1()
-    );
+    )
+    // .withName("ClimbBlueLeft")
+    ;
   }
 
   public Command climbAutoRedRight() {
@@ -329,10 +382,50 @@ public class Autos {
     );
   }
 
+  public Command redDepotButBetter(){
+    return Commands.sequence(
+      basicShootInitial8().withTimeout(2.0),
+      pathing.followPathTeamFlipped(new Path("depotAutoV2")).withTimeout(12),
+      climbAutoRedLeft()
+    );
+  }
+
+  public Command redDepotNoSOTM(){
+    return Commands.sequence(
+      basicShootInitial8().withTimeout(2.0),
+      pathing.followPathTeamFlipped(new Path("depotAutoSweep1")),
+      basicShootInitial8().withTimeout(2.5),
+      pathing.followPathTeamFlipped(new Path("depotAutoSweep2")),
+      basicShootInitial8().withTimeout(2.5),
+      climbAutoRedLeft()
+    )
+    // .withName("Red Depot Auto NOSOTM")
+    ;
+  }
+
+  public Command blueDepotNoSOTM(){
+    return Commands.sequence(
+      basicShootInitial8().withTimeout(2.0),
+      pathing.followPath(new Path("depotAutoSweep1")),
+      basicShootInitial8().withTimeout(2.5),
+      pathing.followPath(new Path("depotAutoSweep2")),
+      basicShootInitial8().withTimeout(2.5),
+      climbAutoBlueLeft()
+    );
+  }
+
   public Command blueDepot() {
     return Commands.sequence(
       basicShootInitial8().withTimeout(2.0),
       pathing.followPath(new Path("depotAuto")).withTimeout(12),
+      climbAutoBlueLeft()
+    );
+  }
+
+  public Command blueDepotButBetter() {
+    return Commands.sequence(
+      basicShootInitial8().withTimeout(2.0),
+      pathing.followPath(new Path("depotAutoV2")).withTimeout(12),
       climbAutoBlueLeft()
     );
   }
