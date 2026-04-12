@@ -118,7 +118,7 @@ public class RobotContainer {
 
     new Trigger(photonvision::doesNotHaveTarget)
     .and(DriverStation::isDisabled)
-    .and(()->DriverStation.getAlliance().isPresent())
+    .and(()->DriverStation.isDSAttached())
     .onFalse(wled.signals.showVisionOkay())
     .onTrue(wled.signals.reboot());
 

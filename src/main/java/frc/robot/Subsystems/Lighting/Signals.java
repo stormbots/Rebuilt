@@ -10,14 +10,9 @@ import java.util.Optional;
 
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
-import edu.wpi.first.wpilibj.SerialPort;
-import edu.wpi.first.wpilibj.SerialPort.Port;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
-import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import edu.wpi.first.wpilibj2.command.button.Trigger;
 /** Add your docs here. */
 public class Signals extends SubsystemBase {
   double[] ownedSegments=new double[]{0,1,2,3};
@@ -80,25 +75,25 @@ public class Signals extends SubsystemBase {
  public Command shiftStart(){
   return Commands.sequence(
     right.solidColor(CustomColor.kWhite),
-    Commands.runOnce(()->right.setBrightness(200),right),
+    Commands.runOnce(()->right.setBrightness(255),right),
     center.solidColor(CustomColor.kWhite),
-    Commands.runOnce(()->center.setBrightness(200),center),
+    Commands.runOnce(()->center.setBrightness(255),center),
     left.solidColor(CustomColor.kWhite),
-    Commands.runOnce(()->left.setBrightness(200),left),
+    Commands.runOnce(()->left.setBrightness(255),left),
     Commands.waitSeconds(1)
-  ).withName("ShiftChange");
+  );
  }
 
  public Command shiftEnd(){
   return Commands.sequence(
     right.blinkSmooth(128,CustomColor.kWhite),
-    Commands.runOnce(()->right.setBrightness(200),right),
+    Commands.runOnce(()->right.setBrightness(255),right),
     center.blinkSmooth(128,CustomColor.kWhite),
-    Commands.runOnce(()->center.setBrightness(200),center),
+    Commands.runOnce(()->center.setBrightness(255),center),
     left.blinkSmooth(128,CustomColor.kWhite),
-    Commands.runOnce(()->left.setBrightness(200),left),
+    Commands.runOnce(()->left.setBrightness(255),left),
     Commands.waitSeconds(1)
-  ).withName("ShiftChange");
+  );
  }
 
 
@@ -131,26 +126,21 @@ public class Signals extends SubsystemBase {
   }
 
   public Command automaticShot(){
-    if (right.col == null || !right.col[0].equals(CustomColor.kWhite)){
-      return Commands.sequence(
-      right.solidColor(CustomColor.kGreen),
-      center.solidColor(CustomColor.kGreen),
-      left.solidColor(CustomColor.kGreen)
+    return Commands.sequence(
+      right.automaticShot(),
+      center.automaticShot(),
+      left.automaticShot()
     );
-    }
-    else return reboot();
+    
     
   }
 
   public Command manualShot(){
-    if (right.col == null || !right.col[0].equals(CustomColor.kWhite)){
-      return Commands.sequence(
-      right.solidColor(CustomColor.kPurple),
-      center.solidColor(CustomColor.kPurple),
-      left.solidColor(CustomColor.kPurple)
+    return Commands.sequence(
+      right.manualShot(),
+      center.manualShot(),
+      left.manualShot()
     );
-    }
-    else return reboot();
   }
 
   public Command wrongShot(){

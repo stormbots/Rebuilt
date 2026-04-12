@@ -11,7 +11,6 @@ import java.util.function.Supplier;
 
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
@@ -353,6 +352,23 @@ public class LedSegment extends LedBase {
       }
     }
 
+    public boolean notShowingShiftChange(){
+      return col == null || !col[0].equals(CustomColor.kWhite);
+    }
+    private HashMap<Boolean,Command> shotMap(CustomColor color){
+      HashMap<Boolean,Command> map = new HashMap<>();
+      map.put(true, solidColor(color));
+      map.put(false, Commands.none());
+      return map;
+    }
+    public Command automaticShot(){
+      return Commands.select(shotMap(CustomColor.kGreen), ()->notShowingShiftChange());
+    }
+
+    public Command manualShot(){
+      return Commands.select(shotMap(CustomColor.kPurple), ()->notShowingShiftChange());
+    }
+
     
 
     public Command stripes(LedMultiRange colors){
@@ -361,10 +377,12 @@ public class LedSegment extends LedBase {
       }, this);      
     }
 
-    public Command noAprilTags(){
+    public Command shootWhileClimb(){
       return new InstantCommand(()->{
         setEffect(110);
-        setIntensity(1);
+        setPalette(11);
+        setSpeed(128);
+        setIntensity(128);
       }, this);
     }
 
