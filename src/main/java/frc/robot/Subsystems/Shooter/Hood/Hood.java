@@ -50,7 +50,10 @@ public class Hood extends SubsystemBase {
   private Angle tolerance = Degrees.of(3); 
 
 
+
   SparkMax motor = new SparkMax(15, MotorType.kBrushless);
+  HoodSim sim = new HoodSim(motor);
+
 
   Trigger isAtHome = new Trigger(()->!homed && motor.getOutputCurrent() > kHomeCurrentThreshold).debounce(0.1);
 
@@ -69,6 +72,11 @@ public class Hood extends SubsystemBase {
     SmartDashboard.putNumber("shooter/hood/position", motor.getEncoder().getPosition());
     SmartDashboard.putBoolean("shooter/hood/homed", homed);
     SmartDashboard.putBoolean("shooter/hood/suppressed", isSuppressed);
+  }
+
+  @Override
+  public void simulationPeriodic(){
+    sim.update();
   }
 
   private SparkBaseConfig getMotorConfig(){
