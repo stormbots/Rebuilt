@@ -145,6 +145,10 @@ public class RobotContainer {
     //update quest pose
     //onEnable
 
+    /** Suppress the hood while near the trench */
+    new Trigger(()->fieldBehaviour.getRetractHood(swerve.getSwervePose()))
+    .and(DriverStation::isTeleop) //TODO: Suppress just for Teleop or all enable?
+    .whileTrue( shooter.suppressForTrench() );
 
   }
 

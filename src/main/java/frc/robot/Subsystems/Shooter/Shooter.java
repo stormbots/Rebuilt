@@ -24,21 +24,18 @@ import frc.robot.Subsystems.TargetingSystem.TargetingSystem;
 public class Shooter {
   Swerve swerve;
   Flywheel flywheel = new Flywheel();
-  Hood hood = new Hood(new Trigger(()->(
-    (swerve.getSwervePose().getX() >= 4.3 && swerve.getSwervePose().getX() <= 5.08) 
-    || (swerve.getSwervePose().getX() >= 11.47 && swerve.getSwervePose().getX() <= 12.43))));
+  Hood hood = new Hood();
   Turret turret = new Turret();
   TargetingSystem targeting;
 
-  /**
-   * Represent the hood being suppressed for the trench, and block fuel in that
-   * case
-   */
-  private boolean stowed = false;
-
   // TODO: Sync this method/concept with shooter code
-  public Trigger isReadyToAcceptFuel = new Trigger(() -> flywheel.getOnTarget() && hood.getOnTarget() && turret.getOnTarget() && stowed == false).debounce(0.1);
-
+  public Trigger isReadyToAcceptFuel = new Trigger(() -> 
+    flywheel.getOnTarget() 
+    && hood.getOnTarget() 
+    && turret.getOnTarget() 
+    && hood.isSuppressed() == false
+  ).debounce(0.1);
+  
   /** Just set up the mechanism2d so we can visualize the system all at once */
   // ShooterVisual visual = new ShooterVisual(flywheel, hood, turret);
   TurretVisual visual = new TurretVisual(turret);
@@ -134,13 +131,19 @@ public class Shooter {
     return shoot(targeting::getPassBotVelCompensated);
   }
 
-  /** Bring the hood down for trench purposes */
+  /** Put the hood down as a standard command */
   public Command stow() {
     return Commands.parallel(
       hood.stow()
-    )
-    .beforeStarting(()->stowed = true)
-    .finallyDo(()->stowed = false);
+    );
+  }
+
+  /** Bring the hood down for trench purposes without interrupting existing
+   * sequences. Forcibly sets angle and not-on-target states.
+   * Does not require hood, and should be cancelled by the calling trigger.
+   */
+  public Command suppressForTrench() {
+    return hood.suppressForTrench();
   }
 
   public Command testTurretVoltage(DoubleSupplier voltage) {

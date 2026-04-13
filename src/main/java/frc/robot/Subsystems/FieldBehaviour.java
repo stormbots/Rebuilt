@@ -78,7 +78,7 @@ public class FieldBehaviour {
   private double redCenter = 11.887;
 
   // generate X coordinate offsets from centerline of obstacles
-  private double trenchHoodOffset = .65;
+  private double trenchHoodOffset = .5; //TODO: Figure out what the best hood distance is to avoid issues
 
   public double[] centerX = new double[] { blueCenter, redCenter };
   public double[] trenchY = new double[] { 0, 1.2, 6.7, 8 };

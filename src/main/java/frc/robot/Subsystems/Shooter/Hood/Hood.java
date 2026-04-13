@@ -22,6 +22,7 @@ import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.FunctionalCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.Command.InterruptionBehavior;
@@ -43,20 +44,19 @@ public class Hood extends SubsystemBase {
   public static final double maxAngle = 43.0;
 
   private boolean homed = true; //TODO:make actual homed thingy
+  private boolean isSuppressed = false;
 
   private Angle targetAngle = Degrees.of(minAngle);
   private Angle tolerance = Degrees.of(3); 
+
 
   SparkMax motor = new SparkMax(15, MotorType.kBrushless);
 
   Trigger isAtHome = new Trigger(()->!homed && motor.getOutputCurrent() > kHomeCurrentThreshold).debounce(0.1);
 
-  Trigger isInTrench;
-
   /** Creates a new Hood. */
-  public Hood(Trigger isInTrench) {
+  public Hood() {
     motor.configure(getMotorConfig(), ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
-    this.isInTrench = isInTrench;
 
     setDefaultCommand(setAngle(()->Degrees.of(0.0), ()->Degrees.of(0.5)));
   }
@@ -68,6 +68,7 @@ public class Hood extends SubsystemBase {
     SmartDashboard.putNumber("shooter/hood/voltage", motor.getAppliedOutput()*motor.getBusVoltage());
     SmartDashboard.putNumber("shooter/hood/position", motor.getEncoder().getPosition());
     SmartDashboard.putBoolean("shooter/hood/homed", homed);
+    SmartDashboard.putBoolean("shooter/hood/suppressed", isSuppressed);
   }
 
   private SparkBaseConfig getMotorConfig(){
@@ -107,17 +108,14 @@ public class Hood extends SubsystemBase {
 
   public Command setAngle(Supplier<Angle> angle, Supplier<Angle> tolerance){
     return run(()->{
-      if(!isInTrench.getAsBoolean()){
       this.targetAngle = angle.get();
+      var targetDegrees = isSuppressed ? 0 : this.targetAngle.in(Degrees);
       this.tolerance = tolerance.get();
       motor.getClosedLoopController().setSetpoint(
-        targetAngle.in(Degrees),
+        targetDegrees,
         ControlType.kPosition
       );
-      }
-      else{
-      stow();
-      }});
+    });
   }
 
   public void stop(){
@@ -129,6 +127,7 @@ public class Hood extends SubsystemBase {
   }
 
   public boolean getOnTarget(){
+    if(isSuppressed) return false;
     return MathUtil.isNear(targetAngle.in(Degrees), motor.getEncoder().getPosition(), tolerance.in(Degrees) + 2.5);
   }
 
@@ -185,5 +184,15 @@ public class Hood extends SubsystemBase {
 
   public Command stow(){
     return setAngle(()->Degrees.of(0), ()->Degrees.of(10));
+  }
+
+  /** Bring the hood down temporarily without disrupting existing commands */
+  public Command suppressForTrench(){
+    return Commands.startEnd(()->isSuppressed=true, ()->isSuppressed=false);
+  }
+
+  /** Indiate if something is suppressing the hood */
+  public boolean isSuppressed(){
+    return isSuppressed;
   }
 }
