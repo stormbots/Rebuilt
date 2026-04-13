@@ -24,9 +24,7 @@ import frc.robot.Subsystems.TargetingSystem.TargetingSystem;
 public class Shooter {
   Swerve swerve;
   Flywheel flywheel = new Flywheel();
-  Hood hood = new Hood(new Trigger(()->(
-    (swerve.getSwervePose().getX() >= 4.3 && swerve.getSwervePose().getX() <= 5.08) 
-    || (swerve.getSwervePose().getX() >= 11.47 && swerve.getSwervePose().getX() <= 12.43))));
+  Hood hood = new Hood(new Trigger(()->(isUnderRedTrench() || isUnderBlueTrench())));
   Turret turret = new Turret();
   TargetingSystem targeting;
 
@@ -50,6 +48,30 @@ public class Shooter {
     this.targeting = targeting;
     //TODO: Enable once we're happy with the turret not jamming
     turret.setDefaultCommand(turret.setAngle(targeting::getTurretTracking));
+  }
+
+  public boolean isUnderRedTrench(){
+    double minNear = 4.3;
+    double minFar = 5.08;
+    double maxNear = 4.02;
+    double maxFar = 5.37;
+    double near = Math.max(minNear, Math.min(maxNear, minNear+((0.3/5.0)*Math.abs(swerve.getChassisSpeedsFieldRelative().vxMetersPerSecond))));
+    double far = Math.max(minFar, Math.min(maxFar, minFar+((0.3/5.0)*Math.abs(swerve.getChassisSpeedsFieldRelative().vxMetersPerSecond))));
+
+    return (swerve.getSwervePose().getX() >= near && swerve.getSwervePose().getX() <= far) && (swerve.getSwervePose().getY() <= 1.43 || swerve.getSwervePose().getY() >= 6.63);
+  }
+
+  public boolean isUnderBlueTrench(){
+    // double minNear = 11.47;
+    // double minFar = 12.43;
+    double minNear = 11.57;
+    double minFar = 12.83;
+    double maxNear = 11.32;
+    double maxFar = 12.51;
+    double near = Math.max(minNear, Math.min(maxNear, minNear+((0.3/5.0)*Math.abs(swerve.getChassisSpeedsFieldRelative().vxMetersPerSecond))));
+    double far = Math.max(minFar, Math.min(maxFar, minFar+((0.3/5.0)*Math.abs(swerve.getChassisSpeedsFieldRelative().vxMetersPerSecond))));
+
+    return (swerve.getSwervePose().getX() >= near && swerve.getSwervePose().getX() <= far) && (swerve.getSwervePose().getY() <= 1.43 || swerve.getSwervePose().getY() >= 6.63);
   }
 
   public Command shoot(Supplier<TargetingSystem.ShooterState> targets) {
