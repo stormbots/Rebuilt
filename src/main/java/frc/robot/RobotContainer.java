@@ -217,8 +217,8 @@ public class RobotContainer {
 
   private void configureOperatorBindings() {
 
-    operator.povRight()
-    .whileTrue(shooter.testTurretVoltage(()->operator.getLeftY()*3));
+    // operator.povRight()
+    // .whileTrue(shooter.testTurretVoltage(()->operator.getLeftY()*3));
 
     operator.rightTrigger()
     .whileTrue(shootHub())
@@ -262,6 +262,7 @@ public class RobotContainer {
     // .whileTrue(Commands.waitSeconds(1).andThen(spindexer.feedToShooterForce()))
     // .whileTrue(wled.signals.wrongShot().repeatedly())
     // ;
+
 
     operator.a()
     .whileTrue(fixedPassOpp())
@@ -322,8 +323,8 @@ public class RobotContainer {
         return targeting.getHeadingToTarget(swerve.getSwervePose().getTranslation(), targeting.getHubTarget()).plus(new Rotation2d(Degrees.of(-153.5)));
       }),
       shooter.shootHubVelComp(),
-      new WaitCommand(1.0).andThen(spindexer.feedToShooterForce())
-      // spindexer.feedToShooter()
+      // new WaitCommand(1.0).andThen(spindexer.feedToShooterForce())
+      spindexer.feedToShooter()
     );
   }
 

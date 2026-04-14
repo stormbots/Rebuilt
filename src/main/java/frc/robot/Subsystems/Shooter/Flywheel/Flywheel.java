@@ -18,6 +18,7 @@ import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.SparkFlexConfig;
 
 import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.wpilibj.motorcontrol.Spark;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
@@ -33,6 +34,7 @@ public class Flywheel extends SubsystemBase {
 
   private double targetRPM = 0.0;
   private double tolerance = 250.0;
+  private double dashboardPValue = 1.0/300.0/12.0;
 
   /** Creates a new Flywheel. */
   public Flywheel() {
@@ -76,7 +78,7 @@ public class Flywheel extends SubsystemBase {
   }
 
   public Command setRPM(Supplier<TargetingSystem.ShooterState> targetSupplier){
-    return setRPM(()->targetSupplier.get().flywheelRPM,()->targetSupplier.get().flywheelRPM);
+    return setRPM(()->targetSupplier.get().flywheelRPM,()->targetSupplier.get().flywheelTolerance);
   }
 
   public boolean getOnTarget(){
@@ -95,11 +97,12 @@ public class Flywheel extends SubsystemBase {
 
     config.closedLoop
       .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
-      .p(0.0/200.0)
+      .p(1.0/450.0/12.0)
       .i(0.000000)
       .d(0.0)
     .feedForward
       .kV(0.0024309 * 4000 / 5174.083984 * 2725 / 2516.0 * 2210 / 2290)
+      .kS(0.09)
     ;
 
     config.encoder
