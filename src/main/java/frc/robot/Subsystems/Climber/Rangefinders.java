@@ -23,7 +23,7 @@ public class Rangefinders {
    */
   public SwerveInputs generateInputs(double facingAngleDegrees) {
     swerveInputs.clear();
-    swerveInputs.ty = 0.05; //Alwyas scoot forward in case we lose it for a moment
+    swerveInputs.ty = 0.15; //Alwyas scoot forward in case we lose it for a moment
 
     if (facingAngleDegrees == 90) {
       // flip outputs for going the other field direction
@@ -45,8 +45,12 @@ public class Rangefinders {
     return leftOk || rightOk;
   }
 
+  public boolean isLeftChecked(){
+    return left.getDistanceOptional().orElse(Inches.of(24)).lt(Inches.of(13));
+  }
+
   public Trigger isDetectableTrigger = new Trigger(this::isDetectable).debounce(0.1); 
   public Trigger isLinedupL1Trigger = new Trigger(this::isLinedUpL1).debounce(0.1); 
-
+  public Trigger isRightChecked = new Trigger(this::isLeftChecked).debounce(0.1);
 
 }
