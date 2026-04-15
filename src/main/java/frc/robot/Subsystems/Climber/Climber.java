@@ -44,6 +44,7 @@ public class Climber extends SubsystemBase {
     SmartDashboard.putNumber("climber/position", (stage1.getHeight().in(Inches)));
     SmartDashboard.putBoolean("climber/isAtl1", isAboveL1Rung.getAsBoolean());
     SmartDashboard.putBoolean("climber/linedupl1", isLinedUpWithL1());
+    SmartDashboard.putBoolean("climber/rightChecked", rangefinders.isRightChecked.getAsBoolean());
   }
 
   public Command goHome() {

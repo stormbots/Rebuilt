@@ -29,6 +29,7 @@ public class Pathing extends SubsystemBase {
   TargetingSystem targeting;
 
   FollowPath.Builder pathBuilder;
+  public static boolean isRightAuto = false;
 
   public Pathing(Swerve swerve,
         Shooter shooter,
@@ -49,6 +50,8 @@ public class Pathing extends SubsystemBase {
     new PIDController(1.0, 0.0, 0.0),    // Rotation PID
     new PIDController(0.0, 0.0, 0.0)     // Cross-track PID
     ).withTRatioBasedTranslationHandoffs(true)
+    .withDefaultShouldFlip()
+    .withShouldMirror(()->isRightAuto)
     ;
   
     FollowPath.registerEventTrigger("intake", intake.intake());

@@ -278,30 +278,7 @@ public class RobotContainer {
     //Omitted due to prior odometry issues proving to be a risk factor
     operator.y()
     .whileTrue(
-      Commands.sequence(
-      new InstantCommand(()->System.out.println("0000000bruhbruh0")),
-      pathing.followPath(new Path("climbAuto"))
-      .withTimeout(5.0)
-      .until(climber.rangefinders.isLinedupL1Trigger),
-      new InstantCommand(()->System.out.println("11111111111111bruhbruhbruh1")),
-      new ParallelCommandGroup(
-        swerve.addSecondaryInputsTrueFielcentric(()->climber.generateSwerveInputs(swerve.getSwervePose())),
-        swerve.turnToHeading(()->new Rotation2d(Degrees.of(-90))),
-        intake.stow().asProxy(),
-        climber.prePrepareForClimbL1().asProxy(),
-        wled.signals.climbOkay()
-        )
-      .withTimeout(2.0),
-      new InstantCommand(()->System.out.println("222222222222bruhbruhbruh2")),
-      // .withTimeout(3.0),
-      climber.prepareForClimbL1()
-      .alongWith(swerve.addSecondaryInputsTrueFielcentric(()->climber.generateSwerveInputs(swerve.getSwervePose())))
-      .alongWith(wled.signals.manualShot()),
-      // .withTimeout(4.5),
-      climber.climbL1()
-    )
-    // .until(climber::isLinedUpWithL1)
-    // .andThen(climber.climbL1())
+      autos.climbAuto()
     );
 
     // //TALK TO ABBY MAKE THIS A DIFFERENT BUTTON
