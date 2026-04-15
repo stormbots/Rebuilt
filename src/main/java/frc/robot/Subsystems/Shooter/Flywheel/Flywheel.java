@@ -13,12 +13,12 @@ import com.revrobotics.spark.FeedbackSensor;
 import com.revrobotics.spark.SparkBase;
 import com.revrobotics.spark.SparkFlex;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
+import com.revrobotics.spark.config.SignalsConfig;
 import com.revrobotics.spark.config.SparkBaseConfig;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.SparkFlexConfig;
 
 import edu.wpi.first.math.MathUtil;
-import edu.wpi.first.wpilibj.motorcontrol.Spark;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
@@ -38,11 +38,25 @@ public class Flywheel extends SubsystemBase {
 
   /** Creates a new Flywheel. */
   public Flywheel() {
+
+    var leaderConfig = getMotorConfig();
+    leaderConfig.apply(new SignalsConfig()
+      .appliedOutputPeriodMs(5) //frame 0 : Applied output, faults
+      .primaryEncoderVelocityPeriodMs(20) //frame 1 : Velocity, temp, input voltage, stator current
+      // .primaryEncoderPositionPeriodMs(20) // frame 2 : Motor position
+      // .absoluteEncoderPositionPeriodMs(20) //frame 5 
+      // .absoluteEncoderVelocityPeriodMs(20) //frame 6
+    );
+    leaderMotor.configure(getMotorConfig(), ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+
+
     SparkBaseConfig followerConfig = getMotorConfig();
     followerConfig.follow(leaderMotor, true);
-
-    leaderMotor.configure(getMotorConfig(), ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+    followerConfig.apply(new SignalsConfig()
+      .appliedOutputPeriodMs(100) //frame 0 : Applied output, faults
+    );
     followerMotor.configure(followerConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+
     setDefaultCommand(Commands.waitSeconds(2).andThen(run(this::stop)));
   }
 
@@ -112,7 +126,7 @@ public class Flywheel extends SubsystemBase {
       .positionConversionFactor(kGearing)
       .velocityConversionFactor(kGearing) //Do NOT divide by 60, rpm is desired, not rps
     ;
-
+    
     return config;
   }
 }

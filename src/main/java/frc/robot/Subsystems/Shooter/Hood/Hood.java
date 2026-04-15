@@ -14,6 +14,7 @@ import com.revrobotics.spark.FeedbackSensor;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.SparkBase.ControlType;
+import com.revrobotics.spark.config.SignalsConfig;
 import com.revrobotics.spark.config.SparkBaseConfig;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.SparkMaxConfig;
@@ -107,6 +108,14 @@ public class Hood extends SubsystemBase {
       .reverseSoftLimitEnabled(false)
     ;
 
+    config.apply(new SignalsConfig()
+      .appliedOutputPeriodMs(30) //frame 0 : Applied output, faults
+      .primaryEncoderVelocityPeriodMs(200) //frame 1 : Velocity, temp, input voltage, stator current
+      // .primaryEncoderPositionPeriodMs(20) // frame 2 : Motor position
+      // .absoluteEncoderPositionPeriodMs(20) //frame 5 
+      // .absoluteEncoderVelocityPeriodMs(20) //frame 6
+    );
+    
     return config;
   }
 

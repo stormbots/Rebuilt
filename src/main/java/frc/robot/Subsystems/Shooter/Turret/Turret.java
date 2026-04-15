@@ -18,6 +18,7 @@ import com.revrobotics.spark.SparkBase.ControlType;
 import com.revrobotics.spark.SparkClosedLoopController.ArbFFUnits;
 import com.revrobotics.spark.SparkFlex;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
+import com.revrobotics.spark.config.SignalsConfig;
 import com.revrobotics.spark.config.SparkBaseConfig;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.SparkFlexConfig;
@@ -209,6 +210,15 @@ public class Turret extends SubsystemBase {
       .positionConversionFactor(360.0)
       .inverted(true);
 
+    config.apply(new SignalsConfig()
+      .appliedOutputPeriodMs(10) //frame 0 : Applied output, faults
+      .primaryEncoderVelocityPeriodMs(200) //frame 1 : Velocity, temp, input voltage, stator current
+      // .primaryEncoderPositionPeriodMs(20) // frame 2 : Motor position
+      .absoluteEncoderPositionPeriodMs(100) //frame 5 
+      // .absoluteEncoderVelocityPeriodMs(20) //frame 6
+    );
+
+      
     return config;
   }
 }

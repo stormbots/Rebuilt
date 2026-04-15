@@ -11,6 +11,7 @@ import com.revrobotics.ResetMode;
 import com.revrobotics.spark.SparkBase.ControlType;
 import com.revrobotics.spark.SparkFlex;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
+import com.revrobotics.spark.config.SignalsConfig;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.SparkFlexConfig;
 
@@ -40,6 +41,14 @@ public class DyeRotor extends SubsystemBase {
 
     config.closedLoop.feedForward
       .kV(12 / (7600.0 / conversionfactor) * 3);
+
+    config.apply(new SignalsConfig()
+      .appliedOutputPeriodMs(40) //frame 0 : Applied output, faults
+      .primaryEncoderVelocityPeriodMs(100) //frame 1 : Velocity, temp, input voltage, stator current
+      // .primaryEncoderPositionPeriodMs(20) // frame 2 : Motor position
+      // .absoluteEncoderPositionPeriodMs(20) //frame 5 
+      // .absoluteEncoderVelocityPeriodMs(20) //frame 6
+    );
 
     motor.configure(config, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
 
