@@ -15,6 +15,7 @@ import com.revrobotics.spark.SparkBase.ControlType;
 import com.revrobotics.spark.SparkClosedLoopController.ArbFFUnits;
 import com.revrobotics.spark.SparkFlex;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
+import com.revrobotics.spark.config.SignalsConfig;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.SparkFlexConfig;
 
@@ -68,6 +69,14 @@ public class IntakeExtension extends SubsystemBase {
       .smartCurrentLimit(5)
       .voltageCompensation(11)
       ;
+
+    config.apply(new SignalsConfig()
+    .appliedOutputPeriodMs(10) //frame 0
+    .primaryEncoderVelocityPeriodMs(200) //frame 1
+    // .primaryEncoderPositionPeriodMs(20) // frame 2
+    .absoluteEncoderPositionPeriodMs(100) //frame 5
+    // .absoluteEncoderVelocityPeriodMs(20) //frame 6
+    );
 
     motor.configure(config, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
 

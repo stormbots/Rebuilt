@@ -13,6 +13,7 @@ import com.revrobotics.spark.SparkBase.ControlType;
 import com.revrobotics.spark.SparkFlex;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
+import com.revrobotics.spark.config.SignalsConfig;
 import com.revrobotics.spark.config.SparkFlexConfig;
 
 import edu.wpi.first.units.Units;
@@ -60,13 +61,32 @@ public class Rollers extends SubsystemBase {
       // .voltageCompensation(11)
     ;
 
+    config.apply(new SignalsConfig()
+    .appliedOutputPeriodMs(5) //frame 0 // faster for improved follower perf
+    .primaryEncoderVelocityPeriodMs(200) //frame 1
+    .primaryEncoderPositionPeriodMs(30) // frame 2
+    // .absoluteEncoderPositionPeriodMs(20) //frame 5
+    // .absoluteEncoderVelocityPeriodMs(20) //frame 6
+    );
+
     motor.configure(config, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
     
+    
+    //Configure the follower with additional specific details
     config
       .follow(motor,true)
       ;
-    
+  
+    config.apply(new SignalsConfig()
+    .appliedOutputPeriodMs(100) //frame 0
+    // .primaryEncoderVelocityPeriodMs(20) //frame 1
+    // .primaryEncoderPositionPeriodMs(20) // frame 2
+    // .absoluteEncoderPositionPeriodMs(20) //frame 5
+    // .absoluteEncoderVelocityPeriodMs(20) //frame 6
+    );
+
     follower.configure(config, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+
 
     setDefaultCommand(stop());
   }
@@ -76,7 +96,7 @@ public class Rollers extends SubsystemBase {
     SmartDashboard.putNumber("Intake/Rollers/voltage", motor.getBusVoltage()*motor.getAppliedOutput());
     SmartDashboard.putNumber("Intake/Rollers/DutyCycle", motor.getAppliedOutput());
     SmartDashboard.putNumber("Intake/Rollers/Current", motor.getOutputCurrent());
-    SmartDashboard.putNumber("Intake/Rollers/Follower/Current", follower.getOutputCurrent());
+    // SmartDashboard.putNumber("Intake/Rollers/Follower/Current", follower.getOutputCurrent());
     SmartDashboard.putNumber("Intake/Rollers/Velocity", getVelocity().in(Units.RPM));
     SmartDashboard.putString("Intake/Rollers/Command", getCurrentCommand()==null ? "None" : getCurrentCommand().getName() );
   }

@@ -11,17 +11,17 @@ import com.revrobotics.PersistMode;
 import com.revrobotics.ResetMode;
 import com.revrobotics.spark.SparkAbsoluteEncoder;
 import com.revrobotics.spark.SparkBase.ControlType;
-import com.revrobotics.spark.SparkFlex;
-import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
+import com.revrobotics.spark.SparkMax;
+import com.revrobotics.spark.config.SignalsConfig;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.SparkFlexConfig;
 
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.Command.InterruptionBehavior;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.FunctionalCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
@@ -77,6 +77,14 @@ public class ClimberExtension extends SubsystemBase {
     .reverseSoftLimitEnabled(true)
     ;
 
+    config.apply(new SignalsConfig()
+    .appliedOutputPeriodMs(50) //frame 0 : Applied output, faults
+    .primaryEncoderVelocityPeriodMs(30) //frame 1 : Velocity, temp, input voltage, stator current
+    .primaryEncoderPositionPeriodMs(30) // frame 2 : Motor position
+    // .absoluteEncoderPositionPeriodMs(20) //frame 5 
+    // .absoluteEncoderVelocityPeriodMs(20) //frame 6
+    );
+    
     motor.configure(
       config,
       ResetMode.kResetSafeParameters,

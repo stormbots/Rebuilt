@@ -9,6 +9,7 @@ import com.revrobotics.ResetMode;
 import com.revrobotics.spark.SparkBase.ControlType;
 import com.revrobotics.spark.SparkFlex;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
+import com.revrobotics.spark.config.SignalsConfig;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.SparkFlexConfig;
 
@@ -34,6 +35,14 @@ public class UpGoer extends SubsystemBase {
 
     config.closedLoop.feedForward
       .kV(1 / (7600.0 / conversionfactor));
+
+    config.apply(new SignalsConfig()
+        .appliedOutputPeriodMs(50) //frame 0 : Applied output, faults
+        .primaryEncoderVelocityPeriodMs(50) //frame 1 : Velocity, temp, input voltage, stator current
+        .primaryEncoderPositionPeriodMs(200) // frame 2 : Motor position
+        // .absoluteEncoderPositionPeriodMs(20) //frame 5 
+        // .absoluteEncoderVelocityPeriodMs(20) //frame 6
+    );
 
     motor.configure(config, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
 
@@ -68,7 +77,7 @@ public class UpGoer extends SubsystemBase {
   }
 
   public Command unclog() {
-    return setVoltage(6);
+    return setVoltage(-6);
   }
 
   public Command setVoltage(double volts) {
