@@ -176,7 +176,7 @@ public class Autos {
         intake.stop().asProxy()
       )
       .until(()->climber.isLinedUpWithL1()).withTimeout(2.0),
-      climber.prepareForClimbL1().withTimeout(3.5),
+      climber.prepareForClimbL1().until(climber.isAboveL1Rung).withTimeout(3.5),
       climber.climbL1()
     );
   }
