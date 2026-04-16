@@ -51,6 +51,6 @@ public class Rangefinders {
 
   public Trigger isDetectableTrigger = new Trigger(this::isDetectable).debounce(0.1); 
   public Trigger isLinedupL1Trigger = new Trigger(this::isLinedUpL1).debounce(0.1); 
-  public Trigger isRightChecked = new Trigger(this::isRightChecked).debounce(0.05);
+  public Trigger isRightChecked = new Trigger(this::isRightChecked).debounce(0.1);
 
 }

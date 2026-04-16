@@ -96,14 +96,14 @@ public class Pathing extends SubsystemBase {
   public Command pass(){
     return new ParallelCommandGroup(
       shooter.pass(),
-      spindexer.feedToShooterForce()
+      spindexer.feedToShooter()
     );
   }
 
   public Command shootAuto(){
     return new ParallelCommandGroup(
       shooter.shootHubVelComp(),
-      spindexer.feedToShooterForce()
+      spindexer.feedToShooter()
     );
   }
 
@@ -111,7 +111,7 @@ public class Pathing extends SubsystemBase {
     return new ParallelCommandGroup(
       intake.intake(),
       shooter.pass(),
-      spindexer.feedToShooterForce()
+      spindexer.feedToShooter()
     );
   }
 
@@ -119,7 +119,7 @@ public class Pathing extends SubsystemBase {
     return new ParallelCommandGroup(
       intake.intake(),
       shooter.shootHubVelComp(),
-      spindexer.feedToShooterForce()
+      spindexer.feedToShooter()
     );
   }
 }

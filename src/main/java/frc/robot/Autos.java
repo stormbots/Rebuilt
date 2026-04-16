@@ -195,7 +195,7 @@ public class Autos {
       pathing.followPath(new Path("depotAutoSweep1")),
       basicShoot().withTimeout(2.5),
       pathing.followPath(new Path("depotAutoSweep2")),
-      basicShoot().withTimeout(2.5),
+      basicShoot().alongWith(swerve.stop()).withTimeout(2.5),
       climbAuto()
     )
     // .withName("Red Depot Auto NOSOTM")
@@ -221,7 +221,7 @@ public class Autos {
   public Command pass() {
     return new ParallelCommandGroup(
       shooter.pass().asProxy(),
-      spindexer.feedToShooterForce().asProxy(),
+      spindexer.feedToShooter().asProxy(),
       intake.stop().asProxy()
     );
   }
@@ -229,7 +229,7 @@ public class Autos {
   public Command shootAuto() {
     return new ParallelCommandGroup(
       shooter.shootHub().asProxy(),
-      spindexer.feedToShooterForce().asProxy(),
+      spindexer.feedToShooter().asProxy(),
       intake.stop().asProxy()
     );
   }
@@ -237,7 +237,7 @@ public class Autos {
   public Command shootAutoNotBline() {
     return new ParallelCommandGroup(
       shooter.shootHub().asProxy(),
-      spindexer.feedToShooterForce().asProxy(),
+      spindexer.feedToShooter().asProxy(),
       intake.stop().asProxy()
     );
   }
