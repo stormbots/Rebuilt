@@ -97,8 +97,8 @@ public class Autos {
 
     autoChooser.addOption("Center Auto", this::CenterShootAuto);
     autoChooser.addOption("Defense Prep", this::thisIsStupid);
-    autoChooser.addOption("Depot NO SOTM", this::depotButBetter);
-    autoChooser.addOption("Depot V2", this::depotNoSOTM);
+    autoChooser.addOption("Depot NO SOTM", this::depotNoSOTM);
+    autoChooser.addOption("Depot V2", this::depotButBetter);
     
 
     autoChooser.setDefaultOption("Select Auto", () -> new InstantCommand());
@@ -172,7 +172,7 @@ public class Autos {
       pathing.followPath(climbAutoV2).withTimeout(3.0).until(climber.rangefinders.isRightChecked),
       new ParallelCommandGroup(
         swerve.addSecondaryInputsTrueFielcentric(()->climber.generateSwerveInputs(swerve.getSwervePose())),
-        swerve.turnToHeading(()->new Rotation2d(Degrees.of(-90))),
+        // swerve.turnToHeading(()->new Rotation2d(Degrees.of(-90))),
         intake.stop().asProxy()
       )
       .withTimeout(3.5),
@@ -184,7 +184,7 @@ public class Autos {
   public Command depotButBetter(){
     return Commands.sequence(
       basicShoot().withTimeout(2.25),
-      pathing.followPath(new Path("depotAutoV2")).withTimeout(12),
+      pathing.followPath(new Path("depotAutoV2")).withTimeout(13),
       climbAuto()
     );
   }

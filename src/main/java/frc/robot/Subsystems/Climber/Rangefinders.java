@@ -45,12 +45,12 @@ public class Rangefinders {
     return leftOk || rightOk;
   }
 
-  public boolean isLeftChecked(){
-    return left.getDistanceOptional().orElse(Inches.of(24)).lt(Inches.of(13));
+  public boolean isRightChecked(){
+    return right.getDistanceOptional().orElse(Inches.of(24)).lt(Inches.of(13));
   }
 
   public Trigger isDetectableTrigger = new Trigger(this::isDetectable).debounce(0.1); 
   public Trigger isLinedupL1Trigger = new Trigger(this::isLinedUpL1).debounce(0.1); 
-  public Trigger isRightChecked = new Trigger(this::isLeftChecked).debounce(0.1);
+  public Trigger isRightChecked = new Trigger(this::isRightChecked).debounce(0.05);
 
 }
