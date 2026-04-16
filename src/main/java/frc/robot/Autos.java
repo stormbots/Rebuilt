@@ -169,13 +169,13 @@ public class Autos {
   public Command climbAuto(){
     //TODO:Make heading lock flip 90 or -90 off driver station
     return Commands.sequence(
-      pathing.followPath(climbAutoV2).withTimeout(3.0).until(climber.rangefinders.isRightChecked),
+      pathing.followPath(climbAutoV2).until(climber.rangefinders.isRightChecked),
       new ParallelCommandGroup(
         swerve.addSecondaryInputsTrueFielcentric(()->climber.generateSwerveInputs(swerve.getSwervePose())),
         // swerve.turnToHeading(()->new Rotation2d(Degrees.of(-90))),
         intake.stop().asProxy()
       )
-      .withTimeout(3.5),
+      .until(()->climber.isLinedUpWithL1()).withTimeout(2.0),
       climber.prepareForClimbL1().withTimeout(3.5),
       climber.climbL1()
     );
@@ -191,11 +191,11 @@ public class Autos {
 
   public Command depotNoSOTM(){
     return Commands.sequence(
-      basicShoot().withTimeout(2.25),
+      basicShoot().alongWith(climber.autoPrepClimber()).withTimeout(3.0),
       pathing.followPath(new Path("depotAutoSweep1")),
       basicShoot().withTimeout(2.5),
       pathing.followPath(new Path("depotAutoSweep2")),
-      basicShoot().alongWith(swerve.stop()).withTimeout(2.5),
+      // basicShoot().alongWith(swerve.stop()).withTimeout(2.5),
       climbAuto()
     )
     // .withName("Red Depot Auto NOSOTM")

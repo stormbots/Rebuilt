@@ -40,19 +40,27 @@ public class Spindexer extends SubsystemBase{
   public Command feedToShooter(){
     var feed = Commands.parallel(
       upGoer.feed(),
-      new WaitCommand(0.25).andThen(dyeRotor.feed())
+      new WaitCommand(0.1).andThen(dyeRotor.feed())
+    );
+    var feedContinued = Commands.parallel(
+      upGoer.feed(),
+      dyeRotor.feed()
     );
 
-    return Commands.repeatingSequence(
+    return Commands.sequence(
       stop().until(readyToFeed),
-      feed.until(readyToFeed.negate())
+      feed,
+      Commands.repeatingSequence(
+        feedContinued.onlyWhile(readyToFeed),
+        stop().until(readyToFeed)
+      )
     );
   }
 
   public Command feedToShooterForce(){
     var feed = Commands.parallel(
     upGoer.feed(),
-    new WaitCommand(0.25).andThen(dyeRotor.feed())
+    new WaitCommand(0.1).andThen(dyeRotor.feed())
     );
 
     return feed;
