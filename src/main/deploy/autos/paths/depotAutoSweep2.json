@@ -31,7 +31,7 @@
     },
     {
       "type": "event_trigger",
-      "t_ratio": 1.0,
+      "t_ratio": 0.7638582698863783,
       "lib_key": "intakeStow"
     },
     {

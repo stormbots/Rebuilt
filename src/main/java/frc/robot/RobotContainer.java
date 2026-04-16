@@ -211,7 +211,7 @@ public class RobotContainer {
 
     driver.x() // extend intake
     .whileTrue(intake.intake())
-    .whileFalse(intake.stop());
+    .whileFalse(intake.up());
 
     driver.y().whileTrue(intake.eject()); //intake eject
 

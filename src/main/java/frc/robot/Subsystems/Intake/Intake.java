@@ -72,13 +72,13 @@ public class Intake extends SubsystemBase {
 
     return Commands.sequence(
       upRollers,
-      stop()
+      up()
     )
     .withName("bringUp")
     ;
   }  
   
-  public Command stop(){
+  public Command up(){
     return Commands.parallel(
       rollers.stop(),
       left.up(),

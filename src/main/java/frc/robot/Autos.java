@@ -167,13 +167,18 @@ public class Autos {
   }
 
   public Command climbAuto(){
+    double allianceFacingAngle = DriverStation.getAlliance().equals(Alliance.Blue) ? 90 : -90 ;
+
     //TODO:Make heading lock flip 90 or -90 off driver station
     return Commands.sequence(
-      pathing.followPath(climbAutoV2).until(climber.rangefinders.isRightChecked),
+      pathing.followPath(climbAutoV2).until(()->
+        climber.rangefinders.isRightChecked.getAsBoolean()
+        && swerve.getSwervePose().getRotation().getMeasure().isNear(Degrees.of(allianceFacingAngle), Degrees.of(10))
+      ),
       new ParallelCommandGroup(
         swerve.addSecondaryInputsTrueFielcentric(()->climber.generateSwerveInputs(swerve.getSwervePose())),
         // swerve.turnToHeading(()->new Rotation2d(Degrees.of(-90))),
-        intake.stop().asProxy()
+        intake.up().asProxy()
       )
       .until(()->climber.isLinedUpWithL1()).withTimeout(2.0),
       climber.prepareForClimbL1().until(climber.isAboveL1Rung).withTimeout(3.5),
@@ -214,7 +219,7 @@ public class Autos {
     return Commands.parallel(
       shooter.stow().asProxy(),
       spindexer.stop().asProxy(),
-      intake.stop().asProxy()
+      intake.up().asProxy()
     );
   }
 
@@ -222,7 +227,7 @@ public class Autos {
     return new ParallelCommandGroup(
       shooter.pass().asProxy(),
       spindexer.feedToShooter().asProxy(),
-      intake.stop().asProxy()
+      intake.up().asProxy()
     );
   }
 
@@ -230,7 +235,7 @@ public class Autos {
     return new ParallelCommandGroup(
       shooter.shootHub().asProxy(),
       spindexer.feedToShooter().asProxy(),
-      intake.stop().asProxy()
+      intake.up().asProxy()
     );
   }
 
@@ -238,7 +243,7 @@ public class Autos {
     return new ParallelCommandGroup(
       shooter.shootHub().asProxy(),
       spindexer.feedToShooter().asProxy(),
-      intake.stop().asProxy()
+      intake.up().asProxy()
     );
   }
 
