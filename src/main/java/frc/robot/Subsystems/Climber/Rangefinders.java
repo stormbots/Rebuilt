@@ -8,6 +8,7 @@ import static edu.wpi.first.units.Units.Inches;
 
 import com.stormbots.LaserCanWrapper;
 
+import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Subsystems.Swerve.Swerve.SwerveInputs;
 
@@ -36,19 +37,33 @@ public class Rangefinders {
   }
 
   public boolean isLinedUpL1() {
-    // var leftOk = left.getDistanceOptional().orElse(Inches.of(7)).lt(Inches.of(0.5)) && left.getDistanceOptional().orElse(Inches.of(7)).gt(Inches.of(0.0));
-    var rightOk = right.getDistanceOptional().orElse(Inches.of(7)).lt(Inches.of(0.5)) && right.getDistanceOptional().orElse(Inches.of(7)).gt(Inches.of(0.0));
+    var dist = right.getDistanceOptional().orElse(Inches.of(7));
+    var rightOk = dist.lt(Inches.of(0.5)) 
+    //&& dist.gt(Inches.of(0.0)) //Breaks because of laser can thing, but rejects  errors
+    ;
+
     return rightOk;
   }
 
   public boolean isDetectable() {
-    var leftOk = left.getDistanceOptional().orElse(Inches.of(24)).lt(Inches.of(6));
-    var rightOk = right.getDistanceOptional().orElse(Inches.of(24)).lt(Inches.of(6));
+    Distance leftDistance = left.getDistanceOptional().orElse(Inches.of(24));
+    Distance rightDistance = right.getDistanceOptional().orElse(Inches.of(24));
+
+    var leftOk = leftDistance.lt(Inches.of(6))
+      //&&leftDistance.gt(Inches.of(0));//Breaks because of laser can thing, but rejects  errors
+      ;
+    var rightOk = rightDistance.lt(Inches.of(6))
+      //&&rightDistance.gt(Inches.of(0));//Breaks because of laser can thing, but rejects  errors
+      ;
     return leftOk || rightOk;
   }
 
   public boolean isRightChecked(){
-    return right.getDistanceOptional().orElse(Inches.of(24)).lt(Inches.of(7));
+    var dist = right.getDistanceOptional().orElse(Inches.of(24));
+
+    return dist.lt(Inches.of(7))
+      //&&dist.gt(Inches.of(0)) //Breaks because of laser can thing, but rejects  errors
+      ;
   }
 
   public Trigger isDetectableTrigger = new Trigger(this::isDetectable).debounce(0.1); 
