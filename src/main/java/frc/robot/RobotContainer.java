@@ -150,6 +150,9 @@ public class RobotContainer {
     .and(DriverStation::isTeleop) //TODO: Suppress just for Teleop or all enable?
     .whileTrue( shooter.suppressForTrench() );
 
+    new Trigger(()->fieldBehaviour.getNearTower(swerve.getSwervePose()))
+    .onFalse(climber.stow());
+
   }
 
 
