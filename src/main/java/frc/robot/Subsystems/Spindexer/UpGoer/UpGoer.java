@@ -15,6 +15,7 @@ import com.revrobotics.spark.config.SparkFlexConfig;
 
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class UpGoer extends SubsystemBase {
@@ -47,7 +48,10 @@ public class UpGoer extends SubsystemBase {
     motor.configure(config, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
 
     motor.getEncoder().setPosition(0);
-    setDefaultCommand(stop());
+    setDefaultCommand(Commands.sequence(
+      unclog().withTimeout(.1),
+      stop()
+      ));
   }
 
   @Override
@@ -77,7 +81,7 @@ public class UpGoer extends SubsystemBase {
   }
 
   public Command unclog() {
-    return setVoltage(-6);
+    return setVoltage(-5);
   }
 
   public Command setVoltage(double volts) {

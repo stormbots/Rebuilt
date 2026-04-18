@@ -69,17 +69,20 @@ public class Spindexer extends SubsystemBase{
   public Command unclog(){
     var reverse = Commands.parallel(
       dyeRotor.unclog(),
-      upGoer.stop()
-    ).withTimeout(0.5);
+      upGoer.unclog()
+    ).withTimeout(0.2);
 
     var forward = Commands.parallel(
       dyeRotor.feed(),
       upGoer.stop()
-    );
+    ).withTimeout(0.2);
 
-    return Commands.repeatingSequence(
+    return Commands.sequence(
       reverse,
       forward
+      // reverse,
+      // forward,
+      // reverse
     );
   }
 

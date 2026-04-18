@@ -293,8 +293,8 @@ public class RobotContainer {
         return targeting.getHeadingToTarget(swerve.getSwervePose().getTranslation(), targeting.getPassTarget()).plus(new Rotation2d(Degrees.of(-153.5)));
       }),
       shooter.pass(),
-      new WaitCommand(1.0).andThen(spindexer.feedToShooterForce())
-      // spindexer.feedToShooter()
+      // new WaitCommand(1.0).andThen(spindexer.feedToShooterForce())
+      spindexer.feedToShooter()
     );
   }
 
@@ -312,16 +312,16 @@ public class RobotContainer {
   public Command fixedShot(){
     return new ParallelCommandGroup(
       shooter.shoot(()->targeting.fixedShot()),
-      new WaitCommand(1.0).andThen(spindexer.feedToShooterForce())
-      // spindexer.feedToShooter()
+      // new WaitCommand(1.0).andThen(spindexer.feedToShooterForce())
+      spindexer.feedToShooter()
     );
   }
 
   public Command fixedPass(){
     return new ParallelCommandGroup(
       shooter.shoot(()->targeting.fixedPassNeutral()),
-      new WaitCommand(1.0).andThen(spindexer.feedToShooterForce())
-      // spindexer.feedToShooter()
+      // new WaitCommand(1.0).andThen(spindexer.feedToShooterForce())
+      spindexer.feedToShooter()
     );
   }
 

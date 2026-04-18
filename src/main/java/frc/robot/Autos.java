@@ -196,9 +196,9 @@ public class Autos {
 
   public Command depotNoSOTM(){
     return Commands.sequence(
-      basicShoot().alongWith(climber.autoPrepClimber()).withTimeout(3.0),
+      // basicShoot().alongWith(climber.autoPrepClimber()).withTimeout(3.0),
       pathing.followPath(new Path("depotAutoSweep1")),
-      basicShoot().withTimeout(2.5),
+      basicShoot().alongWith(climber.autoPrepClimber()).withTimeout(2.5),
       pathing.followPath(new Path("depotAutoSweep2")),
       // basicShoot().alongWith(swerve.stop()).withTimeout(2.5),
       climbAuto()

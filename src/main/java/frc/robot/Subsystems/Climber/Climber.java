@@ -88,7 +88,7 @@ public class Climber extends SubsystemBase {
   public Command autoPrepClimber(){
     return Commands.sequence(
       stage1.setClimbCurrentLimit(),
-      stage1.setHeight(Inches.of(4.0))
+      stage1.setHeight(Inches.of(7.9))
     );
   }
 

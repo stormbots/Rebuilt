@@ -13,8 +13,10 @@ import frc.robot.Subsystems.Swerve.Swerve.SwerveInputs;
 
 /** Add your docs here. */
 public class Rangefinders {
-  public LaserCanWrapper left = new LaserCanWrapper(2).configureShortRange().setThreshhold(Inches.of(24));
-  public LaserCanWrapper right = new LaserCanWrapper(3).configureShortRange().setThreshhold(Inches.of(24));
+  // public LaserCanWrapper left = new LaserCanWrapper(2).configureShortRange().setThreshhold(Inches.of(24));
+  // public LaserCanWrapper right = new LaserCanWrapper(3).configureShortRange().setThreshhold(Inches.of(24));
+  public LaserCanWrapper left = new LaserCanWrapper(5).configureShortRange().setThreshhold(Inches.of(24));
+  public LaserCanWrapper right = new LaserCanWrapper(4).configureShortRange().setThreshhold(Inches.of(24));
   SwerveInputs swerveInputs = new SwerveInputs();
 
   /**
@@ -34,9 +36,9 @@ public class Rangefinders {
   }
 
   public boolean isLinedUpL1() {
-    var leftOk = left.getDistanceOptional().orElse(Inches.of(7)).lt(Inches.of(5.25));
-    var rightOk = right.getDistanceOptional().orElse(Inches.of(7)).lt(Inches.of(5.25));
-    return leftOk && rightOk;
+    // var leftOk = left.getDistanceOptional().orElse(Inches.of(7)).lt(Inches.of(0.5)) && left.getDistanceOptional().orElse(Inches.of(7)).gt(Inches.of(0.0));
+    var rightOk = right.getDistanceOptional().orElse(Inches.of(7)).lt(Inches.of(0.5)) && right.getDistanceOptional().orElse(Inches.of(7)).gt(Inches.of(0.0));
+    return rightOk;
   }
 
   public boolean isDetectable() {
@@ -46,7 +48,7 @@ public class Rangefinders {
   }
 
   public boolean isRightChecked(){
-    return right.getDistanceOptional().orElse(Inches.of(24)).lt(Inches.of(13));
+    return right.getDistanceOptional().orElse(Inches.of(24)).lt(Inches.of(7));
   }
 
   public Trigger isDetectableTrigger = new Trigger(this::isDetectable).debounce(0.1); 

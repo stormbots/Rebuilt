@@ -53,7 +53,9 @@ public class DyeRotor extends SubsystemBase {
     motor.configure(config, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
 
     motor.getEncoder().setPosition(0);
-    setDefaultCommand(stop());
+    setDefaultCommand(Commands.sequence(
+      unclog().withTimeout(.1),
+      stop()));
   }
 
   @Override
