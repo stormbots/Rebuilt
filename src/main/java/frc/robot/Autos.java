@@ -138,7 +138,7 @@ public class Autos {
 
   //YAYYYYYAYYYAYY THESE WORK AT START OF BLINE AUTOS NOW!!!!!!!!, Still not really running anything other than the shoot
 
-  public Command basicShoot() {
+  public Command stopAndShoot() {
     return new ParallelCommandGroup(
       swerve.turnToHeadingWithinTurretRange(()->targeting.getHeadingToTarget(swerve.getSwervePose().getTranslation(), targeting.getHubTarget())
           .plus(Rotation2d.k180deg)),
@@ -151,7 +151,7 @@ public class Autos {
   public Command CenterShootAuto(){
     
     return Commands.sequence(
-      basicShoot().withTimeout(2.25),
+      stopAndShoot().withTimeout(2.25),
       pathing.followPath(centerShootPath).withTimeout(12),
       pathing.followPath(postShootToClimb).withTimeout(2.0),
       climbAuto()
@@ -161,7 +161,7 @@ public class Autos {
 
   public Command thisIsStupid(){
     return Commands.sequence(
-      basicShoot().withTimeout(2.25),
+      stopAndShoot().withTimeout(2.25),
       pathing.followPath(new Path("defensePrep"))
     );
   }
@@ -188,7 +188,7 @@ public class Autos {
 
   public Command depotButBetter(){
     return Commands.sequence(
-      basicShoot().withTimeout(2.25),
+      stopAndShoot().withTimeout(2.25),
       pathing.followPath(new Path("depotAutoV2")).withTimeout(13),
       climbAuto()
     );
@@ -198,10 +198,10 @@ public class Autos {
     return Commands.sequence(
       // basicShoot().alongWith(climber.autoPrepClimber()).withTimeout(3.0),
       pathing.followPath(new Path("depotAutoSweep1")),
-      basicShoot().alongWith(climber.autoPrepClimber()).withTimeout(2.5),
+      stopAndShoot().alongWith(climber.autoPrepClimber()).withTimeout(2.5),
       pathing.followPath(new Path("depotAutoSweep2")),
       // basicShoot().alongWith(swerve.stop()).withTimeout(2.5),
-      climbAuto()
+      climbAuto().alongWith(shootAuto())
     )
     // .withName("Red Depot Auto NOSOTM")
     ;

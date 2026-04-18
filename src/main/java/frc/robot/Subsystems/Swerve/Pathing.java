@@ -89,22 +89,22 @@ public class Pathing extends SubsystemBase {
 
   public Command stopShooting(){
     return new ParallelCommandGroup(
-      shooter.testSetHoodAngle(Degrees.of(0)),
-      spindexer.stop()
+      shooter.testSetHoodAngle(Degrees.of(0)).asProxy(),
+      spindexer.stop().asProxy()
     );
   }
 
   public Command pass(){
     return new ParallelCommandGroup(
-      shooter.pass(),
-      spindexer.feedToShooter()
+      shooter.pass().asProxy(),
+      spindexer.feedToShooter().asProxy()
     );
   }
 
   public Command shootAuto(){
     return new ParallelCommandGroup(
-      shooter.shootHubVelComp(),
-      spindexer.feedToShooter()
+      shooter.shootHubVelComp().asProxy(),
+      spindexer.feedToShooter().asProxy()
     );
   }
 
@@ -118,9 +118,9 @@ public class Pathing extends SubsystemBase {
 
   public Command intakeWhileShooting(){
     return new ParallelCommandGroup(
-      intake.intake(),
-      shooter.shootHubVelComp(),
-      spindexer.feedToShooter()
+      intake.intake().asProxy(),
+      shooter.shootHubVelComp().asProxy(),
+      spindexer.feedToShooter().asProxy()
     );
   }
 }

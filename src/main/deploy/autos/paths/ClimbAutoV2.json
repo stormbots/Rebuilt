@@ -5,7 +5,7 @@
       "translation_target": {
         "x_meters": 0.5890192720784735,
         "y_meters": 4.7312824595421095,
-        "intermediate_handoff_radius_meters": 0.4
+        "intermediate_handoff_radius_meters": 0.2
       },
       "rotation_target": {
         "rotation_radians": 1.5707963267948966,
@@ -28,11 +28,6 @@
       "type": "event_trigger",
       "t_ratio": 0.0,
       "lib_key": "intakeStow"
-    },
-    {
-      "type": "event_trigger",
-      "t_ratio": 0.0,
-      "lib_key": "shoot"
     },
     {
       "type": "waypoint",
