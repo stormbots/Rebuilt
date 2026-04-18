@@ -113,4 +113,11 @@ public class Intake extends SubsystemBase {
       rollers.setVoltage(2)
     );
   }
+
+  public Command setOutForShooting(){
+    return Commands.parallel(
+      left.setOutForShooting(),
+      right.setOutForShooting()
+    );
+  }
 }

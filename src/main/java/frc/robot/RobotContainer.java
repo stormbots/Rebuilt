@@ -305,7 +305,8 @@ public class RobotContainer {
       }),
       shooter.shootHubVelComp(),
       // new WaitCommand(1.0).andThen(spindexer.feedToShooterForce())
-      spindexer.feedToShooter()
+      spindexer.feedToShooter(),
+      intake.setOutForShooting().asProxy()
     );
   }
 
@@ -313,7 +314,8 @@ public class RobotContainer {
     return new ParallelCommandGroup(
       shooter.shoot(()->targeting.fixedShot()),
       // new WaitCommand(1.0).andThen(spindexer.feedToShooterForce())
-      spindexer.feedToShooter()
+      spindexer.feedToShooter(),
+      intake.setOutForShooting().asProxy()
     );
   }
 
@@ -321,7 +323,8 @@ public class RobotContainer {
     return new ParallelCommandGroup(
       shooter.shoot(()->targeting.fixedPassNeutral()),
       // new WaitCommand(1.0).andThen(spindexer.feedToShooterForce())
-      spindexer.feedToShooter()
+      spindexer.feedToShooter(),
+      intake.setOutForShooting().asProxy()
     );
   }
 
@@ -329,7 +332,8 @@ public class RobotContainer {
     return new ParallelCommandGroup(
       shooter.shoot(()->targeting.fixedPassOppAlliance()),
       // new WaitCommand(0.5).andThen(spindexer.feedToShooterForce())
-      spindexer.feedToShooter()
+      spindexer.feedToShooter(),
+      intake.setOutForShooting().asProxy()
     );
   }
 }

@@ -79,5 +79,9 @@ public class ShiftTracking {
         }
         return time;
     }
+
+    public boolean lastShiftStarting(){
+        return false;
+    }
     
 }

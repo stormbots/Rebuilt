@@ -72,6 +72,8 @@ public class TargetingSystem extends SubsystemBase {
   // double timescalar = 1.0;
   // double distanceoffset = 0.0;
   double distFactor = 10.0;
+  // double distFactor = 0.0;
+
   // distance, hoodangle, flywheel rpm, TOF
   LUT hubLUT = new LUT(new double[][]{
     //EVERYTHING UNDER THIS IS PROBABLY ACTUALLY CORRECT
@@ -94,8 +96,9 @@ public class TargetingSystem extends SubsystemBase {
     { 41,  5, 2045, 129/fps },
     { 41+distFactor,  5, 2245, 129/fps },
     { 60+distFactor, 10, 2245, 127/fps },
-    { 84+distFactor, 20, 2345, 114/fps },
-    {108+distFactor, 23, 2345, 117/fps },
+    { 84+distFactor, 21, 2315, 114/fps },
+    {108+distFactor, 23, 2325, 117/fps },
+    //NEED TO RETIME THIS ONE CUZ THE SHOT IS BAD
     {132+distFactor, 23, 2490, 129/fps },
     {156+distFactor, 23, 2540, 135/fps },
     {180+distFactor, 25, 2670, 142/fps },
@@ -112,7 +115,7 @@ public class TargetingSystem extends SubsystemBase {
     {225, 35, 2500, 1.2},
     {32*12, 35, 3000, 1.2},
     {40*12, 40, 3500, 1.5},
-    {47*12, 40, 3600, 1.5}
+    {47*12, 40, 3700, 1.5}
 
     //min from center
     //max from midfield

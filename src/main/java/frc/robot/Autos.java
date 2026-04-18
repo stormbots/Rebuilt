@@ -187,6 +187,7 @@ public class Autos {
   }
 
   public Command depotButBetter(){
+    Pathing.isRightAuto = false;
     return Commands.sequence(
       stopAndShoot().withTimeout(2.25),
       pathing.followPath(new Path("depotAutoV2")).withTimeout(13),
@@ -195,13 +196,14 @@ public class Autos {
   }
 
   public Command depotNoSOTM(){
+    Pathing.isRightAuto = false;
     return Commands.sequence(
       // basicShoot().alongWith(climber.autoPrepClimber()).withTimeout(3.0),
       pathing.followPath(new Path("depotAutoSweep1")),
-      stopAndShoot().alongWith(climber.autoPrepClimber()).withTimeout(2.5),
+      stopAndShoot().alongWith(climber.autoPrepClimber()).withTimeout(4.5),
       pathing.followPath(new Path("depotAutoSweep2")),
       // basicShoot().alongWith(swerve.stop()).withTimeout(2.5),
-      climbAuto().alongWith(shootAuto())
+      climbAuto().alongWith(shootAutoNoIntake())
     )
     // .withName("Red Depot Auto NOSOTM")
     ;
@@ -235,8 +237,16 @@ public class Autos {
     return new ParallelCommandGroup(
       shooter.shootHub().asProxy(),
       spindexer.feedToShooter().asProxy(),
-      intake.up().asProxy()
+      intake.setOutForShooting().asProxy()
     );
+  }
+
+  public Command shootAutoNoIntake() {
+    return new ParallelCommandGroup(
+      shooter.shootHub().asProxy(),
+      spindexer.feedToShooter().asProxy(),
+      intake.up().asProxy()
+      );
   }
 
   public Command shootAutoNotBline() {

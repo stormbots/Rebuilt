@@ -19,6 +19,7 @@ import com.revrobotics.spark.config.SignalsConfig;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.SparkFlexConfig;
 
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -29,6 +30,10 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
 
 public class IntakeExtension extends SubsystemBase {
   SparkFlex motor;
+
+  double maxAngleUnderCurrentMode = 90 ; 
+  final double kMinAngleDegrees = 0;
+  final double kMaxAngleDegrees = 90;
   
   // Breaks on real robot? It shouldn't....
   // IntakeExtensionSim sim = new IntakeExtensionSim(motor);
@@ -125,10 +130,11 @@ public class IntakeExtension extends SubsystemBase {
 
   private Command setAngle(double degrees, double arbitraryFFVolts){
     return run(()->{
+      var target = MathUtil.clamp(degrees, 0, maxAngleUnderCurrentMode);
       motor
       .getClosedLoopController()
       .setSetpoint(
-        degrees, 
+        target, 
         ControlType.kPosition, 
         ClosedLoopSlot.kSlot0, 
         arbitraryFFVolts, 
@@ -155,8 +161,8 @@ public class IntakeExtension extends SubsystemBase {
 
   public Command stow(){
     return Commands.sequence(
-      setAngle(90, 0).until(()->getAngle().in(Degree) > 80),
-      setAngle(90, 0)
+      setAngle(maxAngleUnderCurrentMode, 0).until(()->getAngle().in(Degree) > 80),
+      setAngle(maxAngleUnderCurrentMode, 0)
     )
     .withName("Stow")
     ;
@@ -164,8 +170,8 @@ public class IntakeExtension extends SubsystemBase {
 
   public Command up(){
     return Commands.sequence(
-      setAngle(70, 0).until(()->getAngle().in(Degree) > 60),
-      setAngle(70, 0)
+      setAngle(maxAngleUnderCurrentMode, 0).until(()->getAngle().in(Degree) > 60),
+      setAngle(maxAngleUnderCurrentMode, 0)
     )
     .withName("Up")
     ;
@@ -200,5 +206,9 @@ public class IntakeExtension extends SubsystemBase {
     )
     .withName("Down")
     ;
+  }
+
+  public Command setOutForShooting(){
+    return Commands.startEnd(()->maxAngleUnderCurrentMode = 70, ()->maxAngleUnderCurrentMode = kMaxAngleDegrees);
   }
 }
