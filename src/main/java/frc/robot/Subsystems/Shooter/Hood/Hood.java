@@ -20,11 +20,13 @@ import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.SparkMaxConfig;
 
 import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.FunctionalCommand;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.Command.InterruptionBehavior;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
@@ -36,7 +38,7 @@ public class Hood extends SubsystemBase {
 
   public static final int kPreHomeCurrentLimit = 10;
   //CANNOT be higher than 20, ITS A NEO 550
-  public static final int kPostHomeCurrentLimit = 20;
+  public static final int kPostHomeCurrentLimit = 30;
   public static final double kHomeCurrentThreshold = 4.0;
 
   public static final double homeAngle = 0.0;
@@ -50,7 +52,10 @@ public class Hood extends SubsystemBase {
   private Angle targetAngle = Degrees.of(minAngle);
   private Angle tolerance = Degrees.of(3); 
 
+  private final TrapezoidProfile trapProfile = new TrapezoidProfile(new TrapezoidProfile.Constraints(11000, 11000));
 
+  TrapezoidProfile.State goalState =  new TrapezoidProfile.State(0,0);
+  TrapezoidProfile.State currentState =  new TrapezoidProfile.State(0,0);
 
   SparkMax motor = new SparkMax(15, MotorType.kBrushless);
   HoodSim sim = new HoodSim(motor);
@@ -62,7 +67,7 @@ public class Hood extends SubsystemBase {
   public Hood() {
     motor.configure(getMotorConfig(), ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
 
-    setDefaultCommand(setAngle(()->Degrees.of(0.0), ()->Degrees.of(0.5)));
+    setDefaultCommand(setAngleTrap(()->Degrees.of(0.0), ()->Degrees.of(0.5)));
   }
 
   @Override
@@ -73,6 +78,7 @@ public class Hood extends SubsystemBase {
     SmartDashboard.putNumber("shooter/hood/position", motor.getEncoder().getPosition());
     SmartDashboard.putBoolean("shooter/hood/homed", homed);
     SmartDashboard.putBoolean("shooter/hood/suppressed", isSuppressed);
+    SmartDashboard.putBoolean("shooter/hood/onTarget", this.getOnTarget());
   }
 
   @Override
@@ -133,6 +139,43 @@ public class Hood extends SubsystemBase {
         ControlType.kPosition
       );
     });
+  }
+
+  //There isnt really a need to clamp these since we never set the target to anything outside of the safe range, 
+  // but I figured I would for safety and cuz it makes our code look more uniform since its written like this for turret
+  public Command setAngleTrap(Supplier<Angle> angle, Supplier<Angle> tolerance){
+    return startRun(
+        () -> {
+            double clampedPosition = MathUtil.clamp(
+              angle.get().in(Degrees),
+              minAngle, maxAngle
+            );
+            goalState = new TrapezoidProfile.State(clampedPosition, 0);
+            currentState = new TrapezoidProfile.State(getAngle().in(Degrees), 0);
+            this.targetAngle = Degrees.of(clampedPosition);
+            this.tolerance = tolerance.get();
+        },
+        () -> {
+            double clampedPosition = MathUtil.clamp(
+              angle.get().in(Degrees),
+              minAngle, maxAngle
+            );
+            goalState = new TrapezoidProfile.State(clampedPosition, 0);
+            this.targetAngle = Degrees.of(clampedPosition);
+            this.tolerance = tolerance.get();
+            currentState = trapProfile.calculate(0.02, currentState, goalState);
+            motor.getClosedLoopController().setSetpoint(
+              isSuppressed ? 0 : currentState.position,
+              ControlType.kPosition
+            );
+            SmartDashboard.putNumber("shooter/hood/trapPosition", currentState.position);
+            SmartDashboard.putNumber("shooter/hood/trapVelocity", currentState.velocity);
+        }
+    );
+  }
+
+  public Command setAngleTrap(Supplier<TargetingSystem.ShooterState> targetSupplier) {
+    return setAngleTrap(()->targetSupplier.get().hoodAngle, ()->targetSupplier.get().hoodTolerance);
   }
 
   public void stop(){

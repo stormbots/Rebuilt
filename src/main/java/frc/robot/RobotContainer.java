@@ -71,7 +71,7 @@ public class RobotContainer {
 
   CommandXboxController driver = new CommandXboxController(0);
   CommandXboxController operator = new CommandXboxController(1);
-  CommandXboxController debug = new CommandXboxController(3);
+  // CommandXboxController debug = new CommandXboxController(3);
   Path testingPath = new Path("goCollect");
   Double rpm = 2600.0;
   Double hoodAngle = 25.0;
@@ -160,7 +160,7 @@ public class RobotContainer {
     // debug.y().whileTrue(swerve.pidToPose(()->new Pose2d(7.7, 7.4, new Rotation2d(Math.PI/2))));
     // debug.povRight().whileTrue(swerve.pidToPose(()->new Pose2d(12.5, 7.4, new Rotation2d())));
     // debug.povLeft().whileTrue(swerve.pidToPose(()->new Pose2d(12.5, 0.6, new Rotation2d())));
-    debug.x().whileTrue(spindexer.setVoltages(3, 5));
+    // debug.x().whileTrue(spindexer.setVoltages(3, 5));
     // .whileTrue(shooter.shootWithDashboardValues())
     // .whileTrue(Commands.waitSeconds(1).andThen(spindexer.feedToShooter()))
     // ;
@@ -221,9 +221,6 @@ public class RobotContainer {
 
   private void configureOperatorBindings() {
 
-    // operator.povRight()
-    // .whileTrue(shooter.testTurretVoltage(()->operator.getLeftY()*3));
-
     operator.rightTrigger()
     .whileTrue(shootHub())
     .whileTrue(wled.signals.automaticShot().repeatedly());
@@ -280,18 +277,14 @@ public class RobotContainer {
     .whileTrue(
       autos.climbAuto()
     );
-
-    // //TALK TO ABBY MAKE THIS A DIFFERENT BUTTON
-    // operator.povRight()
-    // .whileTrue(fixedShot());
   }
 
   //BUTTON FUNCTIONS/STATES
   public Command pass(){
     return new ParallelCommandGroup(
-      swerve.verifyAngleTargetPass(()->{
-        return targeting.getHeadingToTarget(swerve.getSwervePose().getTranslation(), targeting.getPassTarget()).plus(new Rotation2d(Degrees.of(-153.5)));
-      }),
+      // swerve.verifyAngleTargetPass(()->{
+      //   return targeting.getHeadingToTarget(swerve.getSwervePose().getTranslation(), targeting.getPassTarget());
+      // }),
       shooter.pass(),
       // new WaitCommand(1.0).andThen(spindexer.feedToShooterForce())
       spindexer.feedToShooter()
@@ -300,9 +293,9 @@ public class RobotContainer {
 
   public Command shootHub(){
     return new ParallelCommandGroup(
-      swerve.turnToHeadingWithinTurretRange(()->{
-        return targeting.getHeadingToTarget(swerve.getSwervePose().getTranslation(), targeting.getHubTarget()).plus(new Rotation2d(Degrees.of(-153.5)));
-      }),
+      // swerve.turnToHeadingWithinTurretRange(()->{
+      //   return targeting.getHeadingToTarget(swerve.getSwervePose().getTranslation(), targeting.getHubTarget());
+      // }),
       shooter.shootHubVelComp(),
       // new WaitCommand(1.0).andThen(spindexer.feedToShooterForce())
       spindexer.feedToShooter(),

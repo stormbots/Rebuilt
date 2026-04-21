@@ -52,7 +52,7 @@ public class Shooter {
   public Command shoot(Supplier<TargetingSystem.ShooterState> targets) {
     return Commands.parallel(
       flywheel.setRPM(targets),
-      hood.setAngle(targets),
+      hood.setAngleTrap(targets),
       
       // turret.setAngle(targets)
       //TODO: fix settrap so we can use it instead.
@@ -63,7 +63,7 @@ public class Shooter {
   public Command shootNoTurret(Supplier<TargetingSystem.ShooterState> targets) {
     return Commands.parallel(
       flywheel.setRPM(targets),
-      hood.setAngle(targets),
+      hood.setAngleTrap(targets),
       turret.setAngle(()->Degrees.of(-180.0), ()->Degrees.of(5.0))
     );
   }
@@ -73,7 +73,7 @@ public class Shooter {
   }
 
   public Command testSetHoodAngle(Angle angle) {
-    return hood.setAngle(()->angle, ()->Degrees.of(3));
+    return hood.setAngleTrap(()->angle, ()->Degrees.of(3));
   }
 
   public Command testSetFlywheelRPM(double rpm) {

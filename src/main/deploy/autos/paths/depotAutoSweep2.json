@@ -22,7 +22,7 @@
       "translation_target": {
         "x_meters": 0.106,
         "y_meters": 5.277,
-        "intermediate_handoff_radius_meters": 0.65
+        "intermediate_handoff_radius_meters": 0.62
       },
       "rotation_target": {
         "rotation_radians": 2.356194490192345,
@@ -38,7 +38,7 @@
       "type": "translation",
       "x_meters": 0.683475967846715,
       "y_meters": 4.729244236947416,
-      "intermediate_handoff_radius_meters": 0.2
+      "intermediate_handoff_radius_meters": 0.1
     }
   ],
   "constraints": {
@@ -49,12 +49,12 @@
         "end_ordinal": 0
       },
       {
-        "value": 0.1,
+        "value": 0.09,
         "start_ordinal": 1,
         "end_ordinal": 1
       },
       {
-        "value": 0.2,
+        "value": 0.15,
         "start_ordinal": 2,
         "end_ordinal": 2
       }
