@@ -115,6 +115,7 @@ public class Turret extends SubsystemBase {
     return DegreesPerSecond.of(motor.getEncoder().getVelocity());
   }
 
+  //This technically still works so I'm not gonna remove it, but the trapezoidal is what should always be used(if it stops working for some reason try this)
   public Command setAngle(Supplier<Angle> position, Supplier<Angle> tolerance) {
     return run(()->{
       SmartDashboard.putNumber("shooter/turret/preClampedTarget", position.get().in(Degrees));
@@ -138,41 +139,8 @@ public class Turret extends SubsystemBase {
     return setAngle(()->targetSupplier.get().turretAngle, ()->targetSupplier.get().turretTolerance);
   }
 
-  // public Command setAngleTrap(Supplier<Angle> position, Supplier<Angle> tolerance) {
-  //   return startRun(()->{
-  //       double normalizedPosition = position.get().in(Degrees) > kMaxRotation ? position.get().in(Degrees) - 360.0 : position.get().in(Degrees);
-  //       double clampedPosition = MathUtil.clamp(
-  //         normalizedPosition,
-  //         kMinRotation+3, kMaxRotation-3
-  //       );
-  //       goalState = new TrapezoidProfile.State(clampedPosition, 0);
-  //       currentState = new TrapezoidProfile.State(getAngle().in(Degrees), getVelocity().in(DegreesPerSecond));
-  //       this.targetPosition = Degrees.of(normalizedPosition);
-  //       this.tolerance = tolerance.get();
-  //     },
-  //     ()->{
-  //       double normalizedPosition = position.get().in(Degrees) > kMaxRotation ? position.get().in(Degrees) - 360.0 : position.get().in(Degrees);
-  //       double clampedPosition = MathUtil.clamp(
-  //         normalizedPosition,
-  //         kMinRotation+3, kMaxRotation-3
-  //       );
-  //       goalState = new TrapezoidProfile.State(clampedPosition, 0);
-  //       this.targetPosition = Degrees.of(normalizedPosition);
-  //       this.tolerance = tolerance.get();
-  //       currentState = trapProfile.calculate(0.02, currentState, goalState);
-  //       double ff = feedforward.calculate(currentState.velocity);
-  //       SmartDashboard.putNumber("shooter/turret/trapposition", currentState.position);
-  //       SmartDashboard.putNumber("shooter/turret/trapvelocity", currentState.velocity);
-  //       motor.getClosedLoopController().setSetpoint(
-  //         currentState.position,
-  //         ControlType.kPosition,
-  //         ClosedLoopSlot.kSlot0,
-  //         ff,
-  //         ArbFFUnits.kVoltage
-  //       );
-  //     });
-  // }
-
+  //Trapezoidal with rotational velocity from swerve added in to reduce pid/targeting jitter,
+  //as we turn it adds that in so that we don't just rely on it tracking to target constantly
   public Command setAngleTrap(Supplier<Angle> position, Supplier<Angle> tolerance) {
     return startRun(()->{
         double normalizedPosition = position.get().in(Degrees) > kMaxRotation ? position.get().in(Degrees) - 360.0 : position.get().in(Degrees);

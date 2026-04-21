@@ -335,6 +335,7 @@ public class Swerve extends SubsystemBase {
     });
   }
 
+  //NONE OF THIS STUFF WORKS, after we changed turret range it all got slightly messed up, need to fix
   public Command verifyAngleTargetPass(Supplier<Rotation2d> bearing) {
     return Commands.run(() -> {
       isOnTargetAngle = false;
@@ -358,7 +359,7 @@ public class Swerve extends SubsystemBase {
       secondaryInputs.r = 0;
     });
   }
-
+  //This also needs to be changed for new turret ranges, jacob complained that it took over his drivetrain too much so just don't run in tele
   public Command turnToHeadingWithinTurretRange(Supplier<Rotation2d> bearing) {
     return Commands.run(() -> {
       isOnTargetAngle = false;
@@ -389,7 +390,7 @@ public class Swerve extends SubsystemBase {
   private void setInitialPoseVoid(Pose2d targetPose) {
     swerveDrive.resetOdometry(targetPose);
   }
-
+  //This doesn't work super well, we could definitely do this there isn't any point right now though since we run BLINE for autos
   public Command pidToPose(Supplier<Pose2d> targetPoseSupplier, double maxVelocityMPS, Distance tolerance) {
     return Commands.run(() -> {
       isOnTargetTranslate = false;
