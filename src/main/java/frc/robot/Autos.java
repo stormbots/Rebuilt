@@ -99,6 +99,7 @@ public class Autos {
     autoChooser.addOption("Defense Prep", this::thisIsStupid);
     autoChooser.addOption("Depot NO SOTM", this::depotNoSOTM);
     autoChooser.addOption("Depot V2", this::depotButBetter);
+    autoChooser.addOption("Ahner+ Defense Prep", this::thisIsStupidPart2);
     
 
     autoChooser.setDefaultOption("Select Auto", () -> new InstantCommand());
@@ -152,9 +153,16 @@ public class Autos {
     
     return Commands.sequence(
       stopAndShoot().withTimeout(2.25),
-      pathing.followPath(centerShootPath).withTimeout(12),
-      pathing.followPath(postShootToClimb).withTimeout(2.0),
-      climbAuto()
+      pathing.followPath(centerShootPath).withTimeout(20)
+      // pathing.followPath(postShootToClimb).withTimeout(2.0),
+      // climbAuto()
+    );
+  }
+
+  public Command thisIsStupidPart2(){
+    return Commands.sequence(
+      thisIsStupid(),
+      pathing.followPath(new Path("defensePathPart2"))
     );
   }
 
