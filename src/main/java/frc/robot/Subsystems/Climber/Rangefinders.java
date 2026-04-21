@@ -26,7 +26,7 @@ public class Rangefinders {
    */
   public SwerveInputs generateInputs(double facingAngleDegrees) {
     swerveInputs.clear();
-    swerveInputs.ty = 0.15; //Alwyas scoot forward in case we lose it for a moment
+    swerveInputs.ty = 0.25; //Alwyas scoot forward in case we lose it for a moment
 
     if (facingAngleDegrees == 90) {
       // flip outputs for going the other field direction
@@ -61,7 +61,7 @@ public class Rangefinders {
   public boolean isRightChecked(){
     var dist = right.getDistanceOptional().orElse(Inches.of(24));
 
-    return dist.lt(Inches.of(7))
+    return dist.lt(Inches.of(6.75))
       //&&dist.gt(Inches.of(0)) //Breaks because of laser can thing, but rejects  errors
       ;
   }

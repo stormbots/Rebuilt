@@ -62,7 +62,7 @@ public class Turret extends SubsystemBase {
   // does this also speak to our defaults for setAngle?
   //however, this trap profile runs extremely smoothly without pid. it just needs to be tuned. so this is relatively high priority
   //fixes many of our sotm problems
-  private final TrapezoidProfile trapProfile = new TrapezoidProfile(new TrapezoidProfile.Constraints(700, 700));
+  private final TrapezoidProfile trapProfile = new TrapezoidProfile(new TrapezoidProfile.Constraints(700, 700*4));
 
   SparkFlex motor = new SparkFlex(14, MotorType.kBrushless);
   TurretSim sim = new TurretSim(motor);
