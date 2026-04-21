@@ -27,12 +27,13 @@ import com.stormbots.CRTAbsoluteEncoder;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import edu.wpi.first.wpilibj2.command.button.Trigger;
+import frc.robot.Subsystems.Swerve.Swerve;
 import frc.robot.Subsystems.TargetingSystem.TargetingSystem;
 
 public class Turret extends SubsystemBase {
@@ -72,14 +73,20 @@ public class Turret extends SubsystemBase {
 
   SimpleMotorFeedforward feedforward = new SimpleMotorFeedforward(0.2, 0.0143);
 
+  Swerve swerve;
+
+  private static final double ROTATION_FF_ALPHA = 0.15; // EMA smoothing, tune this
+  private double smoothedOmegaDegPerSec = 0.0;
+
   
   /** Creates a new Turret. */
-  public Turret() {
+  public Turret(Swerve swerve) {
     motor.configure(getMotorConfig(), ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
 
     CRTAbsoluteEncoder.getInstance().setParams(kTurretGearToothCount, kGear1ToothCount, kGear2ToothCount, true);
     CRTAbsoluteEncoder.getInstance().setRelativeEncoder(motor.getEncoder());
     CRTAbsoluteEncoder.getInstance().setEncoder1(motor.getAbsoluteEncoder());
+    this.swerve = swerve;
   }
 
   @Override
@@ -94,6 +101,7 @@ public class Turret extends SubsystemBase {
     SmartDashboard.putNumber("shooter/turret/e1", motor.getAbsoluteEncoder().getPosition());
     SmartDashboard.putNumber("shooter/turret/relPos", motor.getEncoder().getPosition());
     SmartDashboard.putNumber("shooter/turret/velocity", motor.getEncoder().getVelocity());
+    SmartDashboard.putNumber("shooter/turret/dtAngular", Units.radiansToDegrees(swerve.getChassisSpeedsFieldRelative().omegaRadiansPerSecond));
   }
 
   /**
@@ -130,40 +138,91 @@ public class Turret extends SubsystemBase {
     return setAngle(()->targetSupplier.get().turretAngle, ()->targetSupplier.get().turretTolerance);
   }
 
+  // public Command setAngleTrap(Supplier<Angle> position, Supplier<Angle> tolerance) {
+  //   return startRun(()->{
+  //       double normalizedPosition = position.get().in(Degrees) > kMaxRotation ? position.get().in(Degrees) - 360.0 : position.get().in(Degrees);
+  //       double clampedPosition = MathUtil.clamp(
+  //         normalizedPosition,
+  //         kMinRotation+3, kMaxRotation-3
+  //       );
+  //       goalState = new TrapezoidProfile.State(clampedPosition, 0);
+  //       currentState = new TrapezoidProfile.State(getAngle().in(Degrees), getVelocity().in(DegreesPerSecond));
+  //       this.targetPosition = Degrees.of(normalizedPosition);
+  //       this.tolerance = tolerance.get();
+  //     },
+  //     ()->{
+  //       double normalizedPosition = position.get().in(Degrees) > kMaxRotation ? position.get().in(Degrees) - 360.0 : position.get().in(Degrees);
+  //       double clampedPosition = MathUtil.clamp(
+  //         normalizedPosition,
+  //         kMinRotation+3, kMaxRotation-3
+  //       );
+  //       goalState = new TrapezoidProfile.State(clampedPosition, 0);
+  //       this.targetPosition = Degrees.of(normalizedPosition);
+  //       this.tolerance = tolerance.get();
+  //       currentState = trapProfile.calculate(0.02, currentState, goalState);
+  //       double ff = feedforward.calculate(currentState.velocity);
+  //       SmartDashboard.putNumber("shooter/turret/trapposition", currentState.position);
+  //       SmartDashboard.putNumber("shooter/turret/trapvelocity", currentState.velocity);
+  //       motor.getClosedLoopController().setSetpoint(
+  //         currentState.position,
+  //         ControlType.kPosition,
+  //         ClosedLoopSlot.kSlot0,
+  //         ff,
+  //         ArbFFUnits.kVoltage
+  //       );
+  //     });
+  // }
+
   public Command setAngleTrap(Supplier<Angle> position, Supplier<Angle> tolerance) {
     return startRun(()->{
         double normalizedPosition = position.get().in(Degrees) > kMaxRotation ? position.get().in(Degrees) - 360.0 : position.get().in(Degrees);
-        double clampedPosition = MathUtil.clamp(
-          normalizedPosition,
-          kMinRotation+3, kMaxRotation-3
-        );
+        double clampedPosition = MathUtil.clamp(normalizedPosition, kMinRotation+3, kMaxRotation-3);
         goalState = new TrapezoidProfile.State(clampedPosition, 0);
         currentState = new TrapezoidProfile.State(getAngle().in(Degrees), getVelocity().in(DegreesPerSecond));
         this.targetPosition = Degrees.of(normalizedPosition);
         this.tolerance = tolerance.get();
+        smoothedOmegaDegPerSec = 0.0; // reset on command init
       },
       ()->{
         double normalizedPosition = position.get().in(Degrees) > kMaxRotation ? position.get().in(Degrees) - 360.0 : position.get().in(Degrees);
-        double clampedPosition = MathUtil.clamp(
-          normalizedPosition,
-          kMinRotation+3, kMaxRotation-3
-        );
+        double clampedPosition = MathUtil.clamp(normalizedPosition, kMinRotation+3, kMaxRotation-3);
         goalState = new TrapezoidProfile.State(clampedPosition, 0);
         this.targetPosition = Degrees.of(normalizedPosition);
         this.tolerance = tolerance.get();
-        currentState = trapProfile.calculate(0.02, currentState, goalState);
+
+        // Get robot omega from YAGSL in deg/s, negate because turret must counter-rotate
+        double rawOmegaDegPerSec = Units.radiansToDegrees(
+            swerve.getChassisSpeedsFieldRelative().omegaRadiansPerSecond
+        );
+        // Smooth it to kill jitter
+        smoothedOmegaDegPerSec = smoothedOmegaDegPerSec + ROTATION_FF_ALPHA * (rawOmegaDegPerSec - smoothedOmegaDegPerSec);
+        
+        // Ignore noise when nearly still, maybe fix bad tag stuff too idk, I wanna add something similar to SOTM
+        double effectiveOmega = Math.abs(smoothedOmegaDegPerSec) < 2.0 ? 0.0 : smoothedOmegaDegPerSec;
+
+        // Inject robot rotation as a velocity bias into the current trap state
+        // This makes the profile "expect" the turret needs to move, reducing lag, SPECIFICALLY THAT WEIRD FRICKING JITTER
+        TrapezoidProfile.State adjustedCurrentState = new TrapezoidProfile.State(
+            currentState.position,
+            currentState.velocity - effectiveOmega // subtract because opposite of rotation
+        );
+
+        currentState = trapProfile.calculate(0.02, adjustedCurrentState, goalState);
         double ff = feedforward.calculate(currentState.velocity);
+
         SmartDashboard.putNumber("shooter/turret/trapposition", currentState.position);
         SmartDashboard.putNumber("shooter/turret/trapvelocity", currentState.velocity);
+        SmartDashboard.putNumber("shooter/turret/omegaFF", effectiveOmega);
+
         motor.getClosedLoopController().setSetpoint(
-          currentState.position,
-          ControlType.kPosition,
-          ClosedLoopSlot.kSlot0,
-          ff,
-          ArbFFUnits.kVoltage
+            currentState.position,
+            ControlType.kPosition,
+            ClosedLoopSlot.kSlot0,
+            ff,
+            ArbFFUnits.kVoltage
         );
       });
-  }
+}
 
   public Command setAngleTrap(Supplier<TargetingSystem.ShooterState> targetSupplier) {
     return setAngleTrap(()->targetSupplier.get().turretAngle, ()->targetSupplier.get().turretTolerance);
@@ -195,7 +254,8 @@ public class Turret extends SubsystemBase {
       // .p(0)
       .positionWrappingEnabled(false)
       .maxOutput(outPut)
-      .minOutput(-outPut);
+      .minOutput(-outPut)
+      ;
       
 
     config.softLimit

@@ -36,15 +36,19 @@ import frc.robot.Robot;
 import frc.robot.Subsystems.Swerve.Swerve;
 
 public class TargetingSystem extends SubsystemBase {
-
+  //NEW VALUES HOPEFULLY HELP SMOOTH SOTM
+  private Translation2d smoothedBotVelocity = new Translation2d();
+  private static final double VELOCITY_ALPHA = 0.15; // lower = more smoothing (tune this)
+  private static final double CONVERGENCE_THRESHOLD_METERS = 0.005; // 5mm
   public static class ShooterState {
+  
     public Angle turretAngle;
     public Angle hoodAngle;
     public double flywheelRPM;
 
     public Angle turretTolerance = Degrees.of(1.5);
     public Angle hoodTolerance = Degrees.of(0.5);
-    public double flywheelTolerance = 350;
+    public double flywheelTolerance = 250;
 
     public ShooterState(Angle turretAngle, Angle hoodAngle, double flywheelRPM){
       this.turretAngle = turretAngle;
@@ -111,11 +115,11 @@ public class TargetingSystem extends SubsystemBase {
 
   //distance, hoodangle, flywheel rpm
   public LUT passLUT = new LUT(new double[][]{
-    {169, 25, 2000, 1.2},
-    {225, 35, 2500, 1.2},
-    {32*12, 35, 3000, 1.2},
-    {40*12, 40, 3500, 1.5},
-    {47*12, 40, 3700, 1.5}
+    {169, 25, 2000, 138/fps},
+    {225, 35, 2500, 152/fps},
+    {32*12, 35, 3000, 184/fps},
+    {40*12, 40, 3500, 193/fps},
+    {47*12, 40, 3700, 219/fps}
 
     //min from center
     //max from midfield
@@ -157,11 +161,25 @@ public class TargetingSystem extends SubsystemBase {
       return new Pose2d(getHubTarget(), new Rotation2d());
     }
     
-    if(botPosition.getX() > 11.9){
+    if(alliance != Alliance.Blue && botPosition.getX() > 11.9){
       return new Pose2d(getHubTarget(), new Rotation2d());
     }
 
     return new Pose2d(getPassTarget(), new Rotation2d());
+  }
+
+  public LUT getBestLutTarget(Pose2d botPosition){
+    var alliance = DriverStation.getAlliance().orElse(Alliance.Blue);
+
+    if(alliance == Alliance.Blue && botPosition.getX() < 4.6){
+      return hubLUT;
+    }
+    
+    if(alliance != Alliance.Blue && botPosition.getX() > 11.9){
+      return hubLUT;
+    }
+
+    return passLUT;
   }
 
   public Pose2d getTarLockTemp(){
@@ -205,43 +223,84 @@ public class TargetingSystem extends SubsystemBase {
     return new ShooterState(heading.minus(botPose.get().getRotation()).getMeasure(), Degrees.of(angle), rpm);
   }
 
-  public Translation2d getBotVelCompensatedTarget(Supplier<Pose2d> botPose, Supplier<Translation2d> target, LUT lut, Supplier<ChassisSpeeds> botVelocity){
-    Distance magnitude = getDistanceToTarget(botPose.get().getTranslation(), target.get());
+  // public Translation2d getBotVelCompensatedTarget(Supplier<Pose2d> botPose, Supplier<Translation2d> target, LUT lut, Supplier<ChassisSpeeds> botVelocity){
+  //   Distance magnitude = getDistanceToTarget(botPose.get().getTranslation(), target.get());
     
-    var entry = lut.get(magnitude.in(Inches));   
-    var tof = entry[3];
+  //   var entry = lut.get(magnitude.in(Inches));   
+  //   var tof = entry[3];
 
-    Translation2d botVelocityTranslation = new Translation2d(botVelocity.get().vxMetersPerSecond*1.0, botVelocity.get().vyMetersPerSecond*1.0);
+  //   Translation2d botVelocityTranslation = new Translation2d(botVelocity.get().vxMetersPerSecond*1.0, botVelocity.get().vyMetersPerSecond*1.0);
 
-    //Bot velocity * Time of Flight = how much impact in the unit of distance the bots velocity will have on the shot
-    //Since we want to compensate for this, find the inverse of this vector and apply to our target
-    Translation2d distanceCompensation = botVelocityTranslation.times(tof)
-    .unaryMinus();
+  //   //Bot velocity * Time of Flight = how much impact in the unit of distance the bots velocity will have on the shot
+  //   //Since we want to compensate for this, find the inverse of this vector and apply to our target
+  //   Translation2d distanceCompensation = botVelocityTranslation.times(tof)
+  //   .unaryMinus();
     
-    //This is where we would have to aim, assuming we are static, to compensate
-    //Hence, call it virtual target, as it is not our "true" target, but is effectively what is known to the shooter
-    Translation2d virtualTarget = target.get().plus(distanceCompensation);
+  //   //This is where we would have to aim, assuming we are static, to compensate
+  //   //Hence, call it virtual target, as it is not our "true" target, but is effectively what is known to the shooter
+  //   Translation2d virtualTarget = target.get().plus(distanceCompensation);
 
-    //However, with a changed target, our shot trajectory changes
-    //Hence, we will have a changed time of flight
-    //Repeat the above process until the change between each iteration is negligible
-    //Essentially, the virtual target stabilizes
-    //TODO: change from a static amount of 3 iterations to dynamically ensuring percent change is negligible (eg. 2% or less)
-    for(int i=0; i<5; i++){
-      magnitude = getDistanceToTarget(botPose.get().getTranslation(), virtualTarget);
+  //   //However, with a changed target, our shot trajectory changes
+  //   //Hence, we will have a changed time of flight
+  //   //Repeat the above process until the change between each iteration is negligible
+  //   //Essentially, the virtual target stabilizes
+  //   //TODO: change from a static amount of 3 iterations to dynamically ensuring percent change is negligible (eg. 2% or less)
+  //   for(int i=0; i<5; i++){
+  //     magnitude = getDistanceToTarget(botPose.get().getTranslation(), virtualTarget);
 
-      entry = lut.get(magnitude.in(Inches));
-      tof = entry[3]; 
+  //     entry = lut.get(magnitude.in(Inches));
+  //     tof = entry[3]; 
 
-      distanceCompensation = botVelocityTranslation.times(tof).unaryMinus(); 
+  //     distanceCompensation = botVelocityTranslation.times(tof).unaryMinus(); 
 
-      //new distance compensation is always applied to TARGET not VIRTUALTARGET
-      //This is since the goal of each iteration is to get a tof that approaches the tof of ideal shot
-      virtualTarget = target.get().plus(distanceCompensation);
+  //     //new distance compensation is always applied to TARGET not VIRTUALTARGET
+  //     //This is since the goal of each iteration is to get a tof that approaches the tof of ideal shot
+  //     virtualTarget = target.get().plus(distanceCompensation);
+  //   }
+
+  //   return virtualTarget;
+  // }
+
+  public Translation2d getBotVelCompensatedTarget(
+    Supplier<Pose2d> botPose, Supplier<Translation2d> target, LUT lut, Supplier<ChassisSpeeds> botVelocity){
+    // Smooth velocity with exponential moving average
+    // Call .get() once and store — avoids double-sampling across the loop
+    ChassisSpeeds speeds = botVelocity.get();
+    Translation2d rawVelocity = new Translation2d(
+        speeds.vxMetersPerSecond,
+        speeds.vyMetersPerSecond
+    );
+    smoothedBotVelocity = smoothedBotVelocity.interpolate(rawVelocity, VELOCITY_ALPHA);
+
+    // Optionally dead-band tiny velocities that are just noise
+    double speed = smoothedBotVelocity.getNorm();
+    Translation2d effectiveVelocity = speed < 0.05 // m/s threshold, tune to taste
+        ? new Translation2d()
+        : smoothedBotVelocity;
+
+    Translation2d currentTarget = target.get();
+    Translation2d botTranslation = botPose.get().getTranslation();
+
+    // Initial compensation
+    Distance magnitude = getDistanceToTarget(botTranslation, currentTarget);
+    double tof = lut.get(magnitude.in(Inches))[3];
+    Translation2d virtualTarget = currentTarget.plus(effectiveVelocity.times(tof).unaryMinus());
+
+    for (int i = 0; i < 10; i++) {
+        magnitude = getDistanceToTarget(botTranslation, virtualTarget);
+        tof = lut.get(magnitude.in(Inches))[3];
+        Translation2d newVirtualTarget = currentTarget.plus(effectiveVelocity.times(tof).unaryMinus());
+
+        // Break early when change is negligible
+        if (newVirtualTarget.getDistance(virtualTarget) < CONVERGENCE_THRESHOLD_METERS) {
+            virtualTarget = newVirtualTarget;
+            break;
+        }
+        virtualTarget = newVirtualTarget;
     }
 
     return virtualTarget;
-  }
+}
 
   //Compensates for drivetrain velocity
   public ShooterState getLUTShooterStateBotVelCompensated(Supplier<Pose2d> botPose, Supplier<Translation2d> target, LUT lut, Supplier<ChassisSpeeds> botVelocity){
@@ -265,6 +324,7 @@ public class TargetingSystem extends SubsystemBase {
     var turret = new Pose2d(botpose.getX(),botpose.getY(),angle);
 
     var bestTarget = getBestTarget(botpose);
+    var bestLut = getBestLutTarget(botpose);
 
     field.getObject("turret").setPose(turret);
     field.getObject("bestTarget").setPose(bestTarget);
@@ -280,7 +340,7 @@ public class TargetingSystem extends SubsystemBase {
     var compensatedTarget = getBotVelCompensatedTarget(
       swerve::getSwervePose,
       bestTarget::getTranslation,
-      hubLUT,
+      bestLut,
       swerve::getChassisSpeedsFieldRelative
     );
 

@@ -25,7 +25,7 @@ public class Shooter {
   Swerve swerve;
   Flywheel flywheel = new Flywheel();
   Hood hood = new Hood();
-  Turret turret = new Turret();
+  Turret turret;
   TargetingSystem targeting;
 
   // TODO: Sync this method/concept with shooter code
@@ -45,6 +45,7 @@ public class Shooter {
   public Shooter(TargetingSystem targeting, Swerve swerve) {
     this.swerve = swerve;
     this.targeting = targeting;
+    this.turret = new Turret(swerve);
     //TODO: Enable once we're happy with the turret not jamming
     turret.setDefaultCommand(turret.setAngle(targeting::getTurretTracking));
   }
