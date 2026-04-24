@@ -30,23 +30,23 @@ public class ShiftTracking {
 
 
     public Boolean isScoringShift(){
-        double offset = 3.5;
+        double offset = 3.0;
         double time = Timer.getMatchTime();
         if(DriverStation.isTeleopEnabled()){
             //endgame period
-            if (time <= 30){
+            if (time <= 30+offset){
                 return true;
             }
             //transition shift
-            else if (time >= 130-offset){
+            else if (time >= 130+offset){
                 return true;
             }
             //alliance shifts
             else if (didWeWinAuto()){
-                return (((time < 105) && (time > 80-offset)) || ((time < 55) && (time > 30-offset)));
+                return (((time < 105+offset) && (time > 80+offset)) || ((time < 55+offset) && (time > 30+offset)));
             }
             else{
-                return !(((time < 105-offset) && (time > 80)) || ((time < 55-offset) && (time > 30)));
+                return !(((time < 105+offset) && (time > 80+offset)) || ((time < 55+offset) && (time > 30+offset)));
             }
         }
         else{

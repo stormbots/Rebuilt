@@ -4,20 +4,9 @@
 
 package frc.robot.Subsystems.Lighting;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Optional;
-
-import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.DriverStation.Alliance;
-import edu.wpi.first.wpilibj.SerialPort;
-import edu.wpi.first.wpilibj.SerialPort.Port;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
-import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import edu.wpi.first.wpilibj2.command.button.Trigger;
 /** Add your docs here. */
 public class Signals extends SubsystemBase {
   double[] ownedSegments=new double[]{0,1,2,3};
@@ -25,29 +14,18 @@ public class Signals extends SubsystemBase {
   LedSegment center = new LedSegment(1, 23, 40, false);
   LedSegment left = new LedSegment(2, 40, 59, false);
 
-  List<LedSegment> signalSegments = List.of(right,center);
-
+  // LedSegment backRight = new LedSegment(3, 0, 0, false);
+  // LedSegment back = new LedSegment(4, 0, 0, false);
+  // LedSegment backLeft = new LedSegment(5, 0, 0, false);
   
   public Signals(){
     right.setDefaultCommand(right.showAllianceColorInteresting().ignoringDisable(true));
     center.setDefaultCommand(center.showAllianceColorInteresting().ignoringDisable(true));
     left.setDefaultCommand(left.showAllianceColorInteresting().ignoringDisable(true));
-  }
 
-  public Command showAllianceColor(){
-    return Commands.sequence(showAllianceColorBoring(right),showAllianceColorBoring(center));
-  }
-  
-  public Command showAllianceColorIntersingUnchecked(){
-    return Commands.sequence(right.showAllianceColorUnchecked(),center.showAllianceColorUnchecked());
-  }
-
-  private Command showAllianceColorBoring(LedSegment segment){
-    HashMap<Optional<Alliance>,Command> map = new HashMap<>();
-    map.put(Optional.empty(), segment.solidColor(CustomColor.kPurple));
-    map.put(Optional.of(Alliance.Blue), segment.solidColor(CustomColor.kBlue));
-    map.put(Optional.of(Alliance.Red),segment.solidColor(CustomColor.kRed));
-    return Commands.select(map, ()->DriverStation.getAlliance());
+    // backRight.setDefaultCommand(backRight.showAllianceColorInteresting().ignoringDisable(true));
+    // back.setDefaultCommand(back.showAllianceColorInteresting().ignoringDisable(true));
+    // backLeft.setDefaultCommand(backLeft.showAllianceColorInteresting().ignoringDisable(true));
   }
 
  public Command hopperFull(){
@@ -55,6 +33,11 @@ public class Signals extends SubsystemBase {
     right.solidColor(CustomColor.kYellow),
     center.solidColor(CustomColor.kYellow),
     left.solidColor(CustomColor.kYellow),
+
+    // backRight.solidColor(CustomColor.kYellow),
+    // back.solidColor(CustomColor.kYellow),
+    // backLeft.solidColor(CustomColor.kYellow),
+
     Commands.waitSeconds(0.5)
   );
  }
@@ -64,6 +47,11 @@ public class Signals extends SubsystemBase {
     right.blinkSmooth(128,CustomColor.kYellow),
     center.blinkSmooth(128,CustomColor.kYellow),
     left.blinkSmooth(128,CustomColor.kYellow),
+
+    // backRight.blinkSmooth(128,CustomColor.kYellow),
+    // back.blinkSmooth(128,CustomColor.kYellow),
+    // backLeft.blinkSmooth(128,CustomColor.kYellow),
+
     Commands.waitSeconds(0.5)
   );
  }
@@ -73,6 +61,11 @@ public class Signals extends SubsystemBase {
     right.solidColor(CustomColor.kOrange),
     center.solidColor(CustomColor.kOrange),
     left.solidColor(CustomColor.kOrange),
+
+    // backRight.solidColor(CustomColor.kOrange),
+    // back.solidColor(CustomColor.kOrange),
+    // backLeft.solidColor(CustomColor.kOrange),
+
     Commands.waitSeconds(0.5)
   );
  }
@@ -85,8 +78,16 @@ public class Signals extends SubsystemBase {
     Commands.runOnce(()->center.setBrightness(200),center),
     left.solidColor(CustomColor.kWhite),
     Commands.runOnce(()->left.setBrightness(200),left),
+
+    // backRight.solidColor(CustomColor.kWhite),
+    // Commands.runOnce(()->backRight.setBrightness(200),backRight),
+    // back.solidColor(CustomColor.kWhite),
+    // Commands.runOnce(()->back.setBrightness(200),back),
+    // backLeft.solidColor(CustomColor.kWhite),
+    // Commands.runOnce(()->backLeft.setBrightness(200),backLeft),
+
     Commands.waitSeconds(1)
-  ).withName("ShiftChange");
+  );
  }
 
  public Command shiftEnd(){
@@ -97,8 +98,16 @@ public class Signals extends SubsystemBase {
     Commands.runOnce(()->center.setBrightness(200),center),
     left.blinkSmooth(128,CustomColor.kWhite),
     Commands.runOnce(()->left.setBrightness(200),left),
+
+    // backRight.blinkSmooth(128,CustomColor.kWhite),
+    // Commands.runOnce(()->backRight.setBrightness(200),backRight),
+    // back.blinkSmooth(128,CustomColor.kWhite),
+    // Commands.runOnce(()->back.setBrightness(200),back),
+    // backLeft.blinkSmooth(128,CustomColor.kWhite),
+    // Commands.runOnce(()->backLeft.setBrightness(200),backLeft),
+
     Commands.waitSeconds(1)
-  ).withName("ShiftChange");
+  );
  }
 
 
@@ -107,6 +116,11 @@ public class Signals extends SubsystemBase {
     right.solidColor(CustomColor.kPink),
     center.solidColor(CustomColor.kPink),
     left.solidColor(CustomColor.kPink),
+
+    // backRight.solidColor(CustomColor.kPink),
+    // back.solidColor(CustomColor.kPink),
+    // backLeft.solidColor(CustomColor.kPink),
+
     Commands.waitSeconds(0.5)
   );
  }
@@ -116,6 +130,11 @@ public class Signals extends SubsystemBase {
       right.solidColor(CustomColor.kGreen),
       center.solidColor(CustomColor.kGreen),
       left.solidColor(CustomColor.kGreen),
+
+      // backRight.solidColor(CustomColor.kGreen),
+      // back.solidColor(CustomColor.kGreen),
+      // backLeft.solidColor(CustomColor.kGreen),
+
       Commands.waitSeconds(1)
     );
     return command.ignoringDisable(true);
@@ -126,31 +145,49 @@ public class Signals extends SubsystemBase {
       Commands.runOnce(()->{}, right),
       Commands.runOnce(()->{}, center),
       Commands.runOnce(()->{}, left)
+
+      // Commands.runOnce(()->{}, backRight),
+      // Commands.runOnce(()->{}, back),
+      // Commands.runOnce(()->{}, backLeft)
     );
     return command.ignoringDisable(true);
   }
 
   public Command automaticShot(){
-    if (right.col == null || !right.col[0].equals(CustomColor.kWhite)){
-      return Commands.sequence(
-      right.solidColor(CustomColor.kGreen),
-      center.solidColor(CustomColor.kGreen),
-      left.solidColor(CustomColor.kGreen)
+    return Commands.sequence(
+      right.automaticShot(),
+      center.automaticShot(),
+      left.automaticShot()
+
+      // backRight.automaticShot(),
+      // back.automaticShot(),
+      // backLeft.automaticShot()
     );
-    }
-    else return Commands.none();
-    
   }
 
   public Command manualShot(){
-    if (right.col == null || !right.col[0].equals(CustomColor.kWhite)){
-      return Commands.sequence(
-      right.solidColor(CustomColor.kPurple),
-      center.solidColor(CustomColor.kPurple),
-      left.solidColor(CustomColor.kPurple)
+    return Commands.sequence(
+      right.manualShot(),
+      center.manualShot(),
+      left.manualShot()
+
+      // backRight.manualShot(),
+      // back.manualShot(),
+      // backLeft.manualShot()
     );
-    }
-    else return Commands.none();
+  }
+
+  public Command autoClimb(){
+    Command command = Commands.sequence(
+      right.autoClimb(),
+      center.autoClimb(),
+      left.autoClimb()
+
+      // backRight.autoClimb(),
+      // back.autoClimb(),
+      // backLeft.autoClimb()
+    );
+    return command.ignoringDisable(true);
   }
 
   public Command wrongShot(){
@@ -158,6 +195,10 @@ public class Signals extends SubsystemBase {
     right.solidColor(CustomColor.kYellow),
     center.solidColor(CustomColor.kYellow),
     left.solidColor(CustomColor.kYellow)
+
+    // backRight.solidColor(CustomColor.kYellow),
+    // back.solidColor(CustomColor.kYellow),
+    // backLeft.solidColor(CustomColor.kYellow)
   );
   }
 
