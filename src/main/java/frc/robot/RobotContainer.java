@@ -138,7 +138,7 @@ public class RobotContainer {
 
     new Trigger(DriverStation::isEnabled).and(DriverStation::isFMSAttached).onTrue(WLED.setAuraMode());
 
-
+    new Trigger(climber::isLinedUpWithL1).and(DriverStation::isAutonomousEnabled).debounce(0.1).onTrue(wled.signals.autoClimb().repeatedly().until(DriverStation::isDisabled));
 
     //while disabled
     //and see target
