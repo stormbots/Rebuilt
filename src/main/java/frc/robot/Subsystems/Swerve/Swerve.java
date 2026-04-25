@@ -133,7 +133,8 @@ public class Swerve extends SubsystemBase {
   SwerveInputs primaryInputs = new SwerveInputs();
   SwerveInputs fieldInputs = new SwerveInputs();
   SwerveInputs secondaryInputs = new SwerveInputs();
-
+  boolean lockmode=false;
+  
   @Override
   public void periodic() {
     // This method will be called once per scheduler run
@@ -148,32 +149,34 @@ public class Swerve extends SubsystemBase {
 
     // Log the pose to allow AdvantageScope to work properly
     DogLog.log("Swerve/pose", swerveDrive.getPose());
-
     odometryField.setRobotPose(swerveDrive.getPose());
 
-    var inputs = new SwerveInputs()
-        .add(primaryInputs)
-        .add(fieldInputs)
-        .add(secondaryInputs);
+    if(lockmode){
+      swerveDrive.lockPose();
+    }else{
+      //Do standard drive input muxing
+      var inputs = new SwerveInputs()
+          .add(primaryInputs)
+          .add(fieldInputs)
+          .add(secondaryInputs);
 
-    odometryField.getObject("navxAngle").setPose(new Pose2d());
+      // Don't generate output when off
+      if (DriverStation.isDisabled())
+        inputs.clear();
 
-    // Don't generate output when off
-    if (DriverStation.isDisabled())
-      inputs.clear();
+      swerveDrive.drive(
+          new Translation2d(
+              inputs.tx * swerveDrive.getMaximumChassisVelocity(),
+              inputs.ty * swerveDrive.getMaximumChassisVelocity()),
+          inputs.r * swerveDrive.getMaximumChassisAngularVelocity(),
+          true,
+          false);
 
-    swerveDrive.drive(
-        new Translation2d(
-            inputs.tx * swerveDrive.getMaximumChassisVelocity(),
-            inputs.ty * swerveDrive.getMaximumChassisVelocity()),
-        inputs.r * swerveDrive.getMaximumChassisAngularVelocity(),
-        true,
-        false);
-
-    // Now that we've read the inputs, clear them to prevent potential stale data
-    primaryInputs.clear();
-    fieldInputs.clear();
-    secondaryInputs.clear();
+      // Now that we've read the inputs, clear them to prevent potential stale data
+      primaryInputs.clear();
+      fieldInputs.clear();
+      secondaryInputs.clear();
+    }
 
     SmartDashboard.putNumber("swerve/primaryInput/tx", primaryInputs.tx);
     SmartDashboard.putNumber("swerve/primaryInput/ty", primaryInputs.ty);
@@ -191,7 +194,7 @@ public class Swerve extends SubsystemBase {
     SmartDashboard.putNumber("swerve/anglegyro", navx.getAngle());
     odometryField.getObject("navxAngle").setPose(new Pose2d(0, 0, navx.getRotation2d()));
   }
-
+  
   /** Own the subsystem and add dominant field-centric control */
   public Command setPrimaryInputs(DoubleSupplier translationX, DoubleSupplier translationY,
       DoubleSupplier angularRotationX) {
@@ -359,6 +362,12 @@ public class Swerve extends SubsystemBase {
       secondaryInputs.r = 0;
     });
   }
+
+  /** Enable the X mode */
+  public Command stopHarder(){
+    return startEnd(()->lockmode=true, ()->lockmode=false);
+  }
+
   //This also needs to be changed for new turret ranges, jacob complained that it took over his drivetrain too much so just don't run in tele
   public Command turnToHeadingWithinTurretRange(Supplier<Rotation2d> bearing) {
     return Commands.run(() -> {
