@@ -6,6 +6,7 @@ import java.util.List;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -71,20 +72,24 @@ public class FieldBehaviour {
     field.getObject("buthb").setPoses(blueUpperTrenchHoodBox.toPoses());
     field.getObject("rlthb").setPoses(redLowerTrenchHoodBox.toPoses());
     field.getObject("ruthb").setPoses(redUpperTrenchHoodBox.toPoses());
+
+    field.getObject("rt").setPoses(redTowerClimberBox.toPoses());
+    field.getObject("bt").setPoses(blueTowerClimberBox.toPoses());
   }
 
   // Track our field locations, in meters
   private double blueCenter = 4.65;
   private double redCenter = 11.887;
-
+  private double fieldCenterY = Units.inchesToMeters(158.84);
   // generate X coordinate offsets from centerline of obstacles
   private double trenchHoodOffset = .5; //TODO: Figure out what the best hood distance is to avoid issues
+  private double towerClimbOffset = Units.inchesToMeters(12);
 
   public double[] centerX = new double[] { blueCenter, redCenter };
   public double[] trenchY = new double[] { 0, 1.2, 6.7, 8 };
-
   public double[] bumpY = new double[] { 1.7, 3.3, 4.6, 6.3 };
-
+  public double[] towerY = new double[] {fieldCenterY-(Units.inchesToMeters(23.5+11.38)), fieldCenterY+(Units.inchesToMeters(23.5-11.38))};
+  public double[] towerX = new double[] {0, Units.inchesToMeters(43.51), Units.inchesToMeters(651.22-43.51), Units.inchesToMeters(651.22)};
   // TODO: Change bump and trench boxes to be important for stuff
   public BoundingBox blueLowerTrench = new BoundingBox(centerX[0], trenchY[0], centerX[0], trenchY[1]);
   public BoundingBox blueUpperTrench = new BoundingBox(centerX[0], trenchY[2], centerX[0], trenchY[3]);
@@ -104,6 +109,9 @@ public class FieldBehaviour {
       centerX[1] + trenchHoodOffset, trenchY[1]);
   public BoundingBox redLowerTrenchHoodBox = new BoundingBox(centerX[1] - trenchHoodOffset, trenchY[2],
       centerX[1] + trenchHoodOffset, trenchY[3]);
+
+  public BoundingBox redTowerClimberBox = new BoundingBox(towerX[0], towerY[0]-towerClimbOffset, towerX[1]+towerClimbOffset, towerY[1]+towerClimbOffset);
+  public BoundingBox blueTowerClimberBox = new BoundingBox(towerX[2]-towerClimbOffset, towerY[0]-towerClimbOffset, towerX[2], towerY[1]+towerClimbOffset);
 
   public ArrayList<BoundingBox> swerveTrenches = new ArrayList<>() {
     {
@@ -129,6 +137,13 @@ public class FieldBehaviour {
       add(blueUpperTrenchHoodBox);
       add(redUpperTrenchHoodBox);
       add(redLowerTrenchHoodBox);
+    }
+  };
+
+  public ArrayList<BoundingBox> towerList = new ArrayList<>() {
+    {
+      add(redTowerClimberBox);
+      add(blueTowerClimberBox);
     }
   };
 
@@ -168,6 +183,15 @@ public class FieldBehaviour {
   public boolean getRetractHood(Pose2d robotPosition) {
     for (var trench : hoodTrenches) {
       if (trench.contains(robotPosition)) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  public boolean getNearTower(Pose2d robotPosition) {
+    for (var tower : towerList) {
+      if (tower.contains(robotPosition)) {
         return true;
       }
     }

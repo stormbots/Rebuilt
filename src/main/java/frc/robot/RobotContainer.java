@@ -15,10 +15,10 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.SerialPort;
 import edu.wpi.first.wpilibj.SerialPort.Port;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
-import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
@@ -150,6 +150,10 @@ public class RobotContainer {
     .and(DriverStation::isTeleop) //TODO: Suppress just for Teleop or all enable?
     .whileTrue( shooter.suppressForTrench() );
 
+    //Had issues falsely triggering on lineup, which interferes with climb
+    // new Trigger(()->fieldBehaviour.getNearTower(swerve.getSwervePose()))
+    // .onFalse(climber.stow()).debounce(0.1);
+
   }
 
 
@@ -256,7 +260,15 @@ public class RobotContainer {
 
     operator.b()
     .whileTrue(climber.prepareForClimbL1())
-    .onFalse(climber.climbL1());
+    // .onFalse(climber.climbL1());
+    .onFalse(Commands.either(
+      climber.climbL1(),
+      climber.stow(),
+      ()->Timer.getMatchTime() <= (140-20)
+    ));
+
+    
+
 
     // operator.x()
     // .whileTrue(shooter.shootWithDashboardValues())
