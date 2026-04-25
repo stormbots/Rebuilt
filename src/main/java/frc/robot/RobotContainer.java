@@ -18,13 +18,13 @@ import edu.wpi.first.wpilibj.SerialPort.Port;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
-import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Subsystems.FieldBehaviour;
 import frc.robot.Subsystems.Climber.Climber;
+import frc.robot.Subsystems.DriverFeedback.DriverFeedback;
 import frc.robot.Subsystems.HopperSensors.HopperSensors;
 import frc.robot.Subsystems.Intake.Intake;
 import frc.robot.Subsystems.Lighting.WLED;
@@ -72,6 +72,7 @@ public class RobotContainer {
   CommandXboxController driver = new CommandXboxController(0);
   CommandXboxController operator = new CommandXboxController(1);
   // CommandXboxController debug = new CommandXboxController(3);
+  DriverFeedback feedback = new DriverFeedback(driver, operator);
   Path testingPath = new Path("goCollect");
   Double rpm = 2600.0;
   Double hoodAngle = 25.0;
@@ -132,7 +133,8 @@ public class RobotContainer {
     .onFalse(wled.signals.showVisionOkay())
     .onTrue(wled.signals.reboot());
 
-    ShiftTracking.canShoot.onTrue(wled.signals.shiftStart()).onFalse(wled.signals.shiftEnd());
+    ShiftTracking.canShoot.onTrue(wled.signals.shiftStart()).onFalse(wled.signals.shiftEnd())
+    .onTrue(feedback.shiftStart()).onFalse(feedback.shiftEnd());
 
     new Trigger(DriverStation::isEnabled).onTrue(wled.signals.reboot());
 
