@@ -31,4 +31,11 @@ public class DriverFeedback {
             new PulseBoth(operator, 1.0, 0.5, 0.5)
         );
     }
+
+    public Command climberStowed(){
+        return Commands.parallel(
+            new PingPong(driver, 1.0, 0.5, 0.5),
+            new PingPong(operator, 1.0, 0.5, 0.5)
+        );
+    }
 }

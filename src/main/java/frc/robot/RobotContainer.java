@@ -266,7 +266,7 @@ public class RobotContainer {
     // .onFalse(climber.climbL1());
     .onFalse(Commands.either(
       climber.climbL1(),
-      climber.stow(),
+      climber.stow().andThen(feedback.climberStowed()),
       ()->Timer.getMatchTime() <= (140-20)
     ));
 
