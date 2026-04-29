@@ -50,8 +50,8 @@ public class PingPong extends Command {
       finished = true;
     }
 
-    double leftIntensity = (maxIntensity/2)*Math.sin((2*Math.PI*elapsedTime/frequency)-(Math.PI/2))+(maxIntensity/2);
-    double rightIntensity = (maxIntensity/2)*Math.cos(2*Math.PI*elapsedTime/frequency)+(maxIntensity/2);
+    double leftIntensity = (maxIntensity/2)*Math.sin((2*Math.PI*elapsedTime*frequency)-(Math.PI/2))+(maxIntensity/2);
+    double rightIntensity = (maxIntensity/2)*Math.cos(2*Math.PI*elapsedTime*frequency)+(maxIntensity/2);
 
     controller.getHID().setRumble(RumbleType.kLeftRumble, leftIntensity);
     controller.getHID().setRumble(RumbleType.kRightRumble, rightIntensity);

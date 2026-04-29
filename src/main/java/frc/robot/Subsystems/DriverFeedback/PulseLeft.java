@@ -50,7 +50,7 @@ public class PulseLeft extends Command {
       finished = true;
     }
 
-    double intensity = (maxIntensity/2)*Math.sin((2*Math.PI*elapsedTime/frequency)-(Math.PI/2))+(maxIntensity/2);
+    double intensity = (maxIntensity/2)*Math.sin((2*Math.PI*elapsedTime*frequency)-(Math.PI/2))+(maxIntensity/2);
     controller.getHID().setRumble(RumbleType.kLeftRumble, intensity);
   }
 

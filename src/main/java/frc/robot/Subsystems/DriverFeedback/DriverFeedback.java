@@ -27,15 +27,15 @@ public class DriverFeedback {
 
     public Command shiftEnd(){
         return Commands.parallel(
-            new PulseBoth(driver, 1.0, 0.5, 0.5),
-            new PulseBoth(operator, 1.0, 0.5, 0.5)
+            new PulseBoth(driver, 1.0, 0.5, 2.0),
+            new PulseBoth(operator, 1.0, 0.5, 2.0)
         );
     }
 
     public Command climberStowed(){
         return Commands.parallel(
-            new PingPong(driver, 1.0, 0.5, 0.5),
-            new PingPong(operator, 1.0, 0.5, 0.5)
+            new PingPong(driver, 1.0, 0.5, 2.0),
+            new PingPong(operator, 1.0, 0.5, 2.0)
         );
     }
 }
