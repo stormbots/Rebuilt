@@ -32,7 +32,7 @@
     {
       "type": "event_trigger",
       "t_ratio": 0.0,
-      "lib_key": "intakeStow"
+      "lib_key": "intakePump"
     },
     {
       "type": "translation",

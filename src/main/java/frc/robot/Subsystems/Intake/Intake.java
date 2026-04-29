@@ -120,4 +120,12 @@ public class Intake extends SubsystemBase {
       right.setOutForShooting()
     );
   }
+
+  public Command pumpIntakeForShooting(){
+    return Commands.repeatingSequence(
+      setOutForShooting().withTimeout(0.5),
+      new WaitCommand(0.5),
+      intake().withTimeout(0.5)
+    );
+  }
 }

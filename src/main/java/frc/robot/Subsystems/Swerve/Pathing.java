@@ -64,6 +64,7 @@ public class Pathing extends SubsystemBase {
     FollowPath.registerEventTrigger("hoodDown", shooter.testSetHoodAngle(Degrees.of(0)));
     FollowPath.registerEventTrigger("stopShooting", stopShooting());
     FollowPath.registerEventTrigger("spindexerUnclog", spindexer.unclog().asProxy());
+    FollowPath.registerEventTrigger("intakePump", intake.pumpIntakeForShooting().asProxy());
   }
 
   public Command followPath(Path path){
@@ -104,7 +105,8 @@ public class Pathing extends SubsystemBase {
   public Command shootAuto(){
     return new ParallelCommandGroup(
       shooter.shootHubVelComp().asProxy(),
-      spindexer.feedToShooter().asProxy()
+      spindexer.feedToShooter().asProxy(),
+      intake.pumpIntakeForShooting().asProxy()
     );
   }
 

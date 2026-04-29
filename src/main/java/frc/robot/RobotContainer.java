@@ -289,6 +289,13 @@ public class RobotContainer {
     .whileTrue(
       autos.climbAuto()
     );
+
+    // operator.povLeft()
+    // .whileTrue(
+    //   shooter.testTurretVoltage(
+    //     ()->operator.getLeftX()*1.0
+    //   )
+    // );
   }
 
   //BUTTON FUNCTIONS/STATES

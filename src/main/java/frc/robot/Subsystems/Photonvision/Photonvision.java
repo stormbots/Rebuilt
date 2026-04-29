@@ -154,6 +154,7 @@ public class Photonvision extends SubsystemBase {
   private void updateCameraSideOdometry(PhotonPoseEstimator poseEstimator, PhotonCamera camera){
     Optional<EstimatedRobotPose> visionEstimate = Optional.empty();
     for(var result : camera.getAllUnreadResults()){
+      updateEstimationStdDevs(visionEstimate, result.getTargets());
       visionEstimate = poseEstimator.estimateCoprocMultiTagPose(result);
       if (visionEstimate.isEmpty()){
         visionEstimate = poseEstimator.estimateLowestAmbiguityPose(result);
@@ -175,6 +176,7 @@ public class Photonvision extends SubsystemBase {
 
     visionEstimate.ifPresent(
       est ->{
+        
         var estimatedStdDevs = getEstimationStdDevs();
 
         swerve.swerveDrive.addVisionMeasurement(est.estimatedPose.toPose2d(),est.timestampSeconds, estimatedStdDevs);

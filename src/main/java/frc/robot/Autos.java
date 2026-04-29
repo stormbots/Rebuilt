@@ -245,7 +245,7 @@ public class Autos {
     return new ParallelCommandGroup(
       shooter.shootHub().asProxy(),
       spindexer.feedToShooter().asProxy(),
-      intake.setOutForShooting().asProxy()
+      intake.pumpIntakeForShooting().asProxy()
     );
   }
 
