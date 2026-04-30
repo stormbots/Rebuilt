@@ -53,14 +53,14 @@ public class PingPong extends Command {
     double leftIntensity = (maxIntensity/2)*Math.sin((2*Math.PI*elapsedTime*frequency)-(Math.PI/2))+(maxIntensity/2);
     double rightIntensity = (maxIntensity/2)*Math.cos(2*Math.PI*elapsedTime*frequency)+(maxIntensity/2);
 
-    controller.getHID().setRumble(RumbleType.kLeftRumble, leftIntensity);
-    controller.getHID().setRumble(RumbleType.kRightRumble, rightIntensity);
+    controller.setRumble(RumbleType.kLeftRumble, leftIntensity);
+    controller.setRumble(RumbleType.kRightRumble, rightIntensity);
   }
 
   // Called once the command ends or is interrupted.
   @Override
   public void end(boolean interrupted) {
-    controller.getHID().setRumble(RumbleType.kBothRumble, 0.0);
+    controller.setRumble(RumbleType.kBothRumble, 0.0);
   }
 
   // Returns true when the command should end.

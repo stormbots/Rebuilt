@@ -51,13 +51,13 @@ public class PulseRight extends Command {
     }
 
     double intensity = (maxIntensity/2)*Math.sin((2*Math.PI*elapsedTime*frequency)-(Math.PI/2))+(maxIntensity/2);
-    controller.getHID().setRumble(RumbleType.kRightRumble, intensity);
+    controller.setRumble(RumbleType.kRightRumble, intensity);
   }
 
   // Called once the command ends or is interrupted.
   @Override
   public void end(boolean interrupted) {
-    controller.getHID().setRumble(RumbleType.kBothRumble, 0.0);
+    controller.setRumble(RumbleType.kBothRumble, 0.0);
   }
 
   // Returns true when the command should end.

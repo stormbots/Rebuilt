@@ -44,13 +44,13 @@ public class RumbleLeft extends Command {
     if (elapsedTime>duration){
       finished = true;
     }
-    controller.getHID().setRumble(RumbleType.kLeftRumble, intensity);
+    controller.setRumble(RumbleType.kLeftRumble, intensity);
   }
 
   // Called once the command ends or is interrupted.
   @Override
   public void end(boolean interrupted) {
-    controller.getHID().setRumble(RumbleType.kBothRumble, 0.0);
+    controller.setRumble(RumbleType.kBothRumble, 0.0);
   }
 
   // Returns true when the command should end.
