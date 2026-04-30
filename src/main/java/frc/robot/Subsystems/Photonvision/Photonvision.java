@@ -43,7 +43,7 @@ public class Photonvision extends SubsystemBase {
 
   private AprilTagFieldLayout aprilTagFieldLayout = AprilTagFieldLayout.loadField(AprilTagFields.k2026RebuiltWelded);
 
-  private Optional<PhotonCamera> rightCamera = Optional.empty();
+  private Optional<PhotonCamera> frontRightCamera = Optional.empty();
   private Optional<PhotonCamera> frontLeftCamera = Optional.empty();
   private Optional<PhotonCamera> backLeftCamera = Optional.empty();
   private Optional<PhotonCamera> backRightCamera = Optional.empty();
@@ -103,11 +103,11 @@ public class Photonvision extends SubsystemBase {
 
     // TODO: Fix this! If one camera throws an error, we have no cameras
     try{
-      rightCamera = Optional.of(new PhotonCamera("FrontRight"));
+      frontRightCamera = Optional.of(new PhotonCamera("FrontRight"));
     }
     catch(Error e){
       System.err.print(e);
-      rightCamera = Optional.empty();
+      frontRightCamera = Optional.empty();
     }
 
     try{
@@ -137,12 +137,12 @@ public class Photonvision extends SubsystemBase {
 
   public void updateOdometry(){
     if(shouldNotTrack.getAsBoolean()) return;
-    if(rightCamera.isPresent()){
-      frontRightHasTarget = updateCameraSideOdometry(frontRightEstimator, rightCamera.get());
+    if(frontRightCamera.isPresent()){
+      frontRightHasTarget = updateCameraSideOdometry(frontRightEstimator, frontRightCamera.get());
     }
 
     if(frontLeftCamera.isPresent()){
-      frontLeftHasTarget = updateCameraSideOdometry(frontLeftEstimator, rightCamera.get());
+      frontLeftHasTarget = updateCameraSideOdometry(frontLeftEstimator, frontLeftCamera.get());
     }
 
     if(backLeftCamera.isPresent()){
@@ -212,6 +212,10 @@ public class Photonvision extends SubsystemBase {
       }
 
       if (filteredTargets.isEmpty()) continue;
+
+      //if it has 1 tag with greater than .4 m ambiguity dont use
+      if (filteredTargets.size() == 1 && filteredTargets.get(0).getPoseAmbiguity() > 0.4) continue;
+
 
       PhotonPipelineResult filteredResult = new PhotonPipelineResult(
         result.metadata, filteredTargets, result.getMultiTagResult()
@@ -317,7 +321,7 @@ public class Photonvision extends SubsystemBase {
     visionField2d.setRobotPose(swerve.getSwervePose());
     updateOdometry();
 
-    SmartDashboard.putBoolean("vision/rightCameraPresent", rightCamera.isPresent());
+    SmartDashboard.putBoolean("vision/rightCameraPresent", frontRightCamera.isPresent());
     SmartDashboard.putBoolean("vision/leftCameraPresent", frontLeftCamera.isPresent());
     SmartDashboard.putBoolean("vision/backLeftCameraPresent", backLeftCamera.isPresent());
     SmartDashboard.putBoolean("vision/backRightCameraPresent", backRightCamera.isPresent());
