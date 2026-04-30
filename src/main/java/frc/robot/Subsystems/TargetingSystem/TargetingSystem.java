@@ -75,7 +75,7 @@ public class TargetingSystem extends SubsystemBase {
   double fps=240.0;
   // double timescalar = 1.0;
   // double distanceoffset = 0.0;
-  double distFactor = 10.0;
+  double distFactor = 20.0;
   // double distFactor = 0.0;
 
   // distance, hoodangle, flywheel rpm, TOF

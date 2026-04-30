@@ -7,6 +7,7 @@ package frc.robot.Subsystems.Photonvision;
 import static edu.wpi.first.units.Units.Inch;
 import static edu.wpi.first.units.Units.Meters;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -14,6 +15,7 @@ import java.util.Set;
 import org.photonvision.EstimatedRobotPose;
 import org.photonvision.PhotonCamera;
 import org.photonvision.PhotonPoseEstimator;
+import org.photonvision.targeting.PhotonPipelineResult;
 import org.photonvision.targeting.PhotonTrackedTarget;
 
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
@@ -32,6 +34,7 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Subsystems.Swerve.Swerve;
 
 public class Photonvision extends SubsystemBase {
+  private static final Set<Integer> IGNORED_TAGS = Set.of(23, 22, 1, 12, 28, 17, 6, 7);
   private Swerve swerve;
   private boolean backLeftHasTarget = false;
   private boolean backRightHasTarget = false;
@@ -97,6 +100,7 @@ public class Photonvision extends SubsystemBase {
     this.swerve = swerve;
     SmartDashboard.putData("visionfield", visionField2d);
 
+
     // TODO: Fix this! If one camera throws an error, we have no cameras
     try{
       rightCamera = Optional.of(new PhotonCamera("FrontRight"));
@@ -132,69 +136,125 @@ public class Photonvision extends SubsystemBase {
   }
 
   public void updateOdometry(){
-    if(!shouldNotTrack.getAsBoolean()){
-      if(rightCamera.isPresent()){
-        updateCameraSideOdometry(frontRightEstimator, rightCamera.get());
-      }
+    if(shouldNotTrack.getAsBoolean()) return;
+    if(rightCamera.isPresent()){
+      frontRightHasTarget = updateCameraSideOdometry(frontRightEstimator, rightCamera.get());
+    }
 
-      if(frontLeftCamera.isPresent()){
-        updateCameraSideOdometry(frontLeftEstimator, frontLeftCamera.get());
-      }
+    if(frontLeftCamera.isPresent()){
+      frontLeftHasTarget = updateCameraSideOdometry(frontLeftEstimator, rightCamera.get());
+    }
 
-      if(backLeftCamera.isPresent()){
-        updateCameraSideOdometry(backLeftEstimator, backLeftCamera.get());
-      }
-      
-      if(backRightCamera.isPresent()){
-        updateCameraSideOdometry(backRightEstimator, backRightCamera.get());
-      }
+    if(backLeftCamera.isPresent()){
+      backLeftHasTarget = updateCameraSideOdometry(backLeftEstimator, backLeftCamera.get());
+    }
+    
+    if(backRightCamera.isPresent()){
+      backRightHasTarget = updateCameraSideOdometry(backRightEstimator, backRightCamera.get());
     }
   }
 
-  private void updateCameraSideOdometry(PhotonPoseEstimator poseEstimator, PhotonCamera camera){
-    Optional<EstimatedRobotPose> visionEstimate = Optional.empty();
-    for(var result : camera.getAllUnreadResults()){
-      updateEstimationStdDevs(visionEstimate, result.getTargets());
-      visionEstimate = poseEstimator.estimateCoprocMultiTagPose(result);
-      if (visionEstimate.isEmpty()){
-        visionEstimate = poseEstimator.estimateLowestAmbiguityPose(result);
-        if(poseEstimator.equals(frontRightEstimator)){
-          frontRightHasTarget = false;
+  // private void updateCameraSideOdometry(PhotonPoseEstimator poseEstimator, PhotonCamera camera){
+  //   Optional<EstimatedRobotPose> visionEstimate = Optional.empty();
+  //   for(var result : camera.getAllUnreadResults()){
+  //     updateEstimationStdDevs(visionEstimate, result.getTargets());
+  //     visionEstimate = poseEstimator.estimateCoprocMultiTagPose(result);
+  //     if (visionEstimate.isEmpty()){
+  //       visionEstimate = poseEstimator.estimateLowestAmbiguityPose(result);
+  //       if(poseEstimator.equals(frontRightEstimator)){
+  //         frontRightHasTarget = false;
+  //       }
+  //       else if(poseEstimator.equals(frontLeftEstimator)){
+  //         frontLeftHasTarget = false;
+  //       }
+  //       else if(poseEstimator.equals(backRightEstimator)){
+  //         backRightHasTarget = false;
+  //       }
+  //       else if(poseEstimator.equals(backLeftEstimator)){
+  //         backLeftHasTarget = false;
+  //       };
+  //     }
+  //     updateEstimationStdDevs(visionEstimate, result.getTargets());
+  //   }
+
+  //   visionEstimate.ifPresent(
+  //     est ->{
+        
+  //       var estimatedStdDevs = getEstimationStdDevs();
+
+  //       swerve.swerveDrive.addVisionMeasurement(est.estimatedPose.toPose2d(),est.timestampSeconds, estimatedStdDevs);
+  //       visionField2d.getObject(camera.getName()).setPose(est.estimatedPose.toPose2d());
+  //       if(poseEstimator.equals(frontRightEstimator)){
+  //         frontRightHasTarget = true;
+  //       }
+  //       else if(poseEstimator.equals(frontLeftEstimator)){
+  //         frontLeftHasTarget = true;
+  //       }
+  //       else if(poseEstimator.equals(backRightEstimator)){
+  //         backRightHasTarget = true;
+  //       }
+  //       else if(poseEstimator.equals(backLeftEstimator)){
+  //         backLeftHasTarget = true;
+  //       };
+  //     }
+  //   );
+  // }
+
+  private boolean updateCameraSideOdometry(PhotonPoseEstimator poseEstimator, PhotonCamera camera){
+    boolean sawTarget = false;
+    for (PhotonPipelineResult result : camera.getAllUnreadResults()) {
+      // Filter out ignored tags into a mutable copy before estimation
+      List<PhotonTrackedTarget> filteredTargets = new ArrayList<>();
+      for (PhotonTrackedTarget target : result.getTargets()) {
+        if (!IGNORED_TAGS.contains(target.getFiducialId())) {
+          filteredTargets.add(target);
         }
-        else if(poseEstimator.equals(frontLeftEstimator)){
-          frontLeftHasTarget = false;
-        }
-        else if(poseEstimator.equals(backRightEstimator)){
-          backRightHasTarget = false;
-        }
-        else if(poseEstimator.equals(backLeftEstimator)){
-          backLeftHasTarget = false;
-        };
       }
-      updateEstimationStdDevs(visionEstimate, result.getTargets());
+
+      if (filteredTargets.isEmpty()) continue;
+
+      PhotonPipelineResult filteredResult = new PhotonPipelineResult(
+        result.metadata, filteredTargets, result.getMultiTagResult()
+      );
+
+
+      Optional<EstimatedRobotPose> estimatedPose = poseEstimator.update(filteredResult);
+
+      if (estimatedPose.isEmpty()) continue;
+      // Compute std devs inline from the filtered target list
+      int numTags = 0;
+      double avgDistance = 0.0;
+      for (PhotonTrackedTarget target : filteredTargets) {
+        var tagPose = poseEstimator.getFieldTags().getTagPose(target.getFiducialId());
+        if (tagPose.isEmpty()) continue;
+        numTags++;
+        avgDistance += tagPose.get()
+          .toPose2d()
+          .getTranslation()
+          .getDistance(estimatedPose.get().estimatedPose.toPose2d().getTranslation());
+      }
+      if (numTags == 0) continue;
+      avgDistance /= numTags;
+
+      Matrix<N3, N1> stdDevs;
+      if (numTags > 1) {
+        stdDevs = multiTagStdDevs;
+      } else if (avgDistance > 4.0) {
+        continue; // reject cuz too far for single tag
+      } else {
+        stdDevs = singleTagStdDevs.times(1 + (avgDistance * avgDistance / 30));
+      }
+
+      swerve.swerveDrive.addVisionMeasurement(
+        estimatedPose.get().estimatedPose.toPose2d(),
+        estimatedPose.get().timestampSeconds,
+        stdDevs
+      );
+      visionField2d.getObject(camera.getName()).setPose(estimatedPose.get().estimatedPose.toPose2d());
+      sawTarget = true;
     }
 
-    visionEstimate.ifPresent(
-      est ->{
-        
-        var estimatedStdDevs = getEstimationStdDevs();
-
-        swerve.swerveDrive.addVisionMeasurement(est.estimatedPose.toPose2d(),est.timestampSeconds, estimatedStdDevs);
-        visionField2d.getObject(camera.getName()).setPose(est.estimatedPose.toPose2d());
-        if(poseEstimator.equals(frontRightEstimator)){
-          frontRightHasTarget = true;
-        }
-        else if(poseEstimator.equals(frontLeftEstimator)){
-          frontLeftHasTarget = true;
-        }
-        else if(poseEstimator.equals(backRightEstimator)){
-          backRightHasTarget = true;
-        }
-        else if(poseEstimator.equals(backLeftEstimator)){
-          backLeftHasTarget = true;
-        };
-      }
-    );
+    return sawTarget;
   }
 
   public boolean hasTarget(){

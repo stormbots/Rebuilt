@@ -116,7 +116,7 @@ public class Flywheel extends SubsystemBase {
       .d(0.0)
     .feedForward
       .kV(0.0024309 * 4000 / 5174.083984 * 2725 / 2516.0 * 2210 / 2290)
-      .kS(0.09)
+      // .kS(0.09)
     ;
 
     config.encoder
