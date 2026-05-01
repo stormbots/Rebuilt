@@ -287,8 +287,10 @@ public class RobotContainer {
     //Omitted due to prior odometry issues proving to be a risk factor
     operator.y()
     .whileTrue(
-      autos.climbAuto()
-    );
+      Commands.sequence( 
+        climber.autoPrepClimber().withTimeout(1.0),
+        autos.climbAuto()
+        ));
 
     // operator.povLeft()
     // .whileTrue(

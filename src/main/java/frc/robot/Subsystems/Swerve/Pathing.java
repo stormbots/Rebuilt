@@ -59,12 +59,12 @@ public class Pathing extends SubsystemBase {
     FollowPath.registerEventTrigger("intakeWhileShooting", intakeWhileShooting());
     FollowPath.registerEventTrigger("intakeWhilePassing", intakeWhilePassing());
     FollowPath.registerEventTrigger("pass", pass());
-    FollowPath.registerEventTrigger("intakeStop", intake.up().asProxy());
-    FollowPath.registerEventTrigger("intakeStow", intake.stow().asProxy());
+    FollowPath.registerEventTrigger("intakeStop", intake.up());
+    FollowPath.registerEventTrigger("intakeStow", intake.stow());
     FollowPath.registerEventTrigger("hoodDown", shooter.testSetHoodAngle(Degrees.of(0)));
     FollowPath.registerEventTrigger("stopShooting", stopShooting());
     FollowPath.registerEventTrigger("spindexerUnclog", spindexer.unclog().asProxy());
-    FollowPath.registerEventTrigger("intakePump", intake.pumpIntakeForShooting().asProxy());
+    
   }
 
   public Command followPath(Path path){

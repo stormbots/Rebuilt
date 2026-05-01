@@ -5,6 +5,7 @@ import static edu.wpi.first.units.Units.Degrees;
 import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
 
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -58,6 +59,7 @@ public class Shooter {
       // turret.setAngle(targets)
       //TODO: fix settrap so we can use it instead.
       turret.setAngleTrap(targets) 
+      // swerve.turnToHeading(()->new Rotation2d(targets.get().turretAngle)) IF  WE WANT TO DO STATIONARY TURRET
     );
   }
 

@@ -75,7 +75,7 @@ public class TargetingSystem extends SubsystemBase {
   double fps=240.0;
   // double timescalar = 1.0;
   // double distanceoffset = 0.0;
-  double distFactor = 10.0;
+  double distFactor = 15.0;
   // double distFactor = 0.0;
 
   // distance, hoodangle, flywheel rpm, TOF
@@ -100,10 +100,10 @@ public class TargetingSystem extends SubsystemBase {
     { 41,  5, 2045, 129/fps },
     { 41+distFactor,  5, 2245, 129/fps },
     { 60+distFactor, 10, 2245, 127/fps },
-    { 84+distFactor, 21, 2315, 114/fps },
-    {108+distFactor, 23, 2325, 117/fps },
+    { 84+distFactor, 21, 2295, 114/fps },
+    {108+distFactor, 23, 2320, 117/fps },
     //NEED TO RETIME THIS ONE CUZ THE SHOT IS BAD
-    {132+distFactor, 23, 2490, 129/fps },
+    {132+distFactor, 23, 2470, 129/fps },
     {156+distFactor, 23, 2540, 135/fps },
     {180+distFactor, 25, 2670, 142/fps },
     {204+distFactor, 25, 2770, 156/fps },

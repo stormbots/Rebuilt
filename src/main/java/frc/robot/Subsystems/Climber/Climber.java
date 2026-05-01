@@ -35,7 +35,7 @@ public class Climber extends SubsystemBase {
   public ClimberVisual visual = new ClimberVisual();
 
   public Climber() {
-    SmartDashboard.putData("Climber/RFLeft", rangefinders.left);
+    // SmartDashboard.putData("Climber/RFLeft", rangefinders.left);
     SmartDashboard.putData("Climber/RFRight", rangefinders.right);
   }
 

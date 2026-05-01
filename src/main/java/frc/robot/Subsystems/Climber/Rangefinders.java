@@ -16,7 +16,7 @@ import frc.robot.Subsystems.Swerve.Swerve.SwerveInputs;
 public class Rangefinders {
   // public LaserCanWrapper left = new LaserCanWrapper(2).configureShortRange().setThreshhold(Inches.of(24));
   // public LaserCanWrapper right = new LaserCanWrapper(3).configureShortRange().setThreshhold(Inches.of(24));
-  public LaserCanWrapper left = new LaserCanWrapper(5).configureShortRange().setThreshhold(Inches.of(24));
+  // public LaserCanWrapper left = new LaserCanWrapper(5).configureShortRange().setThreshhold(Inches.of(24));
   public LaserCanWrapper right = new LaserCanWrapper(4).configureShortRange().setThreshhold(Inches.of(24));
   SwerveInputs swerveInputs = new SwerveInputs();
 
@@ -46,22 +46,23 @@ public class Rangefinders {
   }
 
   public boolean isDetectable() {
-    Distance leftDistance = left.getDistanceOptional().orElse(Inches.of(24));
+    // Distance leftDistance = left.getDistanceOptional().orElse(Inches.of(24));
     Distance rightDistance = right.getDistanceOptional().orElse(Inches.of(24));
 
-    var leftOk = leftDistance.lt(Inches.of(6))
+    // var leftOk = leftDistance.lt(Inches.of(6))
       //&&leftDistance.gt(Inches.of(0));//Breaks because of laser can thing, but rejects  errors
       ;
     var rightOk = rightDistance.lt(Inches.of(6))
       //&&rightDistance.gt(Inches.of(0));//Breaks because of laser can thing, but rejects  errors
       ;
-    return leftOk || rightOk;
+    return rightOk;
   }
 
   public boolean isRightChecked(){
     var dist = right.getDistanceOptional().orElse(Inches.of(24));
 
-    return dist.lt(Inches.of(6.75))
+    return dist.lt(Inches.of(6.75)) 
+      // && dist.gt(Inches.of(0.1)) still dont work in auto :(, works in tele button???
       //&&dist.gt(Inches.of(0)) //Breaks because of laser can thing, but rejects  errors
       ;
   }

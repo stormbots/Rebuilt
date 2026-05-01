@@ -181,7 +181,7 @@ public class Autos {
     return Commands.sequence(
       pathing.followPath(climbAutoV2).until(()->
         climber.rangefinders.isRightChecked.getAsBoolean()
-        && swerve.getSwervePose().getRotation().getMeasure().isNear(Degrees.of(allianceFacingAngle), Degrees.of(10))
+        // && swerve.getSwervePose().getRotation().getMeasure().isNear(Degrees.of(allianceFacingAngle), Degrees.of(10))
       ),
       new ParallelCommandGroup(
         swerve.addSecondaryInputsTrueFielcentric(()->climber.generateSwerveInputs(swerve.getSwervePose())),
@@ -190,7 +190,7 @@ public class Autos {
       )
       .until(()->climber.isLinedUpWithL1()).withTimeout(2.0),
       climber.prepareForClimbL1().until(climber.isAboveL1Rung).withTimeout(3.5),
-      climber.climbL1()
+      climber.climbL1().alongWith(swerve.addSecondaryInputsTrueFielcentric(()->climber.generateSwerveInputs(swerve.getSwervePose())))
     );
   }
 
@@ -245,7 +245,7 @@ public class Autos {
     return new ParallelCommandGroup(
       shooter.shootHub().asProxy(),
       spindexer.feedToShooter().asProxy(),
-      intake.pumpIntakeForShooting().asProxy()
+      intake.setOutForShooting().asProxy()
     );
   }
 
