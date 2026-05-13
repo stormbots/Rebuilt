@@ -67,6 +67,7 @@ public class Flywheel extends SubsystemBase {
     SmartDashboard.putNumber("shooter/flywheel/rpmSetpoint", leaderMotor.getClosedLoopController().getSetpoint());
     SmartDashboard.putNumber("shooter/flywheel/voltage", leaderMotor.getAppliedOutput()*leaderMotor.getBusVoltage());
     SmartDashboard.putNumber("shooter/flywheel/current", leaderMotor.getOutputCurrent());
+    SmartDashboard.putBoolean("shooter/flywheel/onTarget", getOnTarget());
   }
 
   public double getRPM(){

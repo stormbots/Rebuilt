@@ -61,7 +61,7 @@ public class Rangefinders {
   public boolean isRightChecked(){
     var dist = right.getDistanceOptional().orElse(Inches.of(24));
 
-    return dist.lt(Inches.of(6.75)) 
+    return dist.lt(Inches.of(9.75)) 
       // && dist.gt(Inches.of(0.1)) still dont work in auto :(, works in tele button???
       //&&dist.gt(Inches.of(0)) //Breaks because of laser can thing, but rejects  errors
       ;

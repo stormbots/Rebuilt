@@ -35,11 +35,6 @@
       "lib_key": "intakeStop"
     },
     {
-      "type": "event_trigger",
-      "t_ratio": 1.0,
-      "lib_key": "stopShooting"
-    },
-    {
       "type": "waypoint",
       "translation_target": {
         "x_meters": 7.896,
@@ -55,7 +50,7 @@
   "constraints": {
     "max_velocity_meters_per_sec": [
       {
-        "value": 0.25,
+        "value": 0.15,
         "start_ordinal": 0,
         "end_ordinal": 2
       }

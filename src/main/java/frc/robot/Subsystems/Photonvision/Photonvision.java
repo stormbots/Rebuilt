@@ -7,6 +7,7 @@ package frc.robot.Subsystems.Photonvision;
 import static edu.wpi.first.units.Units.Inch;
 import static edu.wpi.first.units.Units.Meters;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -37,6 +38,7 @@ public class Photonvision extends SubsystemBase {
   private boolean backRightHasTarget = false;
   private boolean frontLeftHasTarget = false;
   private boolean frontRightHasTarget = false;
+  private static final Set<Integer> IGNORED_TAGS = Set.of(23, 22, 1, 12, 28, 17, 6, 7);
 
   private AprilTagFieldLayout aprilTagFieldLayout = AprilTagFieldLayout.loadField(AprilTagFields.k2026RebuiltWelded);
 
@@ -149,52 +151,105 @@ public class Photonvision extends SubsystemBase {
         updateCameraSideOdometry(backRightEstimator, backRightCamera.get());
       }
     }
+
+    
   }
+
+  // private void updateCameraSideOdometry(PhotonPoseEstimator poseEstimator, PhotonCamera camera){
+  //   Optional<EstimatedRobotPose> visionEstimate = Optional.empty();
+  //   for(var result : camera.getAllUnreadResults()){
+  //     updateEstimationStdDevs(visionEstimate, result.getTargets());
+  //     visionEstimate = poseEstimator.estimateCoprocMultiTagPose(result);
+  //     if (visionEstimate.isEmpty()){
+  //       visionEstimate = poseEstimator.estimateLowestAmbiguityPose(result);
+  //       if(poseEstimator.equals(frontRightEstimator)){
+  //         frontRightHasTarget = false;
+  //       }
+  //       else if(poseEstimator.equals(frontLeftEstimator)){
+  //         frontLeftHasTarget = false;
+  //       }
+  //       else if(poseEstimator.equals(backRightEstimator)){
+  //         backRightHasTarget = false;
+  //       }
+  //       else if(poseEstimator.equals(backLeftEstimator)){
+  //         backLeftHasTarget = false;
+  //       };
+  //     }
+  //     updateEstimationStdDevs(visionEstimate, result.getTargets());
+  //   }
+
+  //   visionEstimate.ifPresent(
+  //     est ->{
+        
+  //       var estimatedStdDevs = getEstimationStdDevs();
+
+  //       swerve.swerveDrive.addVisionMeasurement(est.estimatedPose.toPose2d(),est.timestampSeconds, estimatedStdDevs);
+  //       visionField2d.getObject(camera.getName()).setPose(est.estimatedPose.toPose2d());
+  //       if(poseEstimator.equals(frontRightEstimator)){
+  //         frontRightHasTarget = true;
+  //       }
+  //       else if(poseEstimator.equals(frontLeftEstimator)){
+  //         frontLeftHasTarget = true;
+  //       }
+  //       else if(poseEstimator.equals(backRightEstimator)){
+  //         backRightHasTarget = true;
+  //       }
+  //       else if(poseEstimator.equals(backLeftEstimator)){
+  //         backLeftHasTarget = true;
+  //       };
+  //     }
+  //   );
+  // }
 
   private void updateCameraSideOdometry(PhotonPoseEstimator poseEstimator, PhotonCamera camera){
     Optional<EstimatedRobotPose> visionEstimate = Optional.empty();
     for(var result : camera.getAllUnreadResults()){
-      updateEstimationStdDevs(visionEstimate, result.getTargets());
+      // Filter ignored tags into a mutable copy
+      List<PhotonTrackedTarget> filteredTargets = new ArrayList<>();
+      for(PhotonTrackedTarget target : result.getTargets()){
+        if(!IGNORED_TAGS.contains(target.getFiducialId())){
+          filteredTargets.add(target);
+        }
+      }
+
+      updateEstimationStdDevs(visionEstimate, filteredTargets);
       visionEstimate = poseEstimator.estimateCoprocMultiTagPose(result);
       if (visionEstimate.isEmpty()){
-        visionEstimate = poseEstimator.estimateLowestAmbiguityPose(result);
-        if(poseEstimator.equals(frontRightEstimator)){
-          frontRightHasTarget = false;
+         visionEstimate = poseEstimator.estimateLowestAmbiguityPose(result);
+          if(poseEstimator.equals(frontRightEstimator)){
+            frontRightHasTarget = false;
+          }
+          else if(poseEstimator.equals(frontLeftEstimator)){
+            frontLeftHasTarget = false;
+          }
+          else if(poseEstimator.equals(backRightEstimator)){
+            backRightHasTarget = false;
+          }
+          else if(poseEstimator.equals(backLeftEstimator)){
+            backLeftHasTarget = false;
+          };
         }
-        else if(poseEstimator.equals(frontLeftEstimator)){
-          frontLeftHasTarget = false;
-        }
-        else if(poseEstimator.equals(backRightEstimator)){
-          backRightHasTarget = false;
-        }
-        else if(poseEstimator.equals(backLeftEstimator)){
-          backLeftHasTarget = false;
-        };
+      updateEstimationStdDevs(visionEstimate, filteredTargets);
+  }
+  visionEstimate.ifPresent(
+    est ->{
+      var estimatedStdDevs = getEstimationStdDevs();
+      swerve.swerveDrive.addVisionMeasurement(est.estimatedPose.toPose2d(),est.timestampSeconds, estimatedStdDevs);
+      visionField2d.getObject(camera.getName()).setPose(est.estimatedPose.toPose2d());
+      if(poseEstimator.equals(frontRightEstimator)){
+        frontRightHasTarget = true;
       }
-      updateEstimationStdDevs(visionEstimate, result.getTargets());
+      else if(poseEstimator.equals(frontLeftEstimator)){
+        frontLeftHasTarget = true;
+      }
+      else if(poseEstimator.equals(backRightEstimator)){
+        backRightHasTarget = true;
+      }
+      else if(poseEstimator.equals(backLeftEstimator)){
+        backLeftHasTarget = true;
+      };
     }
-
-    visionEstimate.ifPresent(
-      est ->{
-        
-        var estimatedStdDevs = getEstimationStdDevs();
-
-        swerve.swerveDrive.addVisionMeasurement(est.estimatedPose.toPose2d(),est.timestampSeconds, estimatedStdDevs);
-        visionField2d.getObject(camera.getName()).setPose(est.estimatedPose.toPose2d());
-        if(poseEstimator.equals(frontRightEstimator)){
-          frontRightHasTarget = true;
-        }
-        else if(poseEstimator.equals(frontLeftEstimator)){
-          frontLeftHasTarget = true;
-        }
-        else if(poseEstimator.equals(backRightEstimator)){
-          backRightHasTarget = true;
-        }
-        else if(poseEstimator.equals(backLeftEstimator)){
-          backLeftHasTarget = true;
-        };
-      }
-    );
+  );
   }
 
   public boolean hasTarget(){
@@ -256,7 +311,7 @@ public class Photonvision extends SubsystemBase {
     // This method will be called once per scheduler run
     visionField2d.setRobotPose(swerve.getSwervePose());
     updateOdometry();
-
+    
     SmartDashboard.putBoolean("vision/rightCameraPresent", rightCamera.isPresent());
     SmartDashboard.putBoolean("vision/leftCameraPresent", frontLeftCamera.isPresent());
     SmartDashboard.putBoolean("vision/backLeftCameraPresent", backLeftCamera.isPresent());

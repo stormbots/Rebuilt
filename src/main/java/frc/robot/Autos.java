@@ -20,6 +20,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
+import edu.wpi.first.wpilibj2.command.WaitCommand;
 import frc.robot.Subsystems.Climber.Climber;
 import frc.robot.Subsystems.Intake.Intake;
 import frc.robot.Subsystems.Questnav.QuestNavSubsystem;
@@ -100,6 +101,7 @@ public class Autos {
     autoChooser.addOption("Depot NO SOTM", this::depotNoSOTM);
     autoChooser.addOption("Depot V2", this::depotButBetter);
     autoChooser.addOption("Ahner+ Defense Prep", this::thisIsStupidPart2);
+    autoChooser.addOption("Depot NO CLIMB", this::depotNoSOTMNOCLIMB);
     
 
     autoChooser.setDefaultOption("Select Auto", () -> new InstantCommand());
@@ -162,6 +164,7 @@ public class Autos {
   public Command thisIsStupidPart2(){
     return Commands.sequence(
       thisIsStupid(),
+      new WaitCommand(9),
       pathing.followPath(new Path("defensePathPart2"))
     );
   }
@@ -217,6 +220,18 @@ public class Autos {
     ;
   }
 
+  public Command depotNoSOTMNOCLIMB(){
+    Pathing.isRightAuto = false;
+    return Commands.sequence(
+      // basicShoot().alongWith(climber.autoPrepClimber()).withTimeout(3.0),
+      pathing.followPath(new Path("depotAutoSweep1")),
+      stopAndShoot().alongWith().withTimeout(4.5),
+      pathing.followPath(new Path("depotAutoSweep2"))
+      // basicShoot().alongWith(swerve.stop()).withTimeout(2.5),
+      // pathing.followPath(new Path("postDepotToDefense")),
+      // thisIsStupid()
+    );
+  }
 
   
 

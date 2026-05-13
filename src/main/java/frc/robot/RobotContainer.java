@@ -13,6 +13,7 @@ import com.stormbots.CRTAbsoluteEncoder;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import edu.wpi.first.wpilibj.SerialPort;
 import edu.wpi.first.wpilibj.SerialPort.Port;
 import edu.wpi.first.wpilibj.Timer;
@@ -211,6 +212,16 @@ public class RobotContainer {
       )
     );
 
+    driver.b().whileTrue(
+      operatorDrive()
+    )
+    .onTrue(
+      Commands.sequence(
+        controllerRumble().withTimeout(0.5),
+        new WaitCommand(1.5),
+        controllerNoRumble().withTimeout(0.2)
+      ));
+
     driver.a().whileTrue(swerve.turnToHeading(()->new Rotation2d())); // face swerve away from driver
 
     driver.x() // extend intake
@@ -231,8 +242,9 @@ public class RobotContainer {
     ;
 
     operator.rightBumper()
-    .whileTrue(fixedShot())
-    .whileTrue(wled.signals.manualShot().repeatedly());
+    .whileTrue(intake.intake())
+    .whileFalse(intake.up())
+    // .whileTrue(wled.signals.manualShot().repeatedly());
     ;
 
     // operator.povLeft()
@@ -349,5 +361,31 @@ public class RobotContainer {
       spindexer.feedToShooter(),
       intake.setOutForShooting().asProxy()
     );
+  }
+
+  public Command controllerRumble(){
+    return Commands.runOnce(()->{
+      operator.setRumble(RumbleType.kBothRumble, 1.0);
+    });
+  }
+
+  public Command controllerNoRumble(){
+    return Commands.runOnce(()->{
+      operator.setRumble(RumbleType.kBothRumble, 0.0);
+    });
+  }
+
+
+  public Command operatorDrive(){
+    while (operator.leftStick().getAsBoolean()) {
+      return (swerve.setPrimaryInputs(
+        ()->-operator.getLeftY()/3.0, 
+        ()->-operator.getLeftX()/3.0, 
+        ()->-operator.getRightX()));
+    }
+    return (swerve.setPrimaryInputs(
+        ()->-operator.getLeftY(), 
+        ()->-operator.getLeftX(), 
+        ()->-operator.getRightX()));
   }
 }
