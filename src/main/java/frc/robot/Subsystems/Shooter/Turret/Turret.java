@@ -4,6 +4,7 @@
 
 package frc.robot.Subsystems.Shooter.Turret;
 
+import static edu.wpi.first.units.Units.Degree;
 import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.DegreesPerSecond;
 
@@ -53,6 +54,8 @@ public class Turret extends SubsystemBase {
 
   Angle targetPosition = Degrees.of(0);
   Angle tolerance = Degrees.of(3);
+
+  boolean DISABLE_TURRET = true; //ALL CAPS because important and normally undesirable and very hacky
 
   //TODO: TUNE: some really weird overshoot problems
   //1. it hits the target, stops, then overshoots seemingly
@@ -121,6 +124,7 @@ public class Turret extends SubsystemBase {
       SmartDashboard.putNumber("shooter/turret/preClampedTarget", position.get().in(Degrees));
       //ONLY WORKS ASSUMING TOTAL RANGE <360
       double normalizedPosition = position.get().in(Degrees) > kMaxRotation ? position.get().in(Degrees) - 360.0 : position.get().in(Degrees);
+      if(DISABLE_TURRET) normalizedPosition=-180;
       this.targetPosition = Degrees.of(MathUtil.clamp(normalizedPosition, kMinRotation, kMaxRotation));
       this.tolerance = tolerance.get();
       motor.getClosedLoopController().setSetpoint(
@@ -153,6 +157,7 @@ public class Turret extends SubsystemBase {
       },
       ()->{
         double normalizedPosition = position.get().in(Degrees) > kMaxRotation ? position.get().in(Degrees) - 360.0 : position.get().in(Degrees);
+        if(DISABLE_TURRET) normalizedPosition=-180;
         double clampedPosition = MathUtil.clamp(normalizedPosition, kMinRotation+3, kMaxRotation-3);
         goalState = new TrapezoidProfile.State(clampedPosition, 0);
         this.targetPosition = Degrees.of(normalizedPosition);
@@ -197,11 +202,22 @@ public class Turret extends SubsystemBase {
   }
 
   public boolean getOnTarget() {
+    if(DISABLE_TURRET) return true;
+
     if (targetPosition.in(Degrees) < kMaxRotation && targetPosition.in(Degrees) > kMinRotation) {
       return MathUtil.isNear(targetPosition.in(Degrees), motor.getEncoder().getPosition(), tolerance.in(Degrees));
     }
     return false;
   }
+
+  public Command setTurretEnabled(boolean enabled){
+    return runOnce(()->DISABLE_TURRET = !enabled);
+  }
+  public Command toggleTurretEnabled(){
+    return runOnce(()->DISABLE_TURRET = !DISABLE_TURRET);
+  }
+
+
 
   private SparkBaseConfig getMotorConfig() {
     SparkFlexConfig config = new SparkFlexConfig();

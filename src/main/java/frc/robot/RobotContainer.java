@@ -236,6 +236,19 @@ public class RobotContainer {
 
   private void configureOperatorBindings() {
 
+    //Allow the operator to panic disable the turret using the start button, or hold it properly
+    operator.start().debounce(0.4)
+    .or(operator.start().multiPress(4, 0.5))
+    .onTrue(shooter.toggleTurretEnable())
+    //Notify the driver with the rumbles
+    .onTrue(Commands.sequence(
+      opRumble(0.2),
+      Commands.waitSeconds(0.1),
+      opRumble(0.2),
+      Commands.waitSeconds(0.1),
+      opRumble(0.2)
+    ));
+
     operator.rightTrigger()
     .whileTrue(shootHub())
     .whileTrue(wled.signals.automaticShot().repeatedly());
@@ -373,6 +386,15 @@ public class RobotContainer {
     return Commands.runOnce(()->{
       operator.setRumble(RumbleType.kBothRumble, 0.0);
     });
+  }
+
+  public Command opRumble(double time){
+    return Commands.startEnd(
+      ()-> operator.setRumble(RumbleType.kBothRumble, 1.0),
+      ()-> operator.setRumble(RumbleType.kBothRumble, 0)
+      )
+      .withTimeout(time)
+      ;
   }
 
 

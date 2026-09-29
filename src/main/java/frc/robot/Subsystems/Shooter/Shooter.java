@@ -165,4 +165,11 @@ public class Shooter {
     );
   }
 
+  public Command setTurretEnable(boolean enable){
+    return turret.setTurretEnabled(enable);
+  }
+  public Command toggleTurretEnable(){
+    return turret.toggleTurretEnabled();
+  }
+
 }
