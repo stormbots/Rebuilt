@@ -63,6 +63,17 @@ public class Shooter {
     );
   }
 
+  public Command aimWithDrivebaseForStationaryTurret(boolean velocityCompensated){
+    //TODO: This would be more useful to add the current turret position rather than assuming it's pointing backwards
+    // That way if it jams in an unintended location, this command still works
+    return  Commands.either(
+      // swerve.turnToHeading(()->new Rotation2d(targeting.getSwerveBearingForDisabledTurret())),
+      swerve.turnToHeading(()->targeting.getSwerveBearingForDisabledTurret(velocityCompensated)),
+      Commands.idle(),
+      ()->turret.DISABLE_TURRET
+    );
+  }
+
   public Command shootNoTurret(Supplier<TargetingSystem.ShooterState> targets) {
     return Commands.parallel(
       flywheel.setRPM(targets),

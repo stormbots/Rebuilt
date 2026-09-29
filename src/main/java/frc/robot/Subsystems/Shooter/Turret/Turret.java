@@ -55,7 +55,7 @@ public class Turret extends SubsystemBase {
   Angle targetPosition = Degrees.of(0);
   Angle tolerance = Degrees.of(3);
 
-  boolean DISABLE_TURRET = true; //ALL CAPS because important and normally undesirable and very hacky
+  public boolean DISABLE_TURRET = true; //ALL CAPS because important and normally undesirable and very hacky
 
   //TODO: TUNE: some really weird overshoot problems
   //1. it hits the target, stops, then overshoots seemingly
@@ -105,6 +105,7 @@ public class Turret extends SubsystemBase {
     SmartDashboard.putNumber("shooter/turret/relPos", motor.getEncoder().getPosition());
     SmartDashboard.putNumber("shooter/turret/velocity", motor.getEncoder().getVelocity());
     SmartDashboard.putNumber("shooter/turret/dtAngular", Units.radiansToDegrees(swerve.getChassisSpeedsFieldRelative().omegaRadiansPerSecond));
+    SmartDashboard.putBoolean("shooter/turret/Disabled", DISABLE_TURRET);
   }
 
   /**
@@ -148,6 +149,7 @@ public class Turret extends SubsystemBase {
   public Command setAngleTrap(Supplier<Angle> position, Supplier<Angle> tolerance) {
     return startRun(()->{
         double normalizedPosition = position.get().in(Degrees) > kMaxRotation ? position.get().in(Degrees) - 360.0 : position.get().in(Degrees);
+        if(DISABLE_TURRET) normalizedPosition=-180;
         double clampedPosition = MathUtil.clamp(normalizedPosition, kMinRotation+3, kMaxRotation-3);
         goalState = new TrapezoidProfile.State(clampedPosition, 0);
         currentState = new TrapezoidProfile.State(getAngle().in(Degrees), getVelocity().in(DegreesPerSecond));
@@ -167,6 +169,7 @@ public class Turret extends SubsystemBase {
         double rawOmegaDegPerSec = Units.radiansToDegrees(
             swerve.getChassisSpeedsFieldRelative().omegaRadiansPerSecond
         );
+        if(DISABLE_TURRET) rawOmegaDegPerSec=0; //Assume there's no chassis motion in this case since we won't be tracking anything 
         // Smooth it to kill jitter
         smoothedOmegaDegPerSec = smoothedOmegaDegPerSec + ROTATION_FF_ALPHA * (rawOmegaDegPerSec - smoothedOmegaDegPerSec);
         
@@ -211,10 +214,10 @@ public class Turret extends SubsystemBase {
   }
 
   public Command setTurretEnabled(boolean enabled){
-    return runOnce(()->DISABLE_TURRET = !enabled);
+    return runOnce(()->DISABLE_TURRET = !enabled).ignoringDisable(true);
   }
   public Command toggleTurretEnabled(){
-    return runOnce(()->DISABLE_TURRET = !DISABLE_TURRET);
+    return runOnce(()->DISABLE_TURRET = !DISABLE_TURRET).ignoringDisable(true);
   }
 
 

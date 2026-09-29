@@ -237,7 +237,8 @@ public class RobotContainer {
   private void configureOperatorBindings() {
 
     //Allow the operator to panic disable the turret using the start button, or hold it properly
-    operator.start().debounce(0.4)
+    //When disabled, turret will attempt to stay at 180 degrees (backward) and report being on target
+    operator.start().debounce(0.5)
     .or(operator.start().multiPress(4, 0.5))
     .onTrue(shooter.toggleTurretEnable())
     //Notify the driver with the rumbles
@@ -248,6 +249,10 @@ public class RobotContainer {
       Commands.waitSeconds(0.1),
       opRumble(0.2)
     ));
+
+    //TODO: Figure out  the button for "ShootNoTurret"
+    //This will point the drive train at the target, allowing normal firing operations to work as intended
+    // operator.x().onTrue(shooter.aimWithDrivebaseForStationaryTurret(true));
 
     operator.rightTrigger()
     .whileTrue(shootHub())
@@ -294,7 +299,7 @@ public class RobotContainer {
 
     
 
-
+    // For tuning and debug
     // operator.x()
     // .whileTrue(shooter.shootWithDashboardValues())
     // .whileTrue(Commands.waitSeconds(1).andThen(spindexer.feedToShooterForce()))

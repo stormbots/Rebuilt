@@ -393,4 +393,36 @@ public class TargetingSystem extends SubsystemBase {
   public ShooterState fixedPassOppAlliance(){
     return new ShooterState(Degrees.of(-180), Degrees.of(40),3600 );
   }
+
+
+  /**
+   * Aim the back of the robot at the best target. 
+   * Intended for use when the turret is malfunctioning
+   * @param applyVelocityCompensation Attempt to aim at a velocity-compensated target to improve accuracy while moving
+   * @return
+   */
+  
+  public Rotation2d getSwerveBearingForDisabledTurret(boolean applyVelocityCompensation){
+    var botpose = swerve.getSwervePose();
+    var target = getBestTarget(botpose);
+
+    if(applyVelocityCompensation){
+      var compensatedTarget = getBotVelCompensatedTarget(
+        swerve::getSwervePose,
+        target::getTranslation,
+        getBestLutTarget(botpose),
+        swerve::getChassisSpeedsFieldRelative
+      );
+      var compensatedPose = new Pose2d(compensatedTarget,new Rotation2d());
+      //The compensation is tuned for the turret; This might help adjust it 
+      target = target.interpolate(compensatedPose, 1);
+
+    }
+
+
+    var angle = getHeadingToTarget(botpose.getTranslation(),target.getTranslation());
+    angle = angle.plus(Rotation2d.k180deg); //flip the angle because we go out the back
+    return angle;
+
+  }
 }
