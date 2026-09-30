@@ -252,7 +252,7 @@ public class RobotContainer {
 
     //TODO: Figure out  the button for "ShootNoTurret"
     //This will point the drive train at the target, allowing normal firing operations to work as intended
-    // operator.x().onTrue(shooter.aimWithDrivebaseForStationaryTurret(true));
+    operator.x().whileTrue(shooter.aimWithDrivebaseForStationaryTurret(true));
 
     operator.rightTrigger()
     .whileTrue(shootHub())
