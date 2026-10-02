@@ -89,7 +89,7 @@ public class Autos {
     // autoChooser.addOption("Red Depot V2", this::redDepotButBetter);
     // autoChooser.addOption("Blue Depot V2", this::blueDepotButBetter);
 
-    // autoChooser.addOption("ShootOnlyEight", this::basicShoot);
+    autoChooser.addOption("ShootOnlyEight", this::basicShoot);
 
     // autoChooser.addOption("RL Center Auto", this::CenterShootAutoRedLEFT);
     // autoChooser.addOption("BL Center Auto", this::CenterShootAutoBlueLEFT);
@@ -232,6 +232,14 @@ public class Autos {
       // thisIsStupid()
     );
   }
+
+
+    public Command basicShoot(){
+      return Commands.parallel(
+        shooter.aimWithDrivebaseForStationaryTurret(false),
+        Commands.waitSeconds(2).andThen(shootAuto())
+      );
+    }
 
   
 

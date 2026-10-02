@@ -55,7 +55,7 @@ public class Turret extends SubsystemBase {
   Angle targetPosition = Degrees.of(0);
   Angle tolerance = Degrees.of(3);
 
-  public boolean DISABLE_TURRET = true; //ALL CAPS because important and normally undesirable and very hacky
+  public boolean DISABLE_TURRET = false; //ALL CAPS because important and normally undesirable and very hacky
 
   //TODO: TUNE: some really weird overshoot problems
   //1. it hits the target, stops, then overshoots seemingly

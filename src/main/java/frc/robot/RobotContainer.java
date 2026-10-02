@@ -265,10 +265,10 @@ public class RobotContainer {
     // .whileTrue(wled.signals.manualShot().repeatedly());
     ;
 
-    // operator.povLeft()
-    // .whileTrue(shooter.shootWithDashboardValues())
-    // .whileTrue(Commands.waitSeconds(1).andThen(spindexer.feedToShooter()))
-    // ;
+    operator.povLeft()
+    .whileTrue(shooter.shootWithDashboardValues())
+    .whileTrue(Commands.waitSeconds(1).andThen(spindexer.feedToShooter()))
+    ;
 
     operator.leftTrigger()
     .whileTrue(pass())
