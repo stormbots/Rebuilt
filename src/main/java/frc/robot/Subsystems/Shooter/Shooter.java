@@ -183,4 +183,43 @@ public class Shooter {
     return turret.toggleTurretEnabled();
   }
 
+  public Command displayShotShort() {
+    Supplier<TargetingSystem.ShooterState> targets = ()-> new TargetingSystem.ShooterState(
+      Degrees.of(-180.0),
+      Degrees.of(5),
+      2045
+      );
+    return Commands.parallel(
+      flywheel.setRPM(targets),
+      hood.setAngleTrap(targets),
+      turret.setAngle(targets)
+    );
+  }
+
+  public Command displayShotMedium() {
+    Supplier<TargetingSystem.ShooterState> targets = ()-> new TargetingSystem.ShooterState(
+      Degrees.of(-180.0),
+      Degrees.of(21),
+      2295
+      );
+    return Commands.parallel(
+      flywheel.setRPM(targets),
+      hood.setAngleTrap(targets),
+      turret.setAngle(targets)
+    );
+  }
+
+  public Command displayShotFar() {
+    Supplier<TargetingSystem.ShooterState> targets = ()-> new TargetingSystem.ShooterState(
+      Degrees.of(-180.0),
+      Degrees.of(23),
+      2470
+      );
+    return Commands.parallel(
+      flywheel.setRPM(targets),
+      hood.setAngleTrap(targets),
+      turret.setAngle(targets)
+    );
+  }
+
 }

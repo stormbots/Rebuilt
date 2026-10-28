@@ -288,14 +288,13 @@ public class RobotContainer {
     .onTrue(climber.stow())
     .onTrue(intake.stow());
 
-    operator.b()
-    .whileTrue(climber.prepareForClimbL1())
+    operator.b().whileTrue(new ParallelCommandGroup(shooter.displayShotMedium(), spindexer.feedToShooter()));
+    //.whileTrue(climber.prepareForClimbL1())
     // .onFalse(climber.climbL1());
-    .onFalse(Commands.either(
-      climber.climbL1(),
-      climber.stow(),
-      ()->Timer.getMatchTime() <= (140-20)
-    ));
+    //.onFalse(Commands.either(
+      //climber.climbL1(),
+      //climber.stow(),
+      //()->Timer.getMatchTime() <= (140-20)));
 
     
 
@@ -307,20 +306,18 @@ public class RobotContainer {
     // ;
 
 
-    operator.a()
-    .whileTrue(fixedPassOpp())
-    .whileTrue(wled.signals.manualShot().repeatedly());
-    ;
+    operator.a().whileTrue(new ParallelCommandGroup(shooter.displayShotShort(), spindexer.feedToShooter()));
+    //.whileTrue(fixedPassOpp())
+    //.whileTrue(wled.signals.manualShot().repeatedly());
 
     //Operator Climber Lineup command
     //NOTE: Driver may want a swerve.turnToHeading() for this; 
     //Omitted due to prior odometry issues proving to be a risk factor
-    operator.y()
-    .whileTrue(
-      Commands.sequence( 
-        climber.autoPrepClimber().withTimeout(1.0),
-        autos.climbAuto()
-        ));
+    operator.y().whileTrue(new ParallelCommandGroup(shooter.displayShotFar(), spindexer.feedToShooter()));
+    //.whileTrue(
+      //Commands.sequence( 
+        //climber.autoPrepClimber().withTimeout(1.0),
+        //autos.climbAuto()));
 
     // operator.povLeft()
     // .whileTrue(
